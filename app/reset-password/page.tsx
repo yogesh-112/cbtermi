@@ -1,0 +1,54 @@
+"use client";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Building2 } from "lucide-react";
+
+function ResetForm() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const token = params.get("token") ?? "";
+  const [form, setForm] = useState({ password: "", confirm: "" });
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (form.password.length < 8) { setErr("Min 8 characters"); return; }
+    if (form.password !== form.confirm) { setErr("Passwords do not match"); return; }
+    setLoading(true); setErr("");
+    const res = await fetch("/api/auth/reset-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, password: form.password }) });
+    setLoading(false);
+    if (res.ok) router.push("/login");
+    else setErr("Invalid or expired reset link.");
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm w-full max-w-md p-8">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 bg-brand-navy rounded-lg flex items-center justify-center">
+            <Building2 size={18} className="text-white" />
+          </div>
+          <div><h1 className="text-lg font-bold text-slate-900">Set new password</h1>
+          <p className="text-xs text-slate-500">Clear Build USA</p></div>
+        </div>
+        {err && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">{err}</div>}
+        <form onSubmit={submit} className="space-y-4">
+          <div>
+            <label className="label">New password</label>
+            <input type="password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Min 8 characters" className="field" />
+          </div>
+          <div>
+            <label className="label">Confirm new password</label>
+            <input type="password" required value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} placeholder="••••••••" className="field" />
+          </div>
+          <button type="submit" disabled={loading} className="btn-primary btn w-full btn-lg">{loading ? "Saving…" : "Set new password"}</button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return <Suspense><ResetForm /></Suspense>;
+}

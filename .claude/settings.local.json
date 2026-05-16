@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(Remove-Item *)",
-      "PowerShell(Get-NetTCPConnection *)"
+      "PowerShell(Get-NetTCPConnection *)",
+      "Read(//mnt/e/cbv1/components/**)",
+      "Read(//mnt/e/cbv1/**)",
+      "PowerShell(New-Item *)",
+      "Bash(git add *)"
     ]
   }
 }

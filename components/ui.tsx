@@ -155,17 +155,17 @@ export function Select({ value, onChange, options, placeholder, className = "" }
 export function StatCard({ label, value, sub, color = "navy" }: {
   label: string; value: string | number; sub?: string; color?: "navy" | "green" | "yellow" | "red";
 }) {
-  const colors = {
-    navy:   "from-brand-navy to-brand-navy-mid text-white",
-    green:  "from-brand-green to-brand-green-dark text-white",
-    yellow: "from-yellow-400 to-yellow-500 text-white",
-    red:    "from-red-500 to-red-600 text-white",
+  const accent = {
+    navy:   "text-brand-navy",
+    green:  "text-brand-green",
+    yellow: "text-amber-600",
+    red:    "text-red-600",
   };
   return (
-    <div className={`bg-gradient-to-br ${colors[color]} rounded-xl p-5`}>
-      <p className="text-xs font-semibold uppercase tracking-wide opacity-80 mb-1">{label}</p>
-      <p className="text-2xl font-bold">{value}</p>
-      {sub && <p className="text-xs opacity-70 mt-1">{sub}</p>}
+    <div className="bg-white border border-[#E5E7EB] rounded-lg p-5">
+      <p className="text-xs font-medium text-[#6B7280] uppercase tracking-wide mb-2">{label}</p>
+      <p className={`text-2xl font-bold ${accent[color]}`}>{value}</p>
+      {sub && <p className="text-xs text-[#9CA3AF] mt-1">{sub}</p>}
     </div>
   );
 }

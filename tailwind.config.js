@@ -8,13 +8,20 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          navy:          "#1B3A5C",
-          "navy-dark":   "#0F2235",
-          "navy-mid":    "#24507E",
-          green:         "#16A34A",
-          "green-dark":  "#0F7238",
-          "green-light": "#22C55E",
+          navy:          "#123B5D",
+          "navy-dark":   "#0c2a44",
+          "navy-mid":    "#1a4f7a",
+          green:         "#3FA66B",
+          "green-dark":  "#2d8a55",
+          "green-light": "#5cbc83",
         },
+        surface: {
+          DEFAULT: "#F5F7FA",
+          card:    "#FFFFFF",
+        },
+      },
+      fontFamily: {
+        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
       },
     },
   },

@@ -18,7 +18,7 @@ export async function GET() {
     supabase.from("quotes").select("*", { count: "exact", head: true }).eq("business_id", bid).in("status", ["draft", "sent"]),
     supabase.from("invoices").select("total, amount_paid, amount_due, status").eq("business_id", bid).not("status", "eq", "voided"),
     supabase.from("communication_logs").select("*").eq("business_id", bid).order("created_at", { ascending: false }).limit(10),
-    supabase.from("feedback").select("*", { count: "exact", head: true }).eq("business_id", bid).is("rating", null),
+    supabase.from("feedback").select("*", { count: "exact", head: true }).eq("business_id", bid),
   ]);
 
   const pendingInvoices  = (invoices ?? []).filter((i) => ["sent","viewed","partially_paid","overdue"].includes(i.status)).length;

@@ -10,6 +10,7 @@ function LoginForm() {
   const params = useSearchParams();
   const registered = params.get("registered") === "true";
   const verified = params.get("verified") === "true";
+  const next = params.get("next") ?? "";
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [err, setErr] = useState<Record<string, string>>({});
@@ -40,7 +41,7 @@ function LoginForm() {
       if (data.unverified) { setUnverified(true); return; }
       setErr({ general: data.message || "Login failed" });
     } else {
-      router.push(data.redirect || "/dashboard");
+      router.push(next || data.redirect || "/dashboard");
     }
   };
 

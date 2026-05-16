@@ -6,7 +6,9 @@
       "Read(//mnt/e/cbv1/components/**)",
       "Read(//mnt/e/cbv1/**)",
       "PowerShell(New-Item *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(npm run *)"
     ]
   }
 }

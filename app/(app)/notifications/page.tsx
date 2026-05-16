@@ -74,7 +74,13 @@ export default function NotificationsPage() {
     });
     setSSaving(false);
     if (res.ok) {
-      toast("Notification sent");
+      const d = await res.json();
+      if (d.link) {
+        window.open(d.link, "_blank");
+        toast(`${d.channel === "whatsapp" ? "WhatsApp" : "SMS"} draft opened — complete sending in the app`);
+      } else {
+        toast("Notification sent");
+      }
       setSModal(false);
       setSForm({ template_id: "", contact_id: "", subject: "", message: "", channel: "email" });
     } else {

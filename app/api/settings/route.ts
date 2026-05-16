@@ -16,5 +16,9 @@ export async function PATCH(request: NextRequest) {
   const body = await request.json();
   const { data, error } = await supabase.from("businesses").update({ ...body, updated_at: new Date().toISOString() }).eq("id", session.businessId).select().single();
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
-  return NextResponse.json({ settings: data });
+
+  const newToken = await signToken({ id: session.id, name: session.name, email: session.email, businessId: session.businessId, role: session.role });
+  const res = NextResponse.json({ settings: data });
+  res.cookies.set(SESSION_COOKIE, newToken, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 60 * 60 * 24 * 7, path: "/" });
+  return res;
 }

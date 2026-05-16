@@ -21,7 +21,9 @@ export async function POST(request: NextRequest) {
   const token = generateToken();
   const { data: biz } = await supabase.from("businesses").select("name").eq("id", session.businessId).single();
 
-  await supabase.from("team_invitations").insert({ business_id: session.businessId, email, role, token, invited_by: session.id });
+  const expires = new Date();
+  expires.setDate(expires.getDate() + 7);
+  await supabase.from("team_invitations").insert({ business_id: session.businessId, email, role, token, invited_by: session.id, expires_at: expires.toISOString() });
 
   const link = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/invite?token=${token}`;
   await sendEmail({ to: email, subject: `You're invited to ${biz?.name} on Clear Build USA`, html: teamInviteEmail(session.name, biz?.name ?? "Clear Build USA", link) });

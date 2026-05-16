@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS contacts (
   state          TEXT,
   zip            TEXT,
   contact_type   TEXT DEFAULT 'lead',
+  lead_status    TEXT DEFAULT 'New Lead',
   source         TEXT,
   notes          TEXT,
   created_by     UUID REFERENCES users(id),
@@ -296,6 +297,19 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   stripe_customer_id     TEXT,
   created_at             TIMESTAMPTZ DEFAULT NOW(),
   updated_at             TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── TEAM INVITATIONS ────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS team_invitations (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_id UUID REFERENCES businesses(id) ON DELETE CASCADE,
+  email       TEXT NOT NULL,
+  role        TEXT DEFAULT 'staff',
+  token       TEXT UNIQUE NOT NULL,
+  invited_by  UUID REFERENCES users(id),
+  accepted_at TIMESTAMPTZ,
+  expires_at  TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ─── ACTIVITY LOG ────────────────────────────────────────────────────────────

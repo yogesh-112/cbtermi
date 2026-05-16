@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Building2 } from "lucide-react";
+import Image from "next/image";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -16,30 +16,30 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm w-full max-w-md p-8">
+    <div className="min-h-screen bg-[#F5F7FA] flex items-center justify-center p-4">
+      <div className="bg-white border border-[#E5E7EB] rounded-lg w-full max-w-md p-8">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-brand-navy rounded-lg flex items-center justify-center">
-            <Building2 size={18} className="text-white" />
+          <Image src="/logo.png" alt="Clear Build USA" width={40} height={40} className="rounded-lg object-cover" />
+          <div>
+            <h1 className="text-lg font-bold text-[#1F2937] leading-tight">Clear Build USA</h1>
+            <p className="text-xs text-[#6B7280]">Reset your password</p>
           </div>
-          <div><h1 className="text-lg font-bold text-slate-900">Reset password</h1>
-          <p className="text-xs text-slate-500">Clear Build USA</p></div>
         </div>
         {sent ? (
           <div className="text-center">
-            <p className="text-slate-700 mb-2 font-medium">Check your email</p>
-            <p className="text-slate-500 text-sm mb-6">If an account with <strong>{email}</strong> exists, we sent a password reset link.</p>
-            <Link href="/login" className="btn-primary btn w-full">Back to Login</Link>
+            <p className="text-[#1F2937] mb-2 font-medium">Check your email</p>
+            <p className="text-[#6B7280] text-sm mb-6">If an account with <strong>{email}</strong> exists, we sent a password reset link.</p>
+            <Link href="/login" className="btn btn-primary w-full">Back to Login</Link>
           </div>
         ) : (
           <form onSubmit={submit} className="space-y-4">
-            <p className="text-sm text-slate-600">Enter your email address and we'll send you a link to reset your password.</p>
+            <p className="text-sm text-[#6B7280]">Enter your email address and we&apos;ll send you a link to reset your password.</p>
             <div>
               <label className="label">Email address</label>
               <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="field" />
             </div>
-            <button type="submit" disabled={loading} className="btn-primary btn w-full btn-lg">{loading ? "Sending…" : "Send reset link"}</button>
-            <p className="text-center text-sm text-slate-500"><Link href="/login" className="text-brand-navy hover:underline">Back to login</Link></p>
+            <button type="submit" disabled={loading} className="btn btn-primary w-full py-2.5">{loading ? "Sending…" : "Send reset link"}</button>
+            <p className="text-center text-sm text-[#6B7280]"><Link href="/login" className="text-brand-navy hover:underline">Back to login</Link></p>
           </form>
         )}
       </div>

@@ -72,18 +72,29 @@ export default function ContactDetailPage() {
           </div>
           {editing ? (
             <div className="space-y-3">
-              {[["full_name","Full name"],["email","Email"],["phone","Phone"],["whatsapp","WhatsApp"],["city","City"],["source","Source"]].map(([k,l]) => (
+              {[["full_name","Full name"],["business_name","Business name"],["email","Email"],["phone","Phone"],["whatsapp","WhatsApp"],["address","Address"],["city","City"],["state","State"],["zip","Zipcode"]].map(([k,l]) => (
                 <div key={k}><label className="label">{l}</label>
                   <input value={form[k] ?? ""} onChange={(e) => setForm({ ...form, [k]: e.target.value })} className="field" />
                 </div>
               ))}
+              <div><label className="label">Lead Source</label>
+                <select value={form.source ?? ""} onChange={(e) => setForm({ ...form, source: e.target.value })} className="field">
+                  <option value="">Select source</option>
+                  {["Referral","Google","Facebook","Instagram","LinkedIn","Walk-in","Cold Call","Website","Other"].map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div><label className="label">Lead Status</label>
+                <select value={form.lead_status ?? ""} onChange={(e) => setForm({ ...form, lead_status: e.target.value })} className="field">
+                  {["New Lead","In Conversation","Meeting Scheduled","Site Visit","Proposal Sent","Negotiation","Won","Lost"].map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
               <div><label className="label">Type</label>
                 <select value={form.contact_type} onChange={(e) => setForm({ ...form, contact_type: e.target.value })} className="field">
                   <option value="lead">Lead</option><option value="customer">Customer</option><option value="direct_contact">Direct Contact</option>
                 </select>
               </div>
               <div><label className="label">Notes</label><textarea value={form.notes ?? ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} className="field resize-none" /></div>
-              <div className="flex gap-2"><button onClick={save} disabled={saving} className="btn-primary btn btn-sm flex-1">{saving?"Saving…":"Save"}</button><button onClick={() => setEditing(false)} className="btn-ghost btn btn-sm flex-1">Cancel</button></div>
+              <div className="flex gap-2"><button onClick={save} disabled={saving} className="btn btn-primary btn-sm flex-1">{saving?"Saving…":"Save"}</button><button onClick={() => setEditing(false)} className="btn btn-ghost btn-sm flex-1">Cancel</button></div>
             </div>
           ) : (
             <dl className="space-y-2 text-sm">

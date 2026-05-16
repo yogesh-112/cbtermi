@@ -1,7 +1,7 @@
 "use client";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Building2 } from "lucide-react";
+import Image from "next/image";
 
 function ResetForm() {
   const router = useRouter();
@@ -23,16 +23,16 @@ function ResetForm() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm w-full max-w-md p-8">
+    <div className="min-h-screen bg-[#F5F7FA] flex items-center justify-center p-4">
+      <div className="bg-white border border-[#E5E7EB] rounded-lg w-full max-w-md p-8">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-brand-navy rounded-lg flex items-center justify-center">
-            <Building2 size={18} className="text-white" />
+          <Image src="/logo.png" alt="Clear Build USA" width={40} height={40} className="rounded-lg object-cover" />
+          <div>
+            <h1 className="text-lg font-bold text-[#1F2937] leading-tight">Clear Build USA</h1>
+            <p className="text-xs text-[#6B7280]">Set new password</p>
           </div>
-          <div><h1 className="text-lg font-bold text-slate-900">Set new password</h1>
-          <p className="text-xs text-slate-500">Clear Build USA</p></div>
         </div>
-        {err && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">{err}</div>}
+        {err && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm">{err}</div>}
         <form onSubmit={submit} className="space-y-4">
           <div>
             <label className="label">New password</label>
@@ -42,7 +42,7 @@ function ResetForm() {
             <label className="label">Confirm new password</label>
             <input type="password" required value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} placeholder="••••••••" className="field" />
           </div>
-          <button type="submit" disabled={loading} className="btn-primary btn w-full btn-lg">{loading ? "Saving…" : "Set new password"}</button>
+          <button type="submit" disabled={loading} className="btn btn-primary w-full py-2.5">{loading ? "Saving…" : "Set new password"}</button>
         </form>
       </div>
     </div>

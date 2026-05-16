@@ -24,8 +24,22 @@ export async function POST(request: NextRequest) {
 
     if (channel === "email" && contact?.email) {
       await sendEmail({ to: contact.email, subject: subject || "Message from " + biz?.name, html: `<p>${replaced.replace(/\n/g,"<br/>")}</p>` });
+      await supabase.from("communication_logs").insert({ business_id: session.businessId, contact_id, type: "notification", channel, subject, message: replaced, sent_by: session.id });
+      return NextResponse.json({ message: "Sent", channel: "email" });
     }
-    await supabase.from("communication_logs").insert({ business_id: session.businessId, contact_id, type: "notification", channel, subject, message: replaced, sent_by: session.id });
+
+    if (channel === "whatsapp") {
+      const phone = (contact?.whatsapp || contact?.phone || "").replace(/\D/g, "");
+      await supabase.from("communication_logs").insert({ business_id: session.businessId, contact_id, type: "notification", channel, subject, message: replaced, sent_by: session.id, status: "draft" });
+      return NextResponse.json({ message: "Draft ready", channel: "whatsapp", link: `https://wa.me/${phone}?text=${encodeURIComponent(replaced)}` });
+    }
+
+    if (channel === "sms") {
+      const phone = (contact?.phone || "").replace(/\D/g, "");
+      await supabase.from("communication_logs").insert({ business_id: session.businessId, contact_id, type: "notification", channel, subject, message: replaced, sent_by: session.id, status: "draft" });
+      return NextResponse.json({ message: "Draft ready", channel: "sms", link: `sms:+${phone}?body=${encodeURIComponent(replaced)}` });
+    }
+
     return NextResponse.json({ message: "Sent" });
   }
 

@@ -26,11 +26,9 @@ export default function RegisterPage() {
     else if (form.password.length < 8) errs.password = "Min 8 characters";
     if (form.password !== form.confirm) errs.confirm = "Passwords do not match";
     if (Object.keys(errs).length) { setErr(errs); return; }
-
     setLoading(true); setErr({});
     const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: form.name, email: form.email, password: form.password, language: form.language }),
     });
     const data = await res.json();
@@ -40,19 +38,17 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] flex items-center justify-center p-4">
-      <div className="bg-white border border-[#E5E7EB] rounded-lg w-full max-w-md p-8">
-        {/* Logo */}
-        <div className="flex items-center gap-3 mb-8">
-          <Image src="/logo.png" alt="Clear Build USA" width={40} height={40} className="rounded-lg object-cover" />
-          <div>
-            <h1 className="text-lg font-bold text-[#1F2937] leading-tight">Clear Build USA</h1>
-            <p className="text-xs text-[#6B7280]">Create your account</p>
-          </div>
+    <div className="min-h-screen bg-surface flex items-center justify-center p-4">
+      <div className="bg-white border border-[#E5E7EB] rounded-card shadow-card w-full max-w-md p-8">
+        <div className="flex justify-center mb-8">
+          <Image src="/logo.png" alt="Clear Build USA" width={160} height={45} className="object-contain" priority />
         </div>
 
+        <h2 className="text-xl font-bold text-[#111827] mb-1" style={{ letterSpacing: "-0.02em" }}>Create account</h2>
+        <p className="text-sm text-[#9CA3AF] mb-6">Get started with Clear Build USA today.</p>
+
         {err.general && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm">
+          <div className="mb-4 p-3.5 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm">
             {err.general}
           </div>
         )}
@@ -72,14 +68,14 @@ export default function RegisterPage() {
           </div>
           <div>
             <label className="label">
-              Password{" "}
-              <span className="text-[#9CA3AF] font-normal">(min. 8 characters)</span>
+              Password
+              <span className="text-[#9CA3AF] font-normal ml-1.5">(min. 8 characters)</span>
             </label>
             <div className="relative">
               <input type={showPwd ? "text" : "password"} value={form.password} onChange={set("password")}
                 placeholder="••••••••" className="field pr-10" />
               <button type="button" onClick={() => setShowPwd(!showPwd)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]">
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#6B7280]">
                 {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
@@ -99,8 +95,7 @@ export default function RegisterPage() {
               <option value="es">Spanish</option>
             </select>
           </div>
-          <button type="submit" disabled={loading}
-            className="btn btn-primary w-full py-2.5 text-sm font-semibold">
+          <button type="submit" disabled={loading} className="btn btn-primary w-full mt-2">
             {loading ? "Creating account…" : "Create Account"}
           </button>
         </form>

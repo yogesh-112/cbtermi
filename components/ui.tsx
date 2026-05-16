@@ -1,6 +1,6 @@
 "use client";
-import { ReactNode, useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { ReactNode, useState, useEffect, useRef } from "react";
+import { X, CheckCircle, AlertCircle, Info, ChevronDown, MoreHorizontal } from "lucide-react";
 
 // ─── MODAL ────────────────────────────────────────────────────────────────────
 export function Modal({ open, onClose, title, children, size = "md" }: {
@@ -8,18 +8,26 @@ export function Modal({ open, onClose, title, children, size = "md" }: {
   size?: "sm" | "md" | "lg" | "xl";
 }) {
   const widths = { sm: "max-w-md", md: "max-w-lg", lg: "max-w-2xl", xl: "max-w-4xl" };
+  useEffect(() => {
+    if (open) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className={`relative bg-white rounded-xl shadow-xl w-full ${widths[size]} max-h-[90vh] flex flex-col`}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
-            <X size={18} />
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] animate-fade-in" onClick={onClose} />
+      <div className={`relative bg-white w-full ${widths[size]} sm:rounded-modal rounded-t-modal shadow-modal
+                       max-h-[92vh] sm:max-h-[90vh] flex flex-col animate-slide-in-bottom sm:animate-scale-in`}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E7EB] flex-shrink-0">
+          <h2 className="text-base font-semibold text-[#111827]" style={{ letterSpacing: "-0.02em" }}>{title}</h2>
+          <button onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6] transition-all">
+            <X size={16} />
           </button>
         </div>
-        <div className="overflow-y-auto flex-1 p-6">{children}</div>
+        <div className="overflow-y-auto flex-1 p-5">{children}</div>
       </div>
     </div>
   );
@@ -32,10 +40,12 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, message, danger
 }) {
   return (
     <Modal open={open} onClose={onClose} title={title} size="sm">
-      <p className="text-sm text-slate-600 mb-6">{message}</p>
+      <p className="text-sm text-[#6B7280] mb-5 leading-relaxed">{message}</p>
       <div className="flex gap-3 justify-end">
-        <button className="btn-ghost btn" onClick={onClose}>Cancel</button>
-        <button className={danger ? "btn-danger btn" : "btn-primary btn"} onClick={onConfirm}>Confirm</button>
+        <button className="btn btn-outline" onClick={onClose}>Cancel</button>
+        <button className={danger ? "btn btn-danger" : "btn btn-primary"} onClick={() => { onConfirm(); onClose(); }}>
+          {danger ? "Delete" : "Confirm"}
+        </button>
       </div>
     </Modal>
   );
@@ -46,10 +56,10 @@ export function EmptyState({ icon, title, description, action }: {
   icon: ReactNode; title: string; description?: string; action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="text-slate-300 mb-4">{icon}</div>
-      <h3 className="text-base font-semibold text-slate-700 mb-1">{title}</h3>
-      {description && <p className="text-sm text-slate-500 mb-4 max-w-xs">{description}</p>}
+    <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+      <div className="text-[#D1D5DB] mb-4 p-4 bg-[#F9FAFB] rounded-2xl">{icon}</div>
+      <h3 className="text-base font-semibold text-[#374151] mb-1">{title}</h3>
+      {description && <p className="text-sm text-[#9CA3AF] mb-5 max-w-xs leading-relaxed">{description}</p>}
       {action}
     </div>
   );
@@ -63,32 +73,45 @@ export function Spinner({ size = 20 }: { size?: number }) {
   );
 }
 
+// ─── PAGE LOADING SKELETON ────────────────────────────────────────────────────
+export function PageSkeleton() {
+  return (
+    <div className="space-y-4 animate-pulse">
+      <div className="h-8 w-48 skeleton rounded-lg" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => <div key={i} className="h-24 skeleton rounded-card" />)}
+      </div>
+      <div className="h-64 skeleton rounded-card" />
+    </div>
+  );
+}
+
 // ─── STATUS BADGE ─────────────────────────────────────────────────────────────
 export function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    draft: "bg-slate-100 text-slate-600",
-    sent: "bg-blue-100 text-blue-700",
-    viewed: "bg-purple-100 text-purple-700",
-    approved: "bg-green-100 text-green-700",
-    rejected: "bg-red-100 text-red-700",
-    converted: "bg-teal-100 text-teal-700",
-    paid: "bg-green-100 text-green-700",
-    partially_paid: "bg-yellow-100 text-yellow-700",
-    overdue: "bg-red-100 text-red-700",
-    voided: "bg-slate-100 text-slate-500",
-    active: "bg-green-100 text-green-700",
-    on_hold: "bg-yellow-100 text-yellow-700",
-    completed: "bg-blue-100 text-blue-700",
-    cancelled: "bg-red-100 text-red-700",
-    lead: "bg-violet-100 text-violet-700",
-    customer: "bg-green-100 text-green-700",
-    direct_contact: "bg-blue-100 text-blue-700",
-    trial: "bg-yellow-100 text-yellow-700",
-    monthly: "bg-blue-100 text-blue-700",
-    yearly: "bg-green-100 text-green-700",
+    draft:          "bg-[#F3F4F6] text-[#6B7280]",
+    sent:           "bg-blue-50 text-blue-700",
+    viewed:         "bg-violet-50 text-violet-700",
+    approved:       "bg-brand-green-light text-brand-green",
+    rejected:       "bg-red-50 text-red-700",
+    converted:      "bg-teal-50 text-teal-700",
+    paid:           "bg-brand-green-light text-brand-green",
+    partially_paid: "bg-amber-50 text-amber-700",
+    overdue:        "bg-red-50 text-red-700",
+    voided:         "bg-[#F3F4F6] text-[#9CA3AF]",
+    active:         "bg-brand-green-light text-brand-green",
+    on_hold:        "bg-amber-50 text-amber-700",
+    completed:      "bg-blue-50 text-blue-700",
+    cancelled:      "bg-red-50 text-red-700",
+    lead:           "bg-violet-50 text-violet-700",
+    customer:       "bg-brand-green-light text-brand-green",
+    direct_contact: "bg-blue-50 text-blue-700",
+    trial:          "bg-amber-50 text-amber-700",
+    monthly:        "bg-blue-50 text-blue-700",
+    yearly:         "bg-brand-green-light text-brand-green",
   };
-  const cls = map[status.toLowerCase()] ?? "bg-slate-100 text-slate-600";
-  const label = status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const cls = map[status?.toLowerCase()] ?? "bg-[#F3F4F6] text-[#6B7280]";
+  const label = status?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ?? "";
   return <span className={`badge ${cls}`}>{label}</span>;
 }
 
@@ -106,16 +129,26 @@ export function ToastProvider() {
     };
     return () => { toastFn = null; };
   }, []);
+
+  const icons = { success: CheckCircle, error: AlertCircle, info: Info };
   const colors: Record<ToastType, string> = {
-    success: "bg-green-600", error: "bg-red-600", info: "bg-brand-navy",
+    success: "bg-[#111827] text-white",
+    error:   "bg-red-600 text-white",
+    info:    "bg-brand-navy text-white",
   };
+
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
-      {toasts.map(({ id, msg, type }) => (
-        <div key={id} className={`${colors[type]} text-white text-sm px-4 py-3 rounded-lg shadow-lg animate-in slide-in-from-right-5`}>
-          {msg}
-        </div>
-      ))}
+    <div className="fixed bottom-20 sm:bottom-5 right-4 z-[100] flex flex-col gap-2 pointer-events-none max-w-xs w-full">
+      {toasts.map(({ id, msg, type }) => {
+        const Icon = icons[type];
+        return (
+          <div key={id}
+            className={`${colors[type]} text-sm px-4 py-3 rounded-xl shadow-modal flex items-center gap-2.5 animate-slide-in-right pointer-events-auto`}>
+            <Icon size={15} className="flex-shrink-0 opacity-90" />
+            <span className="font-medium">{msg}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -124,16 +157,115 @@ export function toast(msg: string, type: ToastType = "success") {
   toastFn?.(msg, type);
 }
 
+// ─── STAT CARD ────────────────────────────────────────────────────────────────
+export function StatCard({ label, value, sub, icon, color = "navy" }: {
+  label: string; value: string | number; sub?: string;
+  icon?: ReactNode; color?: "navy" | "green" | "yellow" | "red";
+}) {
+  const accent = {
+    navy:   "text-brand-navy",
+    green:  "text-brand-green",
+    yellow: "text-amber-500",
+    red:    "text-red-600",
+  };
+  const bg = {
+    navy:   "bg-brand-navy-light",
+    green:  "bg-brand-green-light",
+    yellow: "bg-amber-50",
+    red:    "bg-red-50",
+  };
+  return (
+    <div className="stat-card">
+      {icon && (
+        <div className={`w-9 h-9 rounded-xl ${bg[color]} flex items-center justify-center mb-1 ${accent[color]}`}>
+          {icon}
+        </div>
+      )}
+      <p className="stat-label">{label}</p>
+      <p className={`stat-value ${accent[color]}`}>{value}</p>
+      {sub && <p className="text-xs text-[#9CA3AF]">{sub}</p>}
+    </div>
+  );
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+export function Tabs({ tabs, active, onChange }: {
+  tabs: string[]; active: string; onChange: (t: string) => void;
+}) {
+  return (
+    <div className="tabs-bar">
+      {tabs.map((tab) => (
+        <button key={tab} onClick={() => onChange(tab)}
+          className={`tab-btn ${active === tab ? "active" : ""}`}>
+          {tab}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ─── FORM FIELD ───────────────────────────────────────────────────────────────
+export function FormField({ label, error, children, required, hint }: {
+  label: string; error?: string; children: ReactNode; required?: boolean; hint?: string;
+}) {
+  return (
+    <div>
+      <label className="label">
+        {label}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {hint && <span className="text-[#9CA3AF] font-normal ml-1.5">{hint}</span>}
+      </label>
+      {children}
+      {error && <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">{error}</p>}
+    </div>
+  );
+}
+
+// ─── ACTION MENU (row actions dropdown) ──────────────────────────────────────
+export function ActionMenu({ items }: {
+  items: Array<{ label: string; icon?: ReactNode; onClick: () => void; danger?: boolean }>;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
+        className="btn btn-ghost btn-icon p-1.5 text-[#9CA3AF]">
+        <MoreHorizontal size={16} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-[#E5E7EB] rounded-xl shadow-dropdown z-20 overflow-hidden animate-scale-in">
+          {items.map((item, i) => (
+            <button key={i} onClick={() => { item.onClick(); setOpen(false); }}
+              className={`w-full text-left flex items-center gap-2.5 px-3.5 py-2.5 text-sm transition-colors
+                ${item.danger ? "text-red-600 hover:bg-red-50" : "text-[#374151] hover:bg-[#F9FAFB]"}`}>
+              {item.icon && <span className="opacity-60">{item.icon}</span>}
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── SEARCH INPUT ─────────────────────────────────────────────────────────────
 export function SearchInput({ value, onChange, placeholder = "Search…" }: {
   value: string; onChange: (v: string) => void; placeholder?: string;
 }) {
   return (
-    <input
-      type="text" value={value} onChange={(e) => onChange(e.target.value)}
+    <input type="text" value={value} onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="field max-w-xs"
-    />
+      className="field" />
   );
 }
 
@@ -151,54 +283,19 @@ export function Select({ value, onChange, options, placeholder, className = "" }
   );
 }
 
-// ─── STAT CARD ────────────────────────────────────────────────────────────────
-export function StatCard({ label, value, sub, color = "navy" }: {
-  label: string; value: string | number; sub?: string; color?: "navy" | "green" | "yellow" | "red";
+// ─── INFO BANNER ──────────────────────────────────────────────────────────────
+export function InfoBanner({ children, variant = "info" }: {
+  children: ReactNode; variant?: "info" | "success" | "warning" | "error";
 }) {
-  const accent = {
-    navy:   "text-brand-navy",
-    green:  "text-brand-green",
-    yellow: "text-amber-600",
-    red:    "text-red-600",
+  const styles = {
+    info:    "bg-blue-50 border-blue-100 text-blue-800",
+    success: "bg-brand-green-light border-brand-green/20 text-brand-green",
+    warning: "bg-amber-50 border-amber-100 text-amber-800",
+    error:   "bg-red-50 border-red-100 text-red-700",
   };
   return (
-    <div className="bg-white border border-[#E5E7EB] rounded-lg p-5">
-      <p className="text-xs font-medium text-[#6B7280] uppercase tracking-wide mb-2">{label}</p>
-      <p className={`text-2xl font-bold ${accent[color]}`}>{value}</p>
-      {sub && <p className="text-xs text-[#9CA3AF] mt-1">{sub}</p>}
-    </div>
-  );
-}
-
-// ─── TABS ─────────────────────────────────────────────────────────────────────
-export function Tabs({ tabs, active, onChange }: {
-  tabs: string[]; active: string; onChange: (t: string) => void;
-}) {
-  return (
-    <div className="flex gap-1 border-b border-slate-200 mb-5">
-      {tabs.map((tab) => (
-        <button key={tab} onClick={() => onChange(tab)}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            active === tab
-              ? "border-brand-navy text-brand-navy"
-              : "border-transparent text-slate-500 hover:text-slate-700"
-          }`}>
-          {tab}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// ─── FORM FIELD ───────────────────────────────────────────────────────────────
-export function FormField({ label, error, children, required }: {
-  label: string; error?: string; children: ReactNode; required?: boolean;
-}) {
-  return (
-    <div>
-      <label className="label">{label}{required && <span className="text-red-500 ml-0.5">*</span>}</label>
+    <div className={`border rounded-xl p-4 text-sm leading-relaxed ${styles[variant]}`}>
       {children}
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
   );
 }

@@ -1,8 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Plus, MessageSquare } from "lucide-react";
-import { Modal, toast } from "@/components/ui";
+import { Modal, toast, EmptyState } from "@/components/ui";
 import { fmtDate } from "@/lib/utils";
+
+const TYPE_COLORS: Record<string, string> = {
+  progress:  "bg-blue-50 text-blue-700",
+  milestone: "bg-brand-green-light text-brand-green",
+  issue:     "bg-red-50 text-red-700",
+  note:      "bg-[#F3F4F6] text-[#6B7280]",
+};
 
 export default function ProjectUpdatesPage() {
   const [updates, setUpdates] = useState<any[]>([]);
@@ -28,58 +35,57 @@ export default function ProjectUpdatesPage() {
     if (!form.project_id || !form.message) { toast("Project and message required", "error"); return; }
     setSaving(true);
     const res = await fetch("/api/project-updates", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
     setSaving(false);
     if (res.ok) {
-      toast("Update posted");
-      setModal(false);
+      toast("Update posted"); setModal(false);
       setForm({ project_id: "", update_type: "progress", message: "", is_client_visible: true });
       load();
     } else {
-      const d = await res.json();
-      toast(d.message || "Failed", "error");
+      const d = await res.json(); toast(d.message || "Failed", "error");
     }
-  };
-
-  const typeColor: Record<string, string> = {
-    progress: "bg-blue-100 text-blue-700",
-    milestone: "bg-green-100 text-green-700",
-    issue: "bg-red-100 text-red-700",
-    note: "bg-slate-100 text-slate-600",
   };
 
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Project Updates</h1>
-        <button className="btn-green btn" onClick={() => setModal(true)}><Plus size={16} /> Post Update</button>
+        <div>
+          <h1 className="page-title">Project Updates</h1>
+          <p className="page-desc">{updates.length} updates</p>
+        </div>
+        <button className="btn btn-green" onClick={() => setModal(true)}><Plus size={15} /> Post Update</button>
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center h-64 text-slate-400">Loading…</div>
-      ) : updates.length === 0 ? (
-        <div className="card p-12 text-center text-slate-400">
-          <MessageSquare size={40} className="mx-auto mb-3 opacity-40" />
-          <p className="text-lg font-medium mb-1">No project updates yet</p>
-          <p className="text-sm">Post updates to track progress and communicate with clients.</p>
+        <div className="space-y-3">
+          {[...Array(3)].map((_, i) => <div key={i} className="card h-20 animate-pulse skeleton" />)}
         </div>
+      ) : updates.length === 0 ? (
+        <EmptyState icon={<MessageSquare size={36} />} title="No project updates yet"
+          description="Post updates to track progress and communicate with clients."
+          action={<button className="btn btn-green btn-sm" onClick={() => setModal(true)}><Plus size={14} /> Post Update</button>} />
       ) : (
         <div className="space-y-3">
           {updates.map((u: any) => (
-            <div key={u.id} className="card px-5 py-4">
+            <div key={u.id} className="card px-5 py-4 hover:shadow-card-md transition-shadow">
               <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className={`badge capitalize ${typeColor[u.update_type] ?? "bg-slate-100 text-slate-600"}`}>{u.update_type}</span>
-                    {u.projects?.name && <span className="text-sm font-medium text-slate-700">{u.projects.name}</span>}
-                    {u.is_client_visible && <span className="badge bg-brand-green/10 text-brand-green text-xs">Client visible</span>}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <span className={`badge capitalize ${TYPE_COLORS[u.update_type] ?? "bg-[#F3F4F6] text-[#6B7280]"}`}>
+                      {u.update_type}
+                    </span>
+                    {u.projects?.name && (
+                      <span className="text-sm font-medium text-[#374151]">{u.projects.name}</span>
+                    )}
+                    {u.is_client_visible && (
+                      <span className="badge bg-brand-green-light text-brand-green text-xs">Client visible</span>
+                    )}
                   </div>
-                  <p className="text-slate-800 mt-1">{u.message}</p>
+                  <p className="text-[#374151] leading-relaxed">{u.message}</p>
                 </div>
-                <span className="text-xs text-slate-400 whitespace-nowrap">{fmtDate(u.created_at)}</span>
+                <span className="text-xs text-[#9CA3AF] whitespace-nowrap flex-shrink-0">{fmtDate(u.created_at)}</span>
               </div>
             </div>
           ))}
@@ -89,7 +95,7 @@ export default function ProjectUpdatesPage() {
       <Modal open={modal} onClose={() => setModal(false)} title="Post Project Update" size="md">
         <div className="space-y-4">
           <div>
-            <label className="label">Project *</label>
+            <label className="label">Project <span className="text-red-500">*</span></label>
             <select value={form.project_id} onChange={e => setForm({ ...form, project_id: e.target.value })} className="field">
               <option value="">Select project…</option>
               {projects.map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -105,27 +111,19 @@ export default function ProjectUpdatesPage() {
             </select>
           </div>
           <div>
-            <label className="label">Message *</label>
-            <textarea
-              value={form.message}
-              onChange={e => setForm({ ...form, message: e.target.value })}
-              className="field min-h-[100px] resize-y"
-              placeholder="Describe the update…"
-            />
+            <label className="label">Message <span className="text-red-500">*</span></label>
+            <textarea value={form.message} onChange={e => setForm({ ...form, message: e.target.value })}
+              className="field min-h-[100px] resize-y" placeholder="Describe the update…" />
           </div>
           <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="client_visible"
-              checked={form.is_client_visible}
+            <input type="checkbox" id="client_visible" checked={form.is_client_visible}
               onChange={e => setForm({ ...form, is_client_visible: e.target.checked })}
-              className="rounded border-slate-300"
-            />
-            <label htmlFor="client_visible" className="text-sm text-slate-700 cursor-pointer">Visible to client</label>
+              className="rounded border-[#D1D5DB]" />
+            <label htmlFor="client_visible" className="text-sm text-[#374151] cursor-pointer">Visible to client</label>
           </div>
-          <div className="flex gap-3 justify-end pt-2">
-            <button className="btn-ghost btn" onClick={() => setModal(false)}>Cancel</button>
-            <button className="btn-green btn" onClick={save} disabled={saving}>{saving ? "Posting…" : "Post Update"}</button>
+          <div className="flex gap-3 justify-end pt-2 border-t border-[#E5E7EB]">
+            <button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button>
+            <button className="btn btn-green" onClick={save} disabled={saving}>{saving ? "Posting…" : "Post Update"}</button>
           </div>
         </div>
       </Modal>

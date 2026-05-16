@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Plus, Star, ThumbsUp, ThumbsDown, Minus } from "lucide-react";
-import { Modal, toast } from "@/components/ui";
+import { Modal, toast, StatCard, EmptyState } from "@/components/ui";
 import { fmtDate } from "@/lib/utils";
 
 export default function FeedbackPage() {
@@ -31,100 +31,113 @@ export default function FeedbackPage() {
     if (!form.message) { toast("Message required", "error"); return; }
     setSaving(true);
     const res = await fetch("/api/feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
     setSaving(false);
     if (res.ok) {
-      toast("Feedback recorded");
-      setModal(false);
+      toast("Feedback recorded"); setModal(false);
       setForm({ project_id: "", contact_id: "", rating: 5, category: "general", message: "", is_public: false });
       load();
     } else {
-      const d = await res.json();
-      toast(d.message || "Failed", "error");
+      const d = await res.json(); toast(d.message || "Failed", "error");
     }
   };
 
   const ratingIcon = (r: number) => {
-    if (r >= 4) return <ThumbsUp size={14} className="text-green-600" />;
+    if (r >= 4) return <ThumbsUp size={14} className="text-brand-green" />;
     if (r <= 2) return <ThumbsDown size={14} className="text-red-500" />;
-    return <Minus size={14} className="text-yellow-500" />;
+    return <Minus size={14} className="text-amber-500" />;
   };
+
+  const stars = (r: number) => Array.from({ length: 5 }, (_, i) => (
+    <Star key={i} size={12} className={i < r ? "text-amber-400 fill-amber-400" : "text-[#D1D5DB]"} />
+  ));
 
   const avg = feedback.length ? (feedback.reduce((s, f) => s + (f.rating ?? 0), 0) / feedback.length).toFixed(1) : null;
 
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Feedback</h1>
-        <button className="btn-green btn" onClick={() => setModal(true)}><Plus size={16} /> Record Feedback</button>
+        <div>
+          <h1 className="page-title">Feedback</h1>
+          <p className="page-desc">Client satisfaction tracking</p>
+        </div>
+        <button className="btn btn-green" onClick={() => setModal(true)}><Plus size={15} /> Record Feedback</button>
       </div>
 
-      {avg && (
+      {feedback.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          <div className="stat-card">
-            <p className="stat-label">Average rating</p>
-            <p className="stat-value flex items-center gap-1"><Star size={18} className="text-yellow-400" /> {avg}</p>
-          </div>
-          <div className="stat-card">
-            <p className="stat-label">Total feedback</p>
-            <p className="stat-value">{feedback.length}</p>
-          </div>
-          <div className="stat-card">
-            <p className="stat-label">Positive (4–5★)</p>
-            <p className="stat-value text-green-600">{feedback.filter(f => f.rating >= 4).length}</p>
-          </div>
-          <div className="stat-card">
-            <p className="stat-label">Needs attention (1–2★)</p>
-            <p className="stat-value text-red-500">{feedback.filter(f => f.rating <= 2).length}</p>
-          </div>
+          <StatCard label="Average Rating" value={avg ?? "—"} icon={<Star size={16} />} color="yellow" />
+          <StatCard label="Total Feedback" value={feedback.length} icon={<ThumbsUp size={16} />} color="navy" />
+          <StatCard label="Positive (4–5★)" value={feedback.filter(f => f.rating >= 4).length} icon={<ThumbsUp size={16} />} color="green" />
+          <StatCard label="Needs Attention" value={feedback.filter(f => f.rating <= 2).length} icon={<ThumbsDown size={16} />} color="red" />
         </div>
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center h-64 text-slate-400">Loading…</div>
+        <div className="space-y-3">
+          {[...Array(3)].map((_, i) => <div key={i} className="card h-24 animate-pulse skeleton" />)}
+        </div>
       ) : feedback.length === 0 ? (
-        <div className="card p-12 text-center text-slate-400">
-          <Star size={40} className="mx-auto mb-3 opacity-40" />
-          <p className="text-lg font-medium mb-1">No feedback recorded yet</p>
-          <p className="text-sm">Record client feedback to track satisfaction and improve your services.</p>
-        </div>
+        <EmptyState icon={<Star size={36} />} title="No feedback yet"
+          description="Record client feedback to track satisfaction and improve your services."
+          action={<button className="btn btn-green btn-sm" onClick={() => setModal(true)}><Plus size={14} /> Record Feedback</button>} />
       ) : (
-        <div className="card overflow-hidden">
-          <table className="table-base">
-            <thead>
-              <tr>
-                <th>Contact</th>
-                <th>Project</th>
-                <th>Rating</th>
-                <th>Category</th>
-                <th>Message</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {feedback.map((f: any) => (
-                <tr key={f.id}>
-                  <td className="font-medium">{f.contacts?.full_name ?? "—"}</td>
-                  <td className="text-slate-500">{f.projects?.name ?? "—"}</td>
-                  <td>
-                    <div className="flex items-center gap-1">
-                      {ratingIcon(f.rating)}
-                      <span className="text-sm font-semibold">{f.rating}/5</span>
-                    </div>
-                  </td>
-                  <td><span className="badge bg-slate-100 text-slate-600 capitalize">{f.category}</span></td>
-                  <td className="max-w-xs">
-                    <p className="truncate text-slate-700 text-sm">{f.message}</p>
-                  </td>
-                  <td className="text-slate-400 text-xs">{fmtDate(f.created_at)}</td>
+        <>
+          {/* Mobile cards */}
+          <div className="lg:hidden space-y-3">
+            {feedback.map((f: any) => (
+              <div key={f.id} className="mobile-card">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-[#111827]">{f.contacts?.full_name ?? "Anonymous"}</p>
+                    {f.projects?.name && <p className="text-xs text-[#9CA3AF]">{f.projects.name}</p>}
+                  </div>
+                  <div className="flex items-center gap-0.5">{stars(f.rating)}</div>
+                </div>
+                <p className="text-sm text-[#374151] mt-2 leading-relaxed">{f.message}</p>
+                <div className="flex items-center gap-2 mt-2 text-xs text-[#9CA3AF]">
+                  <span className="badge bg-[#F3F4F6] text-[#6B7280] capitalize">{f.category}</span>
+                  <span>{fmtDate(f.created_at)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden lg:block table-wrapper">
+            <table className="table-base">
+              <thead>
+                <tr>
+                  <th>Contact</th>
+                  <th>Project</th>
+                  <th>Rating</th>
+                  <th>Category</th>
+                  <th>Message</th>
+                  <th>Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {feedback.map((f: any) => (
+                  <tr key={f.id}>
+                    <td className="font-medium">{f.contacts?.full_name ?? "—"}</td>
+                    <td className="text-[#6B7280]">{f.projects?.name ?? "—"}</td>
+                    <td>
+                      <div className="flex items-center gap-1.5">
+                        {ratingIcon(f.rating)}
+                        <span className="text-sm font-semibold">{f.rating}/5</span>
+                      </div>
+                    </td>
+                    <td><span className="badge bg-[#F3F4F6] text-[#6B7280] capitalize">{f.category}</span></td>
+                    <td className="max-w-xs"><p className="truncate text-[#374151] text-sm">{f.message}</p></td>
+                    <td className="text-[#9CA3AF] text-xs">{fmtDate(f.created_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       <Modal open={modal} onClose={() => setModal(false)} title="Record Feedback" size="md">
@@ -164,27 +177,19 @@ export default function FeedbackPage() {
             </div>
           </div>
           <div>
-            <label className="label">Message *</label>
-            <textarea
-              value={form.message}
-              onChange={e => setForm({ ...form, message: e.target.value })}
-              className="field min-h-[100px] resize-y"
-              placeholder="What did the client say?"
-            />
+            <label className="label">Message <span className="text-red-500">*</span></label>
+            <textarea value={form.message} onChange={e => setForm({ ...form, message: e.target.value })}
+              className="field min-h-[100px] resize-y" placeholder="What did the client say?" />
           </div>
           <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="is_public"
-              checked={form.is_public}
+            <input type="checkbox" id="is_public" checked={form.is_public}
               onChange={e => setForm({ ...form, is_public: e.target.checked })}
-              className="rounded border-slate-300"
-            />
-            <label htmlFor="is_public" className="text-sm text-slate-700 cursor-pointer">Mark as public testimonial</label>
+              className="rounded border-[#D1D5DB]" />
+            <label htmlFor="is_public" className="text-sm text-[#374151] cursor-pointer">Mark as public testimonial</label>
           </div>
-          <div className="flex gap-3 justify-end pt-2">
-            <button className="btn-ghost btn" onClick={() => setModal(false)}>Cancel</button>
-            <button className="btn-green btn" onClick={save} disabled={saving}>{saving ? "Saving…" : "Record Feedback"}</button>
+          <div className="flex gap-3 justify-end pt-2 border-t border-[#E5E7EB]">
+            <button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button>
+            <button className="btn btn-green" onClick={save} disabled={saving}>{saving ? "Saving…" : "Record Feedback"}</button>
           </div>
         </div>
       </Modal>

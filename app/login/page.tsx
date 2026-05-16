@@ -31,8 +31,7 @@ function LoginForm() {
     if (Object.keys(errs).length) { setErr(errs); return; }
     setLoading(true); setErr({}); setUnverified(false);
     const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
     const data = await res.json();
@@ -48,42 +47,39 @@ function LoginForm() {
   const resend = async () => {
     setResending(true);
     await fetch("/api/auth/resend-verification", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: form.email }),
     });
     setResending(false); setResent(true);
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] flex items-center justify-center p-4">
-      <div className="bg-white border border-[#E5E7EB] rounded-lg w-full max-w-md p-8">
-        {/* Logo */}
-        <div className="flex items-center gap-3 mb-8">
-          <Image src="/logo.png" alt="Clear Build USA" width={40} height={40} className="rounded-lg object-cover" />
-          <div>
-            <h1 className="text-lg font-bold text-[#1F2937] leading-tight">Clear Build USA</h1>
-            <p className="text-xs text-[#6B7280]">Sign in to your account</p>
-          </div>
+    <div className="min-h-screen bg-surface flex items-center justify-center p-4">
+      <div className="bg-white border border-[#E5E7EB] rounded-card shadow-card w-full max-w-md p-8">
+        <div className="flex justify-center mb-8">
+          <Image src="/logo.png" alt="Clear Build USA" width={160} height={45} className="object-contain" priority />
         </div>
 
+        <h2 className="text-xl font-bold text-[#111827] mb-1" style={{ letterSpacing: "-0.02em" }}>Sign in</h2>
+        <p className="text-sm text-[#9CA3AF] mb-6">Welcome back — sign in to your account.</p>
+
         {registered && (
-          <div className="mb-4 p-3 bg-[#ECFDF5] border border-[#3FA66B]/20 rounded text-brand-green text-sm">
+          <div className="mb-4 p-3.5 bg-brand-green-light border border-brand-green/20 rounded-xl text-brand-green text-sm">
             Account created! Check your email to verify your account.
           </div>
         )}
         {verified && (
-          <div className="mb-4 p-3 bg-[#ECFDF5] border border-[#3FA66B]/20 rounded text-brand-green text-sm">
+          <div className="mb-4 p-3.5 bg-brand-green-light border border-brand-green/20 rounded-xl text-brand-green text-sm">
             Email verified! You can now sign in.
           </div>
         )}
         {err.general && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm">
+          <div className="mb-4 p-3.5 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm">
             {err.general}
           </div>
         )}
         {unverified && (
-          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded text-sm">
+          <div className="mb-4 p-3.5 bg-amber-50 border border-amber-100 rounded-xl text-sm">
             <p className="text-amber-800 font-medium mb-2">Your email is not verified.</p>
             {resent
               ? <p className="text-brand-green text-xs">Verification email sent! Check your inbox.</p>
@@ -102,23 +98,21 @@ function LoginForm() {
             {err.email && <p className="mt-1 text-xs text-red-500">{err.email}</p>}
           </div>
           <div>
-            <div className="flex justify-between mb-1">
+            <div className="flex justify-between mb-1.5">
               <label className="label mb-0">Password</label>
-              <Link href="/forgot-password" className="text-xs text-brand-navy hover:underline">
-                Forgot password?
-              </Link>
+              <Link href="/forgot-password" className="text-xs text-brand-navy hover:underline">Forgot password?</Link>
             </div>
             <div className="relative">
               <input type={showPwd ? "text" : "password"} value={form.password} onChange={set("password")}
                 placeholder="••••••••" className="field pr-10" />
               <button type="button" onClick={() => setShowPwd(!showPwd)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]">
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#6B7280]">
                 {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
             {err.password && <p className="mt-1 text-xs text-red-500">{err.password}</p>}
           </div>
-          <button type="submit" disabled={loading} className="btn btn-primary w-full py-2.5 text-sm font-semibold">
+          <button type="submit" disabled={loading} className="btn btn-primary w-full mt-2">
             {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>

@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 import { useEffect, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, Trash2, ArrowLeft, UserPlus, Users } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, ChevronDown, X, Mail, MessageCircle, Phone } from "lucide-react";
 import { toast } from "@/components/ui";
 import { fmt } from "@/lib/utils";
 
@@ -11,57 +11,79 @@ const EMPTY_ITEM = {
   unit: "", unit_price: 0, tax_rate: 0, discount: 0, total: 0, optional: false,
 };
 
-const EMPTY_MILESTONE = { label: "", percent: 0, amount: 0, due_date: "" };
-
 const PROJECT_TYPES = [
   "Residential Remodel", "Commercial Build", "New Construction",
   "Roofing", "Flooring", "Painting", "Electrical", "Plumbing",
   "Landscaping", "Other",
 ];
 
-const LEAD_SOURCES = [
-  "Referral", "Google", "Facebook", "Instagram", "LinkedIn",
-  "Walk-in", "Cold Call", "Website", "Other",
-];
-
 function calcItem(i: any) {
-  const t = i.quantity * i.unit_price * (1 - i.discount / 100);
-  return { ...i, total: Math.round(t * 100) / 100 };
+  const base = i.quantity * i.unit_price;
+  const disc = base * (i.discount / 100);
+  const taxed = (base - disc) * (1 + i.tax_rate / 100);
+  return { ...i, total: Math.round(taxed * 100) / 100 };
+}
+
+function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
+  return (
+    <button type="button" onClick={onChange}
+      className={`relative w-10 h-[22px] rounded-full transition-colors flex-shrink-0 ${checked ? "bg-brand-navy" : "bg-[#e7e6e1]"}`}>
+      <div className={`absolute top-[3px] w-4 h-4 bg-white rounded-full shadow transition-transform ${checked ? "translate-x-5" : "translate-x-[3px]"}`} />
+    </button>
+  );
 }
 
 function QuoteForm() {
   const router = useRouter();
   const [contacts, setContacts] = useState<any[]>([]);
-  const [contactMode, setContactMode] = useState<"existing" | "new">("existing");
+  const [contactSearch, setContactSearch] = useState("");
+  const [contactOpen, setContactOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+
   const [form, setForm] = useState({
     contact_id: "",
+    contact_name: "",
+    contact_email: "",
     title: "",
     issue_date: new Date().toISOString().split("T")[0],
     valid_until: "",
     project_type: "",
     project_address: "",
     notes: "",
-    terms: "Payment is due within 30 days of the approved quote date. Late payments may be subject to a 1.5% monthly interest charge.",
+    terms: "Payment is due within 30 days of the approved quote date.",
   });
-  const [newContact, setNewContact] = useState({
-    full_name: "", business_name: "", email: "", phone: "", lead_source: "",
-    address: "", city: "", state: "", zip: "",
-  });
+
   const [items, setItems] = useState([{ ...EMPTY_ITEM }]);
-  const [milestones, setMilestones] = useState<typeof EMPTY_MILESTONE[]>([]);
-  const [saving, setSaving] = useState(false);
+  const [sendEmail, setSendEmail] = useState(true);
+  const [sendWhatsapp, setSendWhatsapp] = useState(true);
+  const [sendSms, setSendSms] = useState(false);
 
   useEffect(() => {
     fetch("/api/contacts").then(r => r.json()).then(d => setContacts(d.contacts ?? []));
   }, []);
 
-  const set = (k: keyof typeof form) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-      setForm({ ...form, [k]: e.target.value });
+  const set = (k: keyof typeof form, v: string) => setForm(f => ({ ...f, [k]: v }));
 
-  const setNC = (k: keyof typeof newContact) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-      setNewContact({ ...newContact, [k]: e.target.value });
+  const filteredContacts = contactSearch
+    ? contacts.filter(c =>
+        c.full_name?.toLowerCase().includes(contactSearch.toLowerCase()) ||
+        c.email?.toLowerCase().includes(contactSearch.toLowerCase())
+      )
+    : contacts;
+
+  const selectContact = (c: any) => {
+    set("contact_id", c.id);
+    set("contact_name", c.full_name ?? "");
+    set("contact_email", c.email ?? "");
+    setContactSearch("");
+    setContactOpen(false);
+  };
+
+  const clearContact = () => {
+    set("contact_id", "");
+    set("contact_name", "");
+    set("contact_email", "");
+  };
 
   const setItem = (i: number, k: string, v: any) => {
     const arr = [...items];
@@ -70,50 +92,18 @@ function QuoteForm() {
     setItems(arr);
   };
 
-  const setMilestone = (i: number, k: keyof typeof EMPTY_MILESTONE, v: string) => {
-    const arr = [...milestones];
-    arr[i] = { ...arr[i], [k]: k === "percent" || k === "amount" ? parseFloat(v) || 0 : v };
-    setItems(items); // re-render
-    setMilestones(arr);
-  };
-
-  const subtotal = items.reduce((s, i) => s + i.total, 0);
-  const discountTotal = items.reduce((s, i) => s + (i.quantity * i.unit_price * (i.discount / 100)), 0);
-  const taxAmount = items.reduce((s, i) => s + i.total * (i.tax_rate / 100), 0);
-  const total = subtotal + taxAmount;
+  const subtotal = items.reduce((s, i) => s + i.quantity * i.unit_price, 0);
+  const discountTotal = items.reduce((s, i) => s + i.quantity * i.unit_price * (i.discount / 100), 0);
+  const taxAmount = items.reduce((s, i) => s + (i.quantity * i.unit_price - i.quantity * i.unit_price * (i.discount / 100)) * (i.tax_rate / 100), 0);
+  const total = subtotal - discountTotal + taxAmount;
 
   const save = async (status = "draft") => {
-    let contact_id = form.contact_id;
-
-    if (contactMode === "new") {
-      if (!newContact.full_name.trim() || !newContact.email.trim() || !newContact.phone.trim()) {
-        toast("Full name, email, and phone are required for new contact", "error");
-        return;
-      }
-      const res = await fetch("/api/contacts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...newContact, contact_type: "lead", lead_status: "New Lead" }),
-      });
-      if (!res.ok) { toast("Failed to create contact", "error"); return; }
-      const d = await res.json();
-      contact_id = d.contact.id;
-    } else if (!contact_id) {
-      toast("Please select a contact", "error");
-      return;
-    }
-
+    if (!form.contact_id) { toast("Please select a contact", "error"); return; }
     setSaving(true);
     const res = await fetch("/api/quotes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        contact_id,
-        status,
-        items,
-        milestones: milestones.length > 0 ? milestones : undefined,
-      }),
+      body: JSON.stringify({ ...form, status, items }),
     });
     setSaving(false);
     if (res.ok) {
@@ -125,168 +115,151 @@ function QuoteForm() {
     }
   };
 
+  const initials = form.contact_name?.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase() || "?";
+
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/quotes" className="btn btn-ghost btn-sm"><ArrowLeft size={14} /></Link>
-        <h1 className="page-title">New Quote</h1>
+    <div className="max-w-[1200px]">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-5">
+        <Link href="/quotes" className="w-8 h-8 flex items-center justify-center rounded-lg text-[#4a5168] hover:bg-[#f6f6f3] transition-colors">
+          <ArrowLeft size={16} />
+        </Link>
+        <div className="flex-1">
+          <input
+            value={form.title}
+            onChange={e => set("title", e.target.value)}
+            placeholder="Quote title (e.g. Hartwell Kitchen Remodel)"
+            className="text-[22px] font-bold text-[#0c1226] bg-transparent border-none outline-none w-full placeholder:text-[#c8c6bf]"
+          />
+          <p className="text-[12px] text-[#8a8fa3] mt-0.5">New quote · Draft</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-5">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_272px] gap-5">
+        {/* Main content */}
+        <div className="space-y-4">
 
-          {/* Contact Selection */}
-          <div className="form-section">
-            <h2 className="section-title">Customer / Contact</h2>
-            <div className="flex gap-2 mb-4">
-              <button onClick={() => setContactMode("existing")}
-                className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-medium border transition-colors ${contactMode === "existing" ? "bg-brand-navy text-white border-brand-navy" : "border-[#e7e6e1] text-[#4a5168] hover:bg-[#f6f6f3]"}`}>
-                <Users size={14} /> Select Existing
-              </button>
-              <button onClick={() => setContactMode("new")}
-                className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-medium border transition-colors ${contactMode === "new" ? "bg-brand-navy text-white border-brand-navy" : "border-[#e7e6e1] text-[#4a5168] hover:bg-[#f6f6f3]"}`}>
-                <UserPlus size={14} /> Add New Contact
-              </button>
-            </div>
+          {/* Metadata row: Customer | Job site | Valid through */}
+          <div className="card p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:divide-x md:divide-[#f0efea]">
+              {/* Customer */}
+              <div className="md:pr-4">
+                <p className="text-[10px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-2">Customer</p>
+                {form.contact_id ? (
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 bg-brand-navy rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-[10px] font-bold">{initials}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold text-[#0c1226] truncate">{form.contact_name}</p>
+                      <p className="text-[11px] text-[#8a8fa3] truncate">{form.contact_email}</p>
+                    </div>
+                    <button type="button" onClick={clearContact} className="text-[#8a8fa3] hover:text-[#4a5168]">
+                      <X size={13} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <input
+                      value={contactSearch}
+                      onChange={e => { setContactSearch(e.target.value); setContactOpen(true); }}
+                      onFocus={() => setContactOpen(true)}
+                      placeholder="Search or add…"
+                      className="field text-[13px]"
+                    />
+                    {contactOpen && (
+                      <>
+                        <div className="fixed inset-0 z-10" onClick={() => setContactOpen(false)} />
+                        <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#e7e6e1] rounded-xl shadow-dropdown z-20 max-h-48 overflow-y-auto">
+                          {filteredContacts.length === 0 ? (
+                            <div className="px-3 py-2 text-[12px] text-[#8a8fa3]">No contacts found</div>
+                          ) : filteredContacts.slice(0, 8).map(c => (
+                            <button key={c.id} type="button" onClick={() => selectContact(c)}
+                              className="w-full text-left px-3 py-2 text-[13px] text-[#0c1226] hover:bg-[#f6f6f3] transition-colors">
+                              {c.full_name}
+                              {c.email && <span className="text-[11px] text-[#8a8fa3] ml-2">{c.email}</span>}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
 
-            {contactMode === "existing" ? (
-              <div>
-                <label className="label">Select Contact <span className="text-red-500">*</span></label>
-                <select value={form.contact_id} onChange={set("contact_id")} className="field max-w-sm">
-                  <option value="">Choose a contact…</option>
-                  {contacts.map(c => <option key={c.id} value={c.id}>{c.full_name}{c.business_name ? ` — ${c.business_name}` : ""}</option>)}
-                </select>
+              {/* Job site */}
+              <div className="md:px-4">
+                <p className="text-[10px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-2">Job site</p>
+                <input
+                  value={form.project_address}
+                  onChange={e => set("project_address", e.target.value)}
+                  placeholder="Address…"
+                  className="field text-[13px]"
+                />
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="label">Full Name <span className="text-red-500">*</span></label>
-                  <input value={newContact.full_name} onChange={setNC("full_name")} placeholder="John Doe" className="field" />
-                </div>
-                <div>
-                  <label className="label">Business Name</label>
-                  <input value={newContact.business_name} onChange={setNC("business_name")} placeholder="Company Inc." className="field" />
-                </div>
-                <div>
-                  <label className="label">Email <span className="text-red-500">*</span></label>
-                  <input type="email" value={newContact.email} onChange={setNC("email")} placeholder="john@example.com" className="field" />
-                </div>
-                <div>
-                  <label className="label">Phone <span className="text-red-500">*</span></label>
-                  <input value={newContact.phone} onChange={setNC("phone")} placeholder="+1 (555) 000-0000" className="field" />
-                </div>
-                <div>
-                  <label className="label">Lead Source</label>
-                  <select value={newContact.lead_source} onChange={setNC("lead_source")} className="field">
-                    <option value="">Select source</option>
-                    {LEAD_SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="label">City</label>
-                  <input value={newContact.city} onChange={setNC("city")} placeholder="Dallas" className="field" />
-                </div>
-              </div>
-            )}
-          </div>
 
-          {/* Quote Details */}
-          <div className="form-section">
-            <h2 className="section-title">Quote Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className="label">Quote Title</label>
-                <input value={form.title} onChange={set("title")} placeholder="e.g. Kitchen Remodel — Phase 1" className="field" />
-              </div>
-              <div>
-                <label className="label">Issue Date</label>
-                <input type="date" value={form.issue_date} onChange={set("issue_date")} className="field" />
-              </div>
-              <div>
-                <label className="label">Valid Until</label>
-                <input type="date" value={form.valid_until} onChange={set("valid_until")} className="field" />
-              </div>
-              <div>
-                <label className="label">Project Type</label>
-                <select value={form.project_type} onChange={set("project_type")} className="field">
-                  <option value="">Select type…</option>
-                  {PROJECT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="label">Project Address</label>
-                <input value={form.project_address} onChange={set("project_address")} placeholder="123 Main St, Dallas TX" className="field" />
+              {/* Valid through */}
+              <div className="md:pl-4">
+                <p className="text-[10px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-2">Valid through</p>
+                <input
+                  type="date"
+                  value={form.valid_until}
+                  onChange={e => set("valid_until", e.target.value)}
+                  className="field text-[13px]"
+                />
+                {form.valid_until && (
+                  <p className="text-[11px] text-[#8a8fa3] mt-1">
+                    {Math.max(0, Math.ceil((new Date(form.valid_until).getTime() - Date.now()) / 86400000))} days left
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Line Items */}
-          <div className="form-section">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="section-title mb-0">Line Items</h2>
-              <button onClick={() => setItems([...items, { ...EMPTY_ITEM }])}
-                className="btn btn-outline btn-sm"><Plus size={13} /> Add Item</button>
-            </div>
-            <div className="overflow-x-auto -mx-1">
-              <table className="w-full text-sm min-w-[700px]">
+          {/* Line items */}
+          <div className="card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm min-w-[600px]">
                 <thead>
-                  <tr className="border-b border-[#e7e6e1]">
-                    <th className="text-left py-2 px-1 text-xs text-[#4a5168] font-semibold w-28">Category</th>
-                    <th className="text-left py-2 px-1 text-xs text-[#4a5168] font-semibold">Item / Description</th>
-                    <th className="text-left py-2 px-1 text-xs text-[#4a5168] font-semibold w-12">Qty</th>
-                    <th className="text-left py-2 px-1 text-xs text-[#4a5168] font-semibold w-14">Unit</th>
-                    <th className="text-left py-2 px-1 text-xs text-[#4a5168] font-semibold w-24">Unit Price</th>
-                    <th className="text-left py-2 px-1 text-xs text-[#4a5168] font-semibold w-12">Tax%</th>
-                    <th className="text-left py-2 px-1 text-xs text-[#4a5168] font-semibold w-14">Disc%</th>
-                    <th className="text-right py-2 px-1 text-xs text-[#4a5168] font-semibold w-20">Total</th>
-                    <th className="w-14 text-center py-2 px-1 text-xs text-[#4a5168] font-semibold">Opt?</th>
-                    <th className="w-6" />
+                  <tr className="border-b border-[#f0efea] bg-[#f6f6f3]">
+                    <th className="text-left py-2.5 px-4 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide">Item</th>
+                    <th className="text-left py-2.5 px-2 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide w-14">Unit</th>
+                    <th className="text-left py-2.5 px-2 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide w-14">QTY</th>
+                    <th className="text-left py-2.5 px-2 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide w-24">Rate</th>
+                    <th className="text-right py-2.5 px-4 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide w-24">Total</th>
+                    <th className="w-8" />
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((item, i) => (
-                    <tr key={i} className="border-b border-[#f6f6f3]">
-                      <td className="py-1.5 px-1">
-                        <input value={item.category} onChange={e => setItem(i, "category", e.target.value)}
-                          placeholder="Category" className="field text-xs" />
-                      </td>
-                      <td className="py-1.5 px-1">
+                    <tr key={i} className="border-b border-[#f6f6f3] hover:bg-[#fafaf8] transition-colors group">
+                      <td className="py-2 px-4">
                         <input value={item.item_name} onChange={e => setItem(i, "item_name", e.target.value)}
-                          placeholder="Item name" className="field text-xs mb-1" />
+                          placeholder="Item name" className="field text-[13px] mb-1 font-medium" />
                         <input value={item.description} onChange={e => setItem(i, "description", e.target.value)}
-                          placeholder="Description (optional)" className="field text-xs" />
+                          placeholder="Description (optional)" className="field text-[12px] text-[#8a8fa3]" />
                       </td>
-                      <td className="py-1.5 px-1">
-                        <input type="number" value={item.quantity} onChange={e => setItem(i, "quantity", e.target.value)}
-                          className="field text-xs" min={0} />
-                      </td>
-                      <td className="py-1.5 px-1">
+                      <td className="py-2 px-2">
                         <input value={item.unit} onChange={e => setItem(i, "unit", e.target.value)}
-                          placeholder="hr/sqft" className="field text-xs" />
+                          placeholder="hr" className="field text-[13px]" />
                       </td>
-                      <td className="py-1.5 px-1">
-                        <input type="number" value={item.unit_price} onChange={e => setItem(i, "unit_price", e.target.value)}
-                          className="field text-xs" min={0} step={0.01} />
+                      <td className="py-2 px-2">
+                        <input type="number" value={item.quantity} onChange={e => setItem(i, "quantity", e.target.value)}
+                          className="field text-[13px]" min={0} />
                       </td>
-                      <td className="py-1.5 px-1">
-                        <input type="number" value={item.tax_rate} onChange={e => setItem(i, "tax_rate", e.target.value)}
-                          className="field text-xs" min={0} max={100} />
+                      <td className="py-2 px-2">
+                        <div className="relative">
+                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8a8fa3] text-[12px]">$</span>
+                          <input type="number" value={item.unit_price} onChange={e => setItem(i, "unit_price", e.target.value)}
+                            className="field text-[13px] pl-5" min={0} step={0.01} />
+                        </div>
                       </td>
-                      <td className="py-1.5 px-1">
-                        <input type="number" value={item.discount} onChange={e => setItem(i, "discount", e.target.value)}
-                          className="field text-xs" min={0} max={100} />
-                      </td>
-                      <td className="py-1.5 px-1 text-right font-semibold text-brand-navy text-xs whitespace-nowrap">
+                      <td className="py-2 px-4 text-right font-semibold text-[13px] text-brand-navy whitespace-nowrap">
                         {fmt(item.total)}
                       </td>
-                      <td className="py-1.5 px-1 text-center">
-                        <input type="checkbox" checked={item.optional}
-                          onChange={e => setItem(i, "optional", e.target.checked)}
-                          className="rounded" title="Optional item" />
-                      </td>
-                      <td className="py-1.5 pl-1">
+                      <td className="py-2 pr-3">
                         <button onClick={() => setItems(items.filter((_, idx) => idx !== i))}
-                          className="text-[#d8d6cf] hover:text-red-500 transition-colors">
+                          className="text-[#d8d6cf] hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
                           <Trash2 size={13} />
                         </button>
                       </td>
@@ -295,113 +268,141 @@ function QuoteForm() {
                 </tbody>
               </table>
             </div>
-          </div>
 
-          {/* Payment Milestones */}
-          <div className="form-section">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="section-title mb-0">Payment Milestones</h2>
-                <p className="text-xs text-[#8a8fa3] mt-0.5">Optional — break the total into scheduled payments</p>
-              </div>
-              <button onClick={() => setMilestones([...milestones, { ...EMPTY_MILESTONE }])}
-                className="btn btn-outline btn-sm"><Plus size={13} /> Add Milestone</button>
+            {/* Add buttons */}
+            <div className="flex items-center gap-3 px-4 py-3 border-t border-[#f0efea]">
+              <button onClick={() => setItems([...items, { ...EMPTY_ITEM }])}
+                className="flex items-center gap-1.5 text-[12px] font-medium text-brand-navy hover:text-brand-navy/70 transition-colors">
+                <Plus size={13} /> Add line item
+              </button>
+              <span className="text-[#d8d6cf]">·</span>
+              <button className="flex items-center gap-1.5 text-[12px] font-medium text-[#4a5168] hover:text-[#0c1226] transition-colors">
+                <Plus size={13} /> Add section
+              </button>
             </div>
-            {milestones.length === 0 ? (
-              <p className="text-xs text-[#8a8fa3] text-center py-3">No milestones added. Click &quot;Add Milestone&quot; to create a payment schedule.</p>
-            ) : (
-              <div className="space-y-3">
-                {milestones.map((m, i) => (
-                  <div key={i} className="grid grid-cols-4 gap-3 items-end">
-                    <div className="col-span-2">
-                      <label className="label text-xs">Milestone Label</label>
-                      <input value={m.label} onChange={e => setMilestone(i, "label", e.target.value)}
-                        placeholder="e.g. Deposit, Mid-project, Final" className="field text-xs" />
-                    </div>
-                    <div>
-                      <label className="label text-xs">% of Total</label>
-                      <input type="number" value={m.percent} onChange={e => setMilestone(i, "percent", e.target.value)}
-                        className="field text-xs" min={0} max={100} />
-                    </div>
-                    <div className="flex gap-2 items-end">
-                      <div className="flex-1">
-                        <label className="label text-xs">Due Date</label>
-                        <input type="date" value={m.due_date} onChange={e => setMilestone(i, "due_date", e.target.value)}
-                          className="field text-xs" />
-                      </div>
-                      <button onClick={() => setMilestones(milestones.filter((_, idx) => idx !== i))}
-                        className="text-[#d8d6cf] hover:text-red-500 pb-2">
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
+
+            {/* Totals */}
+            <div className="flex justify-end px-4 py-4 border-t border-[#f0efea]">
+              <div className="w-64 space-y-1.5 text-[13px]">
+                <div className="flex justify-between text-[#4a5168]">
+                  <span>Subtotal</span>
+                  <span>{fmt(subtotal)}</span>
+                </div>
+                {discountTotal > 0 && (
+                  <div className="flex justify-between text-brand-green">
+                    <span>Discount</span>
+                    <span>− {fmt(discountTotal)}</span>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Notes & Terms */}
-          <div className="form-section">
-            <h2 className="section-title">Notes & Terms</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="label">Notes</label>
-                <textarea value={form.notes} onChange={set("notes")} rows={4}
-                  className="field resize-none" placeholder="Additional notes for the customer…" />
-              </div>
-              <div>
-                <label className="label">Terms & Conditions</label>
-                <textarea value={form.terms} onChange={set("terms")} rows={4}
-                  className="field resize-none" />
+                )}
+                <div className="flex justify-between text-[#4a5168]">
+                  <span>Tax</span>
+                  <span>{fmt(taxAmount)}</span>
+                </div>
+                <div className="flex justify-between font-bold text-[16px] border-t border-[#e7e6e1] pt-2 mt-1">
+                  <span>Total</span>
+                  <span className="text-brand-navy">{fmt(total)}</span>
+                </div>
               </div>
             </div>
+          </div>
+
+          {/* Notes */}
+          <div className="card p-4">
+            <label className="label mb-2">Note to customer</label>
+            <textarea
+              value={form.notes}
+              onChange={e => set("notes", e.target.value)}
+              rows={3}
+              placeholder="Add any notes visible to the customer…"
+              className="field resize-none"
+            />
+          </div>
+
+          {/* Issue date + project type (secondary info) */}
+          <div className="card p-4">
+            <h3 className="section-title mb-3">Quote details</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">Issue date</label>
+                <input type="date" value={form.issue_date} onChange={e => set("issue_date", e.target.value)} className="field" />
+              </div>
+              <div>
+                <label className="label">Project type</label>
+                <select value={form.project_type} onChange={e => set("project_type", e.target.value)} className="field">
+                  <option value="">Select type…</option>
+                  {PROJECT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions (mobile) */}
+          <div className="lg:hidden flex gap-3 justify-end pb-6">
+            <Link href="/quotes" className="btn btn-outline">Cancel</Link>
+            <button onClick={() => save("draft")} disabled={saving} className="btn btn-ghost border border-[#e7e6e1]">
+              Save draft
+            </button>
+            <button onClick={() => save("sent")} disabled={saving} className="btn btn-primary">
+              {saving ? "Saving…" : "Send to customer"}
+            </button>
           </div>
         </div>
 
-        {/* Sidebar Summary */}
+        {/* Right sidebar */}
         <div className="space-y-4">
-          <div className="card p-5 sticky top-6">
-            <h2 className="section-title">Summary</h2>
-            <div className="space-y-2.5 text-sm">
-              <div className="flex justify-between text-[#4a5168]">
-                <span>Subtotal</span><span>{fmt(subtotal + discountTotal)}</span>
-              </div>
-              {discountTotal > 0 && (
-                <div className="flex justify-between text-brand-green">
-                  <span>Discount</span><span>- {fmt(discountTotal)}</span>
+
+          {/* Send options */}
+          <div className="card p-4">
+            <p className="text-[13px] font-semibold text-[#0c1226] mb-3">Send</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5 text-[13px] text-[#0c1226]">
+                  <Mail size={14} className="text-[#4a5168]" /> Email
                 </div>
-              )}
-              <div className="flex justify-between text-[#4a5168]">
-                <span>Tax</span><span>{fmt(taxAmount)}</span>
+                <Toggle checked={sendEmail} onChange={() => setSendEmail(!sendEmail)} />
               </div>
-              <div className="flex justify-between font-bold text-base border-t border-[#e7e6e1] pt-3 mt-1">
-                <span>Grand Total</span>
-                <span className="text-brand-navy">{fmt(total)}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5 text-[13px] text-[#0c1226]">
+                  <MessageCircle size={14} className="text-[#4a5168]" /> WhatsApp
+                </div>
+                <Toggle checked={sendWhatsapp} onChange={() => setSendWhatsapp(!sendWhatsapp)} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5 text-[13px] text-[#0c1226]">
+                  <Phone size={14} className="text-[#4a5168]" /> SMS
+                </div>
+                <Toggle checked={sendSms} onChange={() => setSendSms(!sendSms)} />
               </div>
             </div>
+          </div>
 
-            {milestones.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-[#e7e6e1]">
-                <p className="text-xs font-semibold text-[#4a5168] uppercase tracking-wide mb-2">Milestones</p>
-                {milestones.map((m, i) => (
-                  <div key={i} className="flex justify-between text-xs text-[#4a5168] mb-1">
-                    <span>{m.label || `Milestone ${i + 1}`}</span>
-                    <span className="font-medium">{fmt(total * (m.percent / 100))}</span>
-                  </div>
-                ))}
+          {/* Activity */}
+          <div className="card p-4">
+            <p className="text-[13px] font-semibold text-[#0c1226] mb-3">Activity</p>
+            <div className="flex items-start gap-2.5">
+              <div className="w-6 h-6 bg-[#f0efea] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-[10px] text-[#8a8fa3]">✦</span>
               </div>
-            )}
-
-            <div className="mt-5 space-y-2">
-              <button onClick={() => save("draft")} disabled={saving}
-                className="btn btn-ghost border border-[#e7e6e1] w-full">
-                {saving ? "Saving…" : "Save as Draft"}
-              </button>
-              <button onClick={() => save("sent")} disabled={saving}
-                className="btn btn-primary w-full">
-                {saving ? "Saving…" : "Save & Mark Sent"}
-              </button>
+              <div>
+                <p className="text-[12px] font-medium text-[#0c1226]">Quote created</p>
+                <p className="text-[11px] text-[#8a8fa3]">Now · draft</p>
+              </div>
             </div>
+          </div>
+
+          {/* Save / Send actions (desktop) */}
+          <div className="hidden lg:block card p-4 space-y-2.5">
+            <button onClick={() => save("draft")} disabled={saving}
+              className="btn btn-ghost border border-[#e7e6e1] w-full text-[13px]">
+              {saving ? "Saving…" : "Save draft"}
+            </button>
+            <button onClick={() => save("sent")} disabled={saving}
+              className="btn btn-primary w-full text-[13px]">
+              {saving ? "Saving…" : "Send to customer"}
+            </button>
+            <Link href="/quotes" className="btn btn-outline w-full text-[13px] text-center block">
+              Cancel
+            </Link>
           </div>
         </div>
       </div>

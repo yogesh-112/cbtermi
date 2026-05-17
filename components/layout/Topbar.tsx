@@ -1,7 +1,7 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Search, Bell, Plus, ChevronDown, LogOut, Settings } from "lucide-react";
+import { Search, Bell, Plus, ChevronDown, LogOut, Settings, UserCircle } from "lucide-react";
 import Link from "next/link";
 
 const PAGE_META: Record<string, { label: string; ctaLabel?: string; ctaHref?: string }> = {
@@ -22,6 +22,7 @@ const PAGE_META: Record<string, { label: string; ctaLabel?: string; ctaHref?: st
   "/team":              { label: "Team" },
   "/settings":          { label: "Settings" },
   "/subscription":      { label: "Subscription" },
+  "/profile":           { label: "Profile" },
 };
 
 interface Props {
@@ -152,6 +153,10 @@ export default function Topbar({ user, businesses, currentBusiness }: Props) {
                 <p className="text-xs text-[#8a8fa3] truncate">{user.email}</p>
               </div>
               <div className="py-1">
+                <Link href="/profile" onClick={() => setUserOpen(false)}
+                  className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-[#4a5168] hover:bg-[#f6f6f3] transition-colors">
+                  <UserCircle size={14} /> Profile
+                </Link>
                 <Link href="/settings" onClick={() => setUserOpen(false)}
                   className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-[#4a5168] hover:bg-[#f6f6f3] transition-colors">
                   <Settings size={14} /> Settings

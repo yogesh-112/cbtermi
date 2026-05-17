@@ -31,7 +31,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <MobileHeader user={userProps} businesses={businesses} currentBusiness={currentBusiness} />
       <Topbar user={userProps} businesses={businesses} currentBusiness={currentBusiness} />
       <MobileNav />
-      <main className="flex-1 lg:ml-[240px] min-h-screen">
+      <main className="flex-1 sb-ml min-h-screen">
         <div className="p-4 lg:p-6 pt-[72px] lg:pt-[68px] pb-24 lg:pb-6">
           {children}
         </div>

@@ -62,7 +62,7 @@ export default function Topbar({ user, businesses, currentBusiness }: Props) {
   const initials = user.name?.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() || "?";
 
   return (
-    <header className="hidden lg:flex fixed top-0 left-[240px] right-0 z-20 h-[52px] bg-white border-b border-[#e7e6e1] items-center px-5 gap-4">
+    <header className="hidden lg:flex fixed top-0 right-0 z-20 h-[52px] bg-white border-b border-[#e7e6e1] items-center px-5 gap-4 sb-left">
       {/* Business + breadcrumb */}
       <div className="flex items-center gap-2 flex-shrink-0">
         <div className="relative">

@@ -8,8 +8,12 @@
   :root {
     --nav-h: 56px;
     --sidebar-w: 240px;
+    --sidebar-w-collapsed: 64px;
     --bottom-nav-h: 64px;
   }
+
+  /* Collapsed sidebar state — toggled by Sidebar.tsx via data-sb attribute */
+  html[data-sb="1"] { --sidebar-w: 64px; }
 
   * { box-sizing: border-box; }
 
@@ -176,6 +180,12 @@
   /* ═══════════════════════════════════════════════════════════
      SIDEBAR
   ═══════════════════════════════════════════════════════════ */
+  /* Sidebar-responsive layout helpers (use instead of lg:ml-[240px] / left-[240px]) */
+  @media (min-width: 1024px) {
+    .sb-ml  { margin-left: var(--sidebar-w); transition: margin-left 200ms ease; }
+    .sb-left { left: var(--sidebar-w);       transition: left 200ms ease; }
+  }
+
   .sidebar-link {
     @apply flex items-center gap-2.5 px-2.5 py-2 rounded-[8px] text-[13.5px] font-medium
            transition-all duration-150 text-white/70 hover:bg-white/[0.06] hover:text-white

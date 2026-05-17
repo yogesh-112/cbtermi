@@ -37,6 +37,9 @@ export default function CommunicationsPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("All");
   const [mobileView, setMobileView] = useState<"list" | "chat">("list");
+  const [message, setMessage] = useState("");
+  const [channel, setChannel] = useState("email");
+  const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,6 +51,21 @@ export default function CommunicationsPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [selected, logs]);
+
+  const sendMessage = async () => {
+    if (!selected || !message.trim() || sending) return;
+    setSending(true);
+    const res = await fetch("/api/communications", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contact_id: selected, channel, message }),
+    });
+    const data = await res.json();
+    setSending(false);
+    if (!res.ok) return;
+    if (data.link) window.open(data.link, "_blank");
+    if (data.log) setLogs(prev => [...prev, data.log]);
+    setMessage("");
+  };
 
   // Group logs by contact
   const contactMap = new Map<string, Contact & { logs: any[] }>();
@@ -224,18 +242,24 @@ export default function CommunicationsPage() {
               {/* Message input */}
               <div className="bg-white border-t border-[#e7e6e1] px-4 py-3">
                 <div className="flex items-center gap-2 mb-2">
-                  {["Email","WhatsApp","SMS"].map(ch => (
-                    <button key={ch} className="flex items-center gap-1 text-[12px] text-[#8a8fa3] hover:text-[#4a5168] px-2 py-1 rounded-lg hover:bg-[#f6f6f3] transition-colors">
-                      <ChannelIcon channel={ch.toLowerCase()} /> {ch}
+                  {["email","whatsapp","sms"].map(ch => (
+                    <button key={ch} onClick={() => setChannel(ch)}
+                      className={`flex items-center gap-1 text-[12px] px-2 py-1 rounded-lg transition-colors capitalize
+                        ${channel === ch ? "bg-brand-navy text-white" : "text-[#8a8fa3] hover:text-[#4a5168] hover:bg-[#f6f6f3]"}`}>
+                      <ChannelIcon channel={ch} /> {ch}
                     </button>
                   ))}
                 </div>
                 <div className="flex gap-2">
                   <input
-                    placeholder="Confirmed — Talia will be there 8 am Thursday."
+                    value={message}
+                    onChange={e => setMessage(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                    placeholder="Type a message…"
                     className="flex-1 h-9 px-3 text-[13px] bg-[#f6f6f3] border border-[#e7e6e1] rounded-lg placeholder:text-[#8a8fa3] focus:outline-none focus:ring-2 focus:ring-brand-navy/20"
                   />
-                  <button className="w-9 h-9 bg-brand-navy rounded-lg flex items-center justify-center text-white hover:bg-brand-navy/90 transition-colors flex-shrink-0">
+                  <button onClick={sendMessage} disabled={!message.trim() || sending}
+                    className="w-9 h-9 bg-brand-navy rounded-lg flex items-center justify-center text-white hover:bg-brand-navy/90 transition-colors flex-shrink-0 disabled:opacity-50">
                     <Send size={14} />
                   </button>
                 </div>

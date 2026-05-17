@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Upload, AlertTriangle } from "lucide-react";
@@ -33,6 +33,10 @@ export default function ProfileEditPage() {
     skills: "",
   });
 
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
   const [pwForm, setPwForm] = useState({
     current_password: "",
     new_password: "",
@@ -51,6 +55,7 @@ export default function ProfileEditPage() {
         const first = parts[0] ?? "";
         const last = parts.slice(1).join(" ");
         const skills = Array.isArray(u.skills) ? u.skills.join(", ") : (u.skills ?? "");
+        setAvatarUrl(u.avatar_url ?? null);
         setForm({
           first_name: first,
           last_name: last,
@@ -68,6 +73,28 @@ export default function ProfileEditPage() {
   const set = (k: keyof typeof form, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   const initials = [form.first_name[0], form.last_name[0]].filter(Boolean).join("").toUpperCase() || "?";
+
+  const uploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("folder", "avatars");
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    setUploadingPhoto(false);
+    if (!res.ok) { toast(data.message ?? "Upload failed", "error"); return; }
+    setAvatarUrl(data.url);
+    await fetch("/api/profile", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ avatar_url: data.url }) });
+    toast("Photo updated");
+  };
+
+  const removePhoto = async () => {
+    setAvatarUrl(null);
+    await fetch("/api/profile", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ avatar_url: null }) });
+    toast("Photo removed");
+  };
 
   const save = async () => {
     setSaving(true);
@@ -162,17 +189,25 @@ export default function ProfileEditPage() {
           <div className="card p-5">
             <h2 className="section-title mb-4">Photo</h2>
             <div className="flex items-center gap-5">
-              <div className="w-[72px] h-[72px] bg-brand-navy rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-[24px] font-bold">{initials}</span>
-              </div>
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="w-[72px] h-[72px] rounded-full object-cover flex-shrink-0 border border-[#e7e6e1]" />
+              ) : (
+                <div className="w-[72px] h-[72px] bg-brand-navy rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-[24px] font-bold">{initials}</span>
+                </div>
+              )}
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <button type="button" className="btn btn-outline btn-sm gap-1.5">
-                    <Upload size={12} /> Upload photo
+                  <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={uploadPhoto} />
+                  <button type="button" onClick={() => photoInputRef.current?.click()} disabled={uploadingPhoto}
+                    className="btn btn-outline btn-sm gap-1.5">
+                    <Upload size={12} /> {uploadingPhoto ? "Uploading…" : "Upload photo"}
                   </button>
-                  <button type="button" className="btn btn-ghost btn-sm text-red-500 hover:text-red-600">Remove</button>
+                  {avatarUrl && (
+                    <button type="button" onClick={removePhoto} className="btn btn-ghost btn-sm text-red-500 hover:text-red-600">Remove</button>
+                  )}
                 </div>
-                <p className="text-[11px] text-[#8a8fa3]">JPG, PNG up to 2MB · 400 × 400 minimum</p>
+                <p className="text-[11px] text-[#8a8fa3]">JPG, PNG up to 2 MB · Supabase Storage bucket "uploads" required</p>
               </div>
             </div>
           </div>

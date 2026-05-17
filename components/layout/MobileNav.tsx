@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -40,7 +40,7 @@ export default function MobileNav() {
   return (
     <>
       {/* Bottom Navigation Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E5E7EB]"
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e7e6e1]"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
         <div className="flex items-stretch h-16">
           {PRIMARY.map(({ href, icon: Icon, label }) => {
@@ -48,11 +48,11 @@ export default function MobileNav() {
             return (
               <Link key={href} href={href}
                 className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors
-                  ${active ? "text-brand-navy" : "text-[#9CA3AF]"}`}>
-                <div className={`p-1 rounded-lg transition-all ${active ? "bg-brand-navy-light" : ""}`}>
+                  ${active ? "text-brand-navy" : "text-[#8a8fa3]"}`}>
+                <div className={`p-1 rounded-lg transition-all ${active ? "bg-brand-blue-50" : ""}`}>
                   <Icon size={20} strokeWidth={active ? 2.5 : 2} />
                 </div>
-                <span className={`text-[10px] font-medium ${active ? "text-brand-navy" : "text-[#9CA3AF]"}`}>
+                <span className={`text-[10px] font-medium ${active ? "text-brand-navy" : "text-[#8a8fa3]"}`}>
                   {label}
                 </span>
               </Link>
@@ -62,11 +62,11 @@ export default function MobileNav() {
           {/* More */}
           <button onClick={() => setMoreOpen(true)}
             className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors
-              ${isMoreActive ? "text-brand-navy" : "text-[#9CA3AF]"}`}>
-            <div className={`p-1 rounded-lg transition-all ${isMoreActive ? "bg-brand-navy-light" : ""}`}>
+              ${isMoreActive ? "text-brand-navy" : "text-[#8a8fa3]"}`}>
+            <div className={`p-1 rounded-lg transition-all ${isMoreActive ? "bg-brand-blue-50" : ""}`}>
               <MoreHorizontal size={20} strokeWidth={isMoreActive ? 2.5 : 2} />
             </div>
-            <span className={`text-[10px] font-medium ${isMoreActive ? "text-brand-navy" : "text-[#9CA3AF]"}`}>
+            <span className={`text-[10px] font-medium ${isMoreActive ? "text-brand-navy" : "text-[#8a8fa3]"}`}>
               More
             </span>
           </button>
@@ -80,11 +80,11 @@ export default function MobileNav() {
           <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[24px] shadow-modal animate-slide-in-bottom"
             style={{ paddingBottom: "env(safe-area-inset-bottom, 16px)" }}>
             <div className="flex items-center justify-between px-5 pt-5 pb-4">
-              <h2 className="text-base font-bold text-[#111827]" style={{ letterSpacing: "-0.02em" }}>
+              <h2 className="text-base font-bold text-[#0c1226]" style={{ letterSpacing: "-0.02em" }}>
                 More
               </h2>
               <button onClick={() => setMoreOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F3F4F6] text-[#6B7280]">
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#f0efea] text-[#4a5168]">
                 <X size={16} />
               </button>
             </div>
@@ -95,15 +95,15 @@ export default function MobileNav() {
                 return (
                   <Link key={href} href={href} onClick={() => setMoreOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all
-                      ${active ? "bg-brand-navy-light text-brand-navy" : "text-[#374151] hover:bg-[#F9FAFB]"}`}>
+                      ${active ? "bg-brand-blue-50 text-brand-navy" : "text-[#4a5168] hover:bg-[#f6f6f3]"}`}>
                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0
-                      ${active ? "bg-brand-navy text-white" : "bg-[#F3F4F6] text-[#6B7280]"}`}>
+                      ${active ? "bg-brand-navy text-white" : "bg-[#f0efea] text-[#4a5168]"}`}>
                       <Icon size={17} />
                     </div>
                     <span className={`text-sm font-medium flex-1 ${active ? "text-brand-navy font-semibold" : ""}`}>
                       {label}
                     </span>
-                    <ChevronRight size={14} className="text-[#D1D5DB]" />
+                    <ChevronRight size={14} className="text-[#d8d6cf]" />
                   </Link>
                 );
               })}

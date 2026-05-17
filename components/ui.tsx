@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { ReactNode, useState, useEffect, useRef } from "react";
 import { X, CheckCircle, AlertCircle, Info, ChevronDown, MoreHorizontal } from "lucide-react";
 
@@ -20,10 +20,10 @@ export function Modal({ open, onClose, title, children, size = "md" }: {
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] animate-fade-in" onClick={onClose} />
       <div className={`relative bg-white w-full ${widths[size]} sm:rounded-modal rounded-t-modal shadow-modal
                        max-h-[92vh] sm:max-h-[90vh] flex flex-col animate-slide-in-bottom sm:animate-scale-in`}>
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E7EB] flex-shrink-0">
-          <h2 className="text-base font-semibold text-[#111827]" style={{ letterSpacing: "-0.02em" }}>{title}</h2>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#e7e6e1] flex-shrink-0">
+          <h2 className="text-base font-semibold text-[#0c1226]" style={{ letterSpacing: "-0.02em" }}>{title}</h2>
           <button onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6] transition-all">
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-[#8a8fa3] hover:text-[#4a5168] hover:bg-[#f0efea] transition-all">
             <X size={16} />
           </button>
         </div>
@@ -40,7 +40,7 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, message, danger
 }) {
   return (
     <Modal open={open} onClose={onClose} title={title} size="sm">
-      <p className="text-sm text-[#6B7280] mb-5 leading-relaxed">{message}</p>
+      <p className="text-sm text-[#4a5168] mb-5 leading-relaxed">{message}</p>
       <div className="flex gap-3 justify-end">
         <button className="btn btn-outline" onClick={onClose}>Cancel</button>
         <button className={danger ? "btn btn-danger" : "btn btn-primary"} onClick={() => { onConfirm(); onClose(); }}>
@@ -57,9 +57,9 @@ export function EmptyState({ icon, title, description, action }: {
 }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-      <div className="text-[#D1D5DB] mb-4 p-4 bg-[#F9FAFB] rounded-2xl">{icon}</div>
-      <h3 className="text-base font-semibold text-[#374151] mb-1">{title}</h3>
-      {description && <p className="text-sm text-[#9CA3AF] mb-5 max-w-xs leading-relaxed">{description}</p>}
+      <div className="text-[#d8d6cf] mb-4 p-4 bg-[#f6f6f3] rounded-2xl">{icon}</div>
+      <h3 className="text-base font-semibold text-[#4a5168] mb-1">{title}</h3>
+      {description && <p className="text-sm text-[#8a8fa3] mb-5 max-w-xs leading-relaxed">{description}</p>}
       {action}
     </div>
   );
@@ -89,7 +89,7 @@ export function PageSkeleton() {
 // ─── STATUS BADGE ─────────────────────────────────────────────────────────────
 export function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    draft:          "bg-[#F3F4F6] text-[#6B7280]",
+    draft:          "bg-[#f0efea] text-[#4a5168]",
     sent:           "bg-blue-50 text-blue-700",
     viewed:         "bg-violet-50 text-violet-700",
     approved:       "bg-brand-green-light text-brand-green",
@@ -98,7 +98,7 @@ export function StatusBadge({ status }: { status: string }) {
     paid:           "bg-brand-green-light text-brand-green",
     partially_paid: "bg-amber-50 text-amber-700",
     overdue:        "bg-red-50 text-red-700",
-    voided:         "bg-[#F3F4F6] text-[#9CA3AF]",
+    voided:         "bg-[#f0efea] text-[#8a8fa3]",
     active:         "bg-brand-green-light text-brand-green",
     on_hold:        "bg-amber-50 text-amber-700",
     completed:      "bg-blue-50 text-blue-700",
@@ -110,7 +110,7 @@ export function StatusBadge({ status }: { status: string }) {
     monthly:        "bg-blue-50 text-blue-700",
     yearly:         "bg-brand-green-light text-brand-green",
   };
-  const cls = map[status?.toLowerCase()] ?? "bg-[#F3F4F6] text-[#6B7280]";
+  const cls = map[status?.toLowerCase()] ?? "bg-[#f0efea] text-[#4a5168]";
   const label = status?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ?? "";
   return <span className={`badge ${cls}`}>{label}</span>;
 }
@@ -132,7 +132,7 @@ export function ToastProvider() {
 
   const icons = { success: CheckCircle, error: AlertCircle, info: Info };
   const colors: Record<ToastType, string> = {
-    success: "bg-[#111827] text-white",
+    success: "bg-[#0c1226] text-white",
     error:   "bg-red-600 text-white",
     info:    "bg-brand-navy text-white",
   };
@@ -169,7 +169,7 @@ export function StatCard({ label, value, sub, icon, color = "navy" }: {
     red:    "text-red-600",
   };
   const bg = {
-    navy:   "bg-brand-navy-light",
+    navy:   "bg-brand-blue-50",
     green:  "bg-brand-green-light",
     yellow: "bg-amber-50",
     red:    "bg-red-50",
@@ -183,7 +183,7 @@ export function StatCard({ label, value, sub, icon, color = "navy" }: {
       )}
       <p className="stat-label">{label}</p>
       <p className={`stat-value ${accent[color]}`}>{value}</p>
-      {sub && <p className="text-xs text-[#9CA3AF]">{sub}</p>}
+      {sub && <p className="text-xs text-[#8a8fa3]">{sub}</p>}
     </div>
   );
 }
@@ -213,7 +213,7 @@ export function FormField({ label, error, children, required, hint }: {
       <label className="label">
         {label}
         {required && <span className="text-red-500 ml-0.5">*</span>}
-        {hint && <span className="text-[#9CA3AF] font-normal ml-1.5">{hint}</span>}
+        {hint && <span className="text-[#8a8fa3] font-normal ml-1.5">{hint}</span>}
       </label>
       {children}
       {error && <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">{error}</p>}
@@ -239,15 +239,15 @@ export function ActionMenu({ items }: {
   return (
     <div className="relative" ref={ref}>
       <button onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
-        className="btn btn-ghost btn-icon p-1.5 text-[#9CA3AF]">
+        className="btn btn-ghost btn-icon p-1.5 text-[#8a8fa3]">
         <MoreHorizontal size={16} />
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-[#E5E7EB] rounded-xl shadow-dropdown z-20 overflow-hidden animate-scale-in">
+        <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-[#e7e6e1] rounded-xl shadow-dropdown z-20 overflow-hidden animate-scale-in">
           {items.map((item, i) => (
             <button key={i} onClick={() => { item.onClick(); setOpen(false); }}
               className={`w-full text-left flex items-center gap-2.5 px-3.5 py-2.5 text-sm transition-colors
-                ${item.danger ? "text-red-600 hover:bg-red-50" : "text-[#374151] hover:bg-[#F9FAFB]"}`}>
+                ${item.danger ? "text-red-600 hover:bg-red-50" : "text-[#4a5168] hover:bg-[#f6f6f3]"}`}>
               {item.icon && <span className="opacity-60">{item.icon}</span>}
               {item.label}
             </button>

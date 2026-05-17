@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -91,7 +91,7 @@ export default function InvoiceDetailPage() {
   const printInvoice = () => window.print();
 
   if (!data) return (
-    <div className="flex items-center justify-center h-64 text-[#9CA3AF]">Loading…</div>
+    <div className="flex items-center justify-center h-64 text-[#8a8fa3]">Loading…</div>
   );
   const { invoice, items, payments } = data;
 
@@ -111,7 +111,7 @@ export default function InvoiceDetailPage() {
           <Link href="/invoices" className="btn btn-ghost btn-sm mt-0.5"><ArrowLeft size={14} /></Link>
           <div className="flex-1">
             <h1 className="page-title">{invoice.invoice_number}</h1>
-            <p className="text-sm text-[#6B7280] mt-0.5">{invoice.contacts?.full_name}</p>
+            <p className="text-sm text-[#4a5168] mt-0.5">{invoice.contacts?.full_name}</p>
           </div>
           <StatusBadge status={invoice.status} />
         </div>
@@ -127,14 +127,14 @@ export default function InvoiceDetailPage() {
               <CreditCard size={13} /> Record Payment
             </button>
           )}
-          <button onClick={duplicate} className="btn btn-ghost border border-[#E5E7EB] btn-sm">
+          <button onClick={duplicate} className="btn btn-ghost border border-[#e7e6e1] btn-sm">
             <Copy size={13} /> Duplicate
           </button>
-          <button onClick={printInvoice} className="btn btn-ghost border border-[#E5E7EB] btn-sm">
+          <button onClick={printInvoice} className="btn btn-ghost border border-[#e7e6e1] btn-sm">
             <Printer size={13} /> Download PDF
           </button>
           {invoice.status !== "voided" && (
-            <button onClick={voidInvoice} className="btn btn-ghost border border-[#E5E7EB] btn-sm text-[#6B7280]">
+            <button onClick={voidInvoice} className="btn btn-ghost border border-[#e7e6e1] btn-sm text-[#4a5168]">
               <Ban size={13} /> Void
             </button>
           )}
@@ -151,47 +151,47 @@ export default function InvoiceDetailPage() {
             <div className="card p-6">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 text-sm">
                 <div>
-                  <p className="text-xs text-[#6B7280] mb-1">Invoice #</p>
+                  <p className="text-xs text-[#4a5168] mb-1">Invoice #</p>
                   <p className="font-semibold">{invoice.invoice_number}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-[#6B7280] mb-1">Issue Date</p>
+                  <p className="text-xs text-[#4a5168] mb-1">Issue Date</p>
                   <p>{fmtDate(invoice.issue_date)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-[#6B7280] mb-1">Due Date</p>
+                  <p className="text-xs text-[#4a5168] mb-1">Due Date</p>
                   <p>{invoice.due_date ? fmtDate(invoice.due_date) : "—"}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-[#6B7280] mb-1">Terms</p>
+                  <p className="text-xs text-[#4a5168] mb-1">Terms</p>
                   <p>{invoice.payment_terms || "—"}</p>
                 </div>
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-sm border-t border-[#E5E7EB]">
+                <table className="w-full text-sm border-t border-[#e7e6e1]">
                   <thead>
-                    <tr className="bg-[#F5F7FA]">
-                      <th className="text-left px-3 py-2.5 text-xs text-[#6B7280] font-semibold">Item</th>
-                      <th className="text-right px-3 py-2.5 text-xs text-[#6B7280] font-semibold">Qty</th>
-                      <th className="text-right px-3 py-2.5 text-xs text-[#6B7280] font-semibold">Price</th>
-                      <th className="text-right px-3 py-2.5 text-xs text-[#6B7280] font-semibold">Tax</th>
-                      <th className="text-right px-3 py-2.5 text-xs text-[#6B7280] font-semibold">Total</th>
+                    <tr className="bg-[#f6f6f3]">
+                      <th className="text-left px-3 py-2.5 text-xs text-[#4a5168] font-semibold">Item</th>
+                      <th className="text-right px-3 py-2.5 text-xs text-[#4a5168] font-semibold">Qty</th>
+                      <th className="text-right px-3 py-2.5 text-xs text-[#4a5168] font-semibold">Price</th>
+                      <th className="text-right px-3 py-2.5 text-xs text-[#4a5168] font-semibold">Tax</th>
+                      <th className="text-right px-3 py-2.5 text-xs text-[#4a5168] font-semibold">Total</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(items ?? []).map((item: any, i: number) => (
-                      <tr key={i} className="border-b border-[#F5F7FA]">
+                      <tr key={i} className="border-b border-[#f6f6f3]">
                         <td className="px-3 py-2.5">
-                          <p className="font-medium text-[#1F2937]">{item.item_name}</p>
-                          {item.description && <p className="text-xs text-[#9CA3AF]">{item.description}</p>}
+                          <p className="font-medium text-[#0c1226]">{item.item_name}</p>
+                          {item.description && <p className="text-xs text-[#8a8fa3]">{item.description}</p>}
                         </td>
-                        <td className="px-3 py-2.5 text-right text-[#6B7280]">
+                        <td className="px-3 py-2.5 text-right text-[#4a5168]">
                           {item.quantity}{item.unit && ` ${item.unit}`}
                         </td>
-                        <td className="px-3 py-2.5 text-right text-[#6B7280]">{fmt(item.unit_price)}</td>
-                        <td className="px-3 py-2.5 text-right text-[#6B7280]">{item.tax_rate}%</td>
-                        <td className="px-3 py-2.5 text-right font-semibold text-[#1F2937]">{fmt(item.total)}</td>
+                        <td className="px-3 py-2.5 text-right text-[#4a5168]">{fmt(item.unit_price)}</td>
+                        <td className="px-3 py-2.5 text-right text-[#4a5168]">{item.tax_rate}%</td>
+                        <td className="px-3 py-2.5 text-right font-semibold text-[#0c1226]">{fmt(item.total)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -200,13 +200,13 @@ export default function InvoiceDetailPage() {
 
               <div className="flex justify-end mt-5">
                 <div className="w-52 space-y-2 text-sm">
-                  <div className="flex justify-between text-[#6B7280]">
+                  <div className="flex justify-between text-[#4a5168]">
                     <span>Subtotal</span><span>{fmt(invoice.subtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-[#6B7280]">
+                  <div className="flex justify-between text-[#4a5168]">
                     <span>Tax</span><span>{fmt(invoice.tax_amount)}</span>
                   </div>
-                  <div className="flex justify-between font-bold text-base border-t border-[#E5E7EB] pt-2">
+                  <div className="flex justify-between font-bold text-base border-t border-[#e7e6e1] pt-2">
                     <span>Total</span><span className="text-brand-navy">{fmt(invoice.total)}</span>
                   </div>
                   {invoice.amount_paid > 0 && (
@@ -214,7 +214,7 @@ export default function InvoiceDetailPage() {
                       <span>Paid</span><span>- {fmt(invoice.amount_paid)}</span>
                     </div>
                   )}
-                  <div className={`flex justify-between font-bold border-t border-[#E5E7EB] pt-2 ${invoice.amount_due > 0 ? "text-red-600" : "text-brand-green"}`}>
+                  <div className={`flex justify-between font-bold border-t border-[#e7e6e1] pt-2 ${invoice.amount_due > 0 ? "text-red-600" : "text-brand-green"}`}>
                     <span>Amount Due</span><span>{fmt(invoice.amount_due)}</span>
                   </div>
                 </div>
@@ -225,14 +225,14 @@ export default function InvoiceDetailPage() {
               <div className="card p-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
                 {invoice.notes && (
                   <div>
-                    <p className="font-semibold text-[#1F2937] mb-2">Notes</p>
-                    <p className="text-[#6B7280] whitespace-pre-line">{invoice.notes}</p>
+                    <p className="font-semibold text-[#0c1226] mb-2">Notes</p>
+                    <p className="text-[#4a5168] whitespace-pre-line">{invoice.notes}</p>
                   </div>
                 )}
                 {invoice.terms && (
                   <div>
-                    <p className="font-semibold text-[#1F2937] mb-2">Terms</p>
-                    <p className="text-[#6B7280] whitespace-pre-line">{invoice.terms}</p>
+                    <p className="font-semibold text-[#0c1226] mb-2">Terms</p>
+                    <p className="text-[#4a5168] whitespace-pre-line">{invoice.terms}</p>
                   </div>
                 )}
               </div>
@@ -252,8 +252,8 @@ export default function InvoiceDetailPage() {
                       <tr key={p.id}>
                         <td>{fmtDate(p.payment_date)}</td>
                         <td className="font-semibold text-brand-green">{fmt(p.amount)}</td>
-                        <td className="capitalize text-[#6B7280]">{p.payment_method?.replace("_", " ")}</td>
-                        <td className="text-[#9CA3AF] text-xs">{p.reference_number || "—"}</td>
+                        <td className="capitalize text-[#4a5168]">{p.payment_method?.replace("_", " ")}</td>
+                        <td className="text-[#8a8fa3] text-xs">{p.reference_number || "—"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -266,18 +266,18 @@ export default function InvoiceDetailPage() {
           <div className="space-y-4">
             <div className="card p-5 text-sm">
               <h2 className="section-title">Bill To</h2>
-              <p className="font-semibold text-[#1F2937]">{invoice.contacts?.full_name}</p>
+              <p className="font-semibold text-[#0c1226]">{invoice.contacts?.full_name}</p>
               {invoice.contacts?.business_name && (
-                <p className="text-[#6B7280]">{invoice.contacts.business_name}</p>
+                <p className="text-[#4a5168]">{invoice.contacts.business_name}</p>
               )}
-              {invoice.contacts?.email && <p className="text-[#6B7280] mt-1">{invoice.contacts.email}</p>}
-              {invoice.contacts?.phone && <p className="text-[#6B7280]">{invoice.contacts.phone}</p>}
-              {invoice.contacts?.address && <p className="text-[#6B7280] mt-1 text-xs">{invoice.contacts.address}</p>}
+              {invoice.contacts?.email && <p className="text-[#4a5168] mt-1">{invoice.contacts.email}</p>}
+              {invoice.contacts?.phone && <p className="text-[#4a5168]">{invoice.contacts.phone}</p>}
+              {invoice.contacts?.address && <p className="text-[#4a5168] mt-1 text-xs">{invoice.contacts.address}</p>}
               <Link href={`/contacts/${invoice.contact_id}`}
                 className="btn btn-outline btn-sm w-full mt-3 no-print">View Contact</Link>
               {invoice.project_id && (
                 <Link href={`/projects/${invoice.project_id}`}
-                  className="btn btn-ghost border border-[#E5E7EB] btn-sm w-full mt-2 no-print">View Project</Link>
+                  className="btn btn-ghost border border-[#e7e6e1] btn-sm w-full mt-2 no-print">View Project</Link>
               )}
             </div>
           </div>
@@ -320,7 +320,7 @@ export default function InvoiceDetailPage() {
               onChange={e => setPayForm({ ...payForm, notes: e.target.value })}
               rows={2} className="field resize-none" />
           </div>
-          <div className="flex gap-3 justify-end pt-2 border-t border-[#E5E7EB]">
+          <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
             <button className="btn btn-ghost" onClick={() => setPayModal(false)}>Cancel</button>
             <button className="btn btn-green" onClick={recordPayment} disabled={saving}>
               {saving ? "Saving…" : "Record Payment"}

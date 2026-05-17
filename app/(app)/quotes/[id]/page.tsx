@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -105,7 +105,7 @@ export default function QuoteDetailPage() {
   const printQuote = () => window.print();
 
   if (!data) return (
-    <div className="flex items-center justify-center h-64 text-[#9CA3AF]">Loading…</div>
+    <div className="flex items-center justify-center h-64 text-[#8a8fa3]">Loading…</div>
   );
   const { quote, items } = data;
   const isApproved = quote.status === "approved";
@@ -131,7 +131,7 @@ export default function QuoteDetailPage() {
           <Link href="/quotes" className="btn btn-ghost btn-sm mt-0.5"><ArrowLeft size={14} /></Link>
           <div className="flex-1">
             <h1 className="page-title">{quote.quote_number}{quote.title ? ` — ${quote.title}` : ""}</h1>
-            <p className="text-sm text-[#6B7280] mt-0.5">{quote.contacts?.full_name}</p>
+            <p className="text-sm text-[#4a5168] mt-0.5">{quote.contacts?.full_name}</p>
           </div>
           <StatusBadge status={quote.status} />
         </div>
@@ -146,12 +146,12 @@ export default function QuoteDetailPage() {
                 <div key={s} className="flex items-center gap-1">
                   <span className={`text-xs font-medium px-2.5 py-1 rounded ${
                     current ? "bg-brand-navy text-white" :
-                    past ? "bg-[#ECFDF5] text-brand-green" :
-                    "bg-[#F5F7FA] text-[#9CA3AF]"
+                    past ? "bg-[#ecf7ef] text-brand-green" :
+                    "bg-[#f6f6f3] text-[#8a8fa3]"
                   }`}>
                     {s.charAt(0).toUpperCase() + s.slice(1)}
                   </span>
-                  {i < STATUS_FLOW.length - 1 && <ChevronRight size={12} className="text-[#D1D5DB]" />}
+                  {i < STATUS_FLOW.length - 1 && <ChevronRight size={12} className="text-[#d8d6cf]" />}
                 </div>
               );
             })}
@@ -188,10 +188,10 @@ export default function QuoteDetailPage() {
               </button>
             </>
           )}
-          <button onClick={duplicate} className="btn btn-ghost border border-[#E5E7EB] btn-sm">
+          <button onClick={duplicate} className="btn btn-ghost border border-[#e7e6e1] btn-sm">
             <Copy size={13} /> Duplicate
           </button>
-          <button onClick={printQuote} className="btn btn-ghost border border-[#E5E7EB] btn-sm">
+          <button onClick={printQuote} className="btn btn-ghost border border-[#e7e6e1] btn-sm">
             <Printer size={13} /> Download PDF
           </button>
           <button onClick={() => setDelConfirm(true)} className="btn btn-danger btn-sm">
@@ -208,24 +208,24 @@ export default function QuoteDetailPage() {
             <div className="card p-6">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 text-sm">
                 <div>
-                  <p className="text-[#6B7280] text-xs mb-1">Quote #</p>
-                  <p className="font-semibold text-[#1F2937]">{quote.quote_number}</p>
+                  <p className="text-[#4a5168] text-xs mb-1">Quote #</p>
+                  <p className="font-semibold text-[#0c1226]">{quote.quote_number}</p>
                 </div>
                 <div>
-                  <p className="text-[#6B7280] text-xs mb-1">Issue Date</p>
+                  <p className="text-[#4a5168] text-xs mb-1">Issue Date</p>
                   <p>{fmtDate(quote.issue_date)}</p>
                 </div>
                 <div>
-                  <p className="text-[#6B7280] text-xs mb-1">Valid Until</p>
+                  <p className="text-[#4a5168] text-xs mb-1">Valid Until</p>
                   <p>{quote.valid_until ? fmtDate(quote.valid_until) : "—"}</p>
                 </div>
                 <div>
-                  <p className="text-[#6B7280] text-xs mb-1">Project Type</p>
+                  <p className="text-[#4a5168] text-xs mb-1">Project Type</p>
                   <p>{quote.project_type || "—"}</p>
                 </div>
                 {quote.project_address && (
                   <div className="col-span-2 sm:col-span-4">
-                    <p className="text-[#6B7280] text-xs mb-1">Project Address</p>
+                    <p className="text-[#4a5168] text-xs mb-1">Project Address</p>
                     <p>{quote.project_address}</p>
                   </div>
                 )}
@@ -233,29 +233,29 @@ export default function QuoteDetailPage() {
 
               {/* Line Items */}
               <div className="overflow-x-auto">
-                <table className="w-full text-sm border-t border-[#E5E7EB]">
+                <table className="w-full text-sm border-t border-[#e7e6e1]">
                   <thead>
-                    <tr className="bg-[#F5F7FA]">
-                      <th className="text-left px-3 py-2.5 text-xs text-[#6B7280] font-semibold">Item</th>
-                      <th className="text-right px-3 py-2.5 text-xs text-[#6B7280] font-semibold">Qty</th>
-                      <th className="text-right px-3 py-2.5 text-xs text-[#6B7280] font-semibold">Unit Price</th>
-                      <th className="text-right px-3 py-2.5 text-xs text-[#6B7280] font-semibold">Tax</th>
-                      <th className="text-right px-3 py-2.5 text-xs text-[#6B7280] font-semibold">Total</th>
+                    <tr className="bg-[#f6f6f3]">
+                      <th className="text-left px-3 py-2.5 text-xs text-[#4a5168] font-semibold">Item</th>
+                      <th className="text-right px-3 py-2.5 text-xs text-[#4a5168] font-semibold">Qty</th>
+                      <th className="text-right px-3 py-2.5 text-xs text-[#4a5168] font-semibold">Unit Price</th>
+                      <th className="text-right px-3 py-2.5 text-xs text-[#4a5168] font-semibold">Tax</th>
+                      <th className="text-right px-3 py-2.5 text-xs text-[#4a5168] font-semibold">Total</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(items ?? []).map((item: any, i: number) => (
-                      <tr key={i} className="border-b border-[#F5F7FA]">
+                      <tr key={i} className="border-b border-[#f6f6f3]">
                         <td className="px-3 py-2.5">
-                          <p className="font-medium text-[#1F2937]">{item.item_name}</p>
-                          {item.description && <p className="text-xs text-[#9CA3AF]">{item.description}</p>}
-                          {item.category && <p className="text-xs text-[#9CA3AF]">{item.category}</p>}
+                          <p className="font-medium text-[#0c1226]">{item.item_name}</p>
+                          {item.description && <p className="text-xs text-[#8a8fa3]">{item.description}</p>}
+                          {item.category && <p className="text-xs text-[#8a8fa3]">{item.category}</p>}
                           {item.optional && <span className="text-xs text-amber-600 font-medium">(Optional)</span>}
                         </td>
-                        <td className="px-3 py-2.5 text-right text-[#6B7280]">{item.quantity} {item.unit}</td>
-                        <td className="px-3 py-2.5 text-right text-[#6B7280]">{fmt(item.unit_price)}</td>
-                        <td className="px-3 py-2.5 text-right text-[#6B7280]">{item.tax_rate}%</td>
-                        <td className="px-3 py-2.5 text-right font-semibold text-[#1F2937]">{fmt(item.total)}</td>
+                        <td className="px-3 py-2.5 text-right text-[#4a5168]">{item.quantity} {item.unit}</td>
+                        <td className="px-3 py-2.5 text-right text-[#4a5168]">{fmt(item.unit_price)}</td>
+                        <td className="px-3 py-2.5 text-right text-[#4a5168]">{item.tax_rate}%</td>
+                        <td className="px-3 py-2.5 text-right font-semibold text-[#0c1226]">{fmt(item.total)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -265,13 +265,13 @@ export default function QuoteDetailPage() {
               {/* Totals */}
               <div className="flex justify-end mt-5">
                 <div className="w-52 space-y-2 text-sm">
-                  <div className="flex justify-between text-[#6B7280]">
+                  <div className="flex justify-between text-[#4a5168]">
                     <span>Subtotal</span><span>{fmt(quote.subtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-[#6B7280]">
+                  <div className="flex justify-between text-[#4a5168]">
                     <span>Tax</span><span>{fmt(quote.tax_amount)}</span>
                   </div>
-                  <div className="flex justify-between font-bold text-base border-t border-[#E5E7EB] pt-2">
+                  <div className="flex justify-between font-bold text-base border-t border-[#e7e6e1] pt-2">
                     <span>Grand Total</span><span className="text-brand-navy">{fmt(quote.total)}</span>
                   </div>
                 </div>
@@ -283,14 +283,14 @@ export default function QuoteDetailPage() {
               <div className="card p-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
                 {quote.notes && (
                   <div>
-                    <p className="font-semibold text-[#1F2937] mb-2">Notes</p>
-                    <p className="text-[#6B7280] whitespace-pre-line">{quote.notes}</p>
+                    <p className="font-semibold text-[#0c1226] mb-2">Notes</p>
+                    <p className="text-[#4a5168] whitespace-pre-line">{quote.notes}</p>
                   </div>
                 )}
                 {quote.terms && (
                   <div>
-                    <p className="font-semibold text-[#1F2937] mb-2">Terms & Conditions</p>
-                    <p className="text-[#6B7280] whitespace-pre-line">{quote.terms}</p>
+                    <p className="font-semibold text-[#0c1226] mb-2">Terms & Conditions</p>
+                    <p className="text-[#4a5168] whitespace-pre-line">{quote.terms}</p>
                   </div>
                 )}
               </div>
@@ -301,11 +301,11 @@ export default function QuoteDetailPage() {
           <div className="space-y-4">
             <div className="card p-5 text-sm">
               <h2 className="section-title">Customer</h2>
-              <p className="font-semibold text-[#1F2937]">{quote.contacts?.full_name}</p>
-              {quote.contacts?.business_name && <p className="text-[#6B7280]">{quote.contacts.business_name}</p>}
-              {quote.contacts?.email && <p className="text-[#6B7280] mt-1">{quote.contacts.email}</p>}
-              {quote.contacts?.phone && <p className="text-[#6B7280]">{quote.contacts.phone}</p>}
-              {quote.contacts?.address && <p className="text-[#6B7280] mt-1">{quote.contacts.address}</p>}
+              <p className="font-semibold text-[#0c1226]">{quote.contacts?.full_name}</p>
+              {quote.contacts?.business_name && <p className="text-[#4a5168]">{quote.contacts.business_name}</p>}
+              {quote.contacts?.email && <p className="text-[#4a5168] mt-1">{quote.contacts.email}</p>}
+              {quote.contacts?.phone && <p className="text-[#4a5168]">{quote.contacts.phone}</p>}
+              {quote.contacts?.address && <p className="text-[#4a5168] mt-1">{quote.contacts.address}</p>}
               <Link href={`/contacts/${quote.contact_id}`}
                 className="btn btn-outline btn-sm w-full mt-3 no-print">View Contact</Link>
             </div>

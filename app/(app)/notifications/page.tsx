@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { Plus, Send, Trash2, Bell, Mail, MessageCircle, Phone } from "lucide-react";
 import { Modal, EmptyState, toast, ConfirmDialog } from "@/components/ui";
@@ -116,10 +116,10 @@ export default function NotificationsPage() {
       ) : (
         <div className="space-y-3">
           <div className="card p-3 px-4">
-            <p className="text-xs text-[#6B7280]">
+            <p className="text-xs text-[#4a5168]">
               Available variables:{" "}
-              <code className="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-[#374151] text-[11px]">{"{{contact_name}}"}</code>{" "}
-              <code className="bg-[#F3F4F6] px-1.5 py-0.5 rounded text-[#374151] text-[11px]">{"{{business_name}}"}</code>
+              <code className="bg-[#f0efea] px-1.5 py-0.5 rounded text-[#4a5168] text-[11px]">{"{{contact_name}}"}</code>{" "}
+              <code className="bg-[#f0efea] px-1.5 py-0.5 rounded text-[#4a5168] text-[11px]">{"{{business_name}}"}</code>
             </p>
           </div>
           {templates.map((t: any) => {
@@ -127,17 +127,17 @@ export default function NotificationsPage() {
             return (
               <div key={t.id} className="card p-4 hover:shadow-card-md transition-shadow">
                 <div className="flex items-start gap-3">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${CHANNEL_COLORS[t.channel] ?? "bg-[#F3F4F6] text-[#6B7280]"}`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${CHANNEL_COLORS[t.channel] ?? "bg-[#f0efea] text-[#4a5168]"}`}>
                     <ChanIcon size={16} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-semibold text-[#111827]">{t.name}</p>
-                      <span className={`badge capitalize ${CHANNEL_COLORS[t.channel] ?? "bg-[#F3F4F6] text-[#6B7280]"}`}>{t.channel}</span>
-                      {t.subject && <span className="text-xs text-[#9CA3AF]">Subject: {t.subject}</span>}
+                      <p className="font-semibold text-[#0c1226]">{t.name}</p>
+                      <span className={`badge capitalize ${CHANNEL_COLORS[t.channel] ?? "bg-[#f0efea] text-[#4a5168]"}`}>{t.channel}</span>
+                      {t.subject && <span className="text-xs text-[#8a8fa3]">Subject: {t.subject}</span>}
                     </div>
-                    <p className="text-sm text-[#6B7280] mt-1 line-clamp-2">{t.message}</p>
-                    <p className="text-xs text-[#9CA3AF] mt-1">{fmtDate(t.created_at)}</p>
+                    <p className="text-sm text-[#4a5168] mt-1 line-clamp-2">{t.message}</p>
+                    <p className="text-xs text-[#8a8fa3] mt-1">{fmtDate(t.created_at)}</p>
                   </div>
                   <div className="flex gap-1 flex-shrink-0">
                     <button onClick={() => { loadTemplate(t.id); setSModal(true); }}
@@ -186,7 +186,7 @@ export default function NotificationsPage() {
               className="field min-h-[120px] resize-y"
               placeholder={"Hi {{contact_name}}, this is a message from {{business_name}}…"} />
           </div>
-          <div className="flex gap-3 justify-end pt-2 border-t border-[#E5E7EB]">
+          <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
             <button className="btn btn-outline" onClick={() => setTModal(false)}>Cancel</button>
             <button className="btn btn-green" onClick={saveTemplate} disabled={tSaving}>{tSaving ? "Saving…" : "Save Template"}</button>
           </div>
@@ -233,7 +233,7 @@ export default function NotificationsPage() {
             <textarea value={sForm.message} onChange={e => setSForm({ ...sForm, message: e.target.value })}
               className="field min-h-[100px] resize-y" />
           </div>
-          <div className="flex gap-3 justify-end pt-2 border-t border-[#E5E7EB]">
+          <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
             <button className="btn btn-outline" onClick={() => setSModal(false)}>Cancel</button>
             <button className="btn btn-green" onClick={send} disabled={sSaving}>{sSaving ? "Sending…" : "Send"}</button>
           </div>

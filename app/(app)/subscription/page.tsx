@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { Check, Zap, Building2, Crown } from "lucide-react";
 import { toast, PageSkeleton, StatusBadge } from "@/components/ui";
@@ -11,8 +11,8 @@ const PLANS = [
     price: "$0",
     period: "14 days",
     icon: Zap,
-    accent: "text-[#9CA3AF]",
-    ring: "border-[#E5E7EB]",
+    accent: "text-[#8a8fa3]",
+    ring: "border-[#e7e6e1]",
     badge: "",
     features: ["Up to 10 contacts", "5 quotes / invoices", "1 team member", "Basic reporting"],
   },
@@ -71,13 +71,13 @@ export default function SubscriptionPage() {
       {/* Current plan banner */}
       <div className="card px-6 py-5 mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-xs text-[#9CA3AF] font-medium uppercase tracking-wide mb-1">Current plan</p>
-          <p className="text-xl font-bold text-[#111827]">{planName}</p>
+          <p className="text-xs text-[#8a8fa3] font-medium uppercase tracking-wide mb-1">Current plan</p>
+          <p className="text-xl font-bold text-[#0c1226]">{planName}</p>
           {trialEnd && currentPlan === "trial" && (
             <p className="text-sm text-amber-600 mt-1 font-medium">Trial ends {fmtDate(trialEnd)}</p>
           )}
           {subscription?.renews_at && (
-            <p className="text-sm text-[#9CA3AF] mt-1">Renews {fmtDate(subscription.renews_at)}</p>
+            <p className="text-sm text-[#8a8fa3] mt-1">Renews {fmtDate(subscription.renews_at)}</p>
           )}
         </div>
         <StatusBadge status={subscription?.status ?? "trial"} />
@@ -93,21 +93,21 @@ export default function SubscriptionPage() {
               className={`card border-2 ${isCurrent ? plan.ring : "border-transparent"} flex flex-col transition-all duration-200 hover:shadow-card-md`}>
               <div className="px-6 pt-6 pb-4 flex-1">
                 <div className="flex items-center justify-between mb-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isCurrent ? "bg-brand-navy-light" : "bg-[#F3F4F6]"}`}>
-                    <Icon size={18} className={isCurrent ? plan.accent : "text-[#9CA3AF]"} />
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isCurrent ? "bg-brand-blue-50" : "bg-[#f0efea]"}`}>
+                    <Icon size={18} className={isCurrent ? plan.accent : "text-[#8a8fa3]"} />
                   </div>
                   {plan.badge && (
                     <span className="badge bg-brand-navy/10 text-brand-navy text-xs">{plan.badge}</span>
                   )}
                 </div>
-                <h3 className="font-bold text-base text-[#111827]">{plan.name}</h3>
+                <h3 className="font-bold text-base text-[#0c1226]">{plan.name}</h3>
                 <div className="mt-2 mb-5">
-                  <span className="text-3xl font-extrabold text-[#111827]">{plan.price}</span>
-                  <span className="text-[#9CA3AF] text-sm ml-1">{plan.period}</span>
+                  <span className="text-3xl font-extrabold text-[#0c1226]">{plan.price}</span>
+                  <span className="text-[#8a8fa3] text-sm ml-1">{plan.period}</span>
                 </div>
                 <ul className="space-y-2.5">
                   {plan.features.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-[#374151]">
+                    <li key={f} className="flex items-start gap-2 text-sm text-[#4a5168]">
                       <Check size={14} className="text-brand-green mt-0.5 flex-shrink-0" />
                       {f}
                     </li>
@@ -116,11 +116,11 @@ export default function SubscriptionPage() {
               </div>
               <div className="px-6 pb-6 mt-4">
                 {isCurrent ? (
-                  <button disabled className="btn w-full bg-[#F3F4F6] text-[#9CA3AF] cursor-default">
+                  <button disabled className="btn w-full bg-[#f0efea] text-[#8a8fa3] cursor-default">
                     Current plan
                   </button>
                 ) : plan.id === "trial" ? (
-                  <button disabled className="btn w-full bg-[#F3F4F6] text-[#9CA3AF] cursor-default">
+                  <button disabled className="btn w-full bg-[#f0efea] text-[#8a8fa3] cursor-default">
                     Downgrade not available
                   </button>
                 ) : (
@@ -134,7 +134,7 @@ export default function SubscriptionPage() {
         })}
       </div>
 
-      <p className="text-center text-sm text-[#9CA3AF] mt-8">
+      <p className="text-center text-sm text-[#8a8fa3] mt-8">
         Questions? Email us at{" "}
         <a href="mailto:support@clearbuildusa.com" className="text-brand-navy font-medium hover:underline">
           support@clearbuildusa.com

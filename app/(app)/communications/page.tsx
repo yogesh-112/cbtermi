@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { Mail, MessageSquare, Phone, Bell, Search } from "lucide-react";
 import { EmptyState } from "@/components/ui";
@@ -19,7 +19,7 @@ const channelColor: Record<string, string> = {
   whatsapp:     "bg-emerald-50 text-emerald-700",
   notification: "bg-violet-50 text-violet-700",
   call:         "bg-amber-50 text-amber-700",
-  note:         "bg-[#F3F4F6] text-[#6B7280]",
+  note:         "bg-[#f0efea] text-[#4a5168]",
 };
 
 export default function CommunicationsPage() {
@@ -83,14 +83,14 @@ export default function CommunicationsPage() {
             {filtered.map((log: any) => (
               <div key={log.id} className="mobile-card">
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <p className="font-semibold text-[#111827] text-sm">{log.contacts?.full_name ?? "—"}</p>
-                  <span className={`badge capitalize flex items-center gap-1 ${channelColor[log.channel] ?? "bg-[#F3F4F6] text-[#6B7280]"}`}>
+                  <p className="font-semibold text-[#0c1226] text-sm">{log.contacts?.full_name ?? "—"}</p>
+                  <span className={`badge capitalize flex items-center gap-1 ${channelColor[log.channel] ?? "bg-[#f0efea] text-[#4a5168]"}`}>
                     {channelIcon(log.channel)} {log.channel}
                   </span>
                 </div>
-                {log.subject && <p className="text-sm font-medium text-[#374151] truncate">{log.subject}</p>}
-                {log.message && <p className="text-xs text-[#9CA3AF] truncate mt-0.5">{log.message}</p>}
-                <p className="text-xs text-[#9CA3AF] mt-2">{fmtDate(log.created_at)}</p>
+                {log.subject && <p className="text-sm font-medium text-[#4a5168] truncate">{log.subject}</p>}
+                {log.message && <p className="text-xs text-[#8a8fa3] truncate mt-0.5">{log.message}</p>}
+                <p className="text-xs text-[#8a8fa3] mt-2">{fmtDate(log.created_at)}</p>
               </div>
             ))}
           </div>
@@ -112,16 +112,16 @@ export default function CommunicationsPage() {
                   <tr key={log.id}>
                     <td className="font-medium">{log.contacts?.full_name ?? "—"}</td>
                     <td>
-                      <span className={`badge capitalize flex items-center gap-1 w-fit ${channelColor[log.channel] ?? "bg-[#F3F4F6] text-[#6B7280]"}`}>
+                      <span className={`badge capitalize flex items-center gap-1 w-fit ${channelColor[log.channel] ?? "bg-[#f0efea] text-[#4a5168]"}`}>
                         {channelIcon(log.channel)} {log.channel}
                       </span>
                     </td>
-                    <td><span className="badge bg-[#F3F4F6] text-[#6B7280] capitalize">{log.type ?? "—"}</span></td>
+                    <td><span className="badge bg-[#f0efea] text-[#4a5168] capitalize">{log.type ?? "—"}</span></td>
                     <td className="max-w-sm">
-                      {log.subject && <p className="font-medium text-[#111827] text-sm truncate">{log.subject}</p>}
-                      <p className="text-[#9CA3AF] text-xs truncate">{log.message}</p>
+                      {log.subject && <p className="font-medium text-[#0c1226] text-sm truncate">{log.subject}</p>}
+                      <p className="text-[#8a8fa3] text-xs truncate">{log.message}</p>
                     </td>
-                    <td className="text-[#9CA3AF] text-xs whitespace-nowrap">{fmtDate(log.created_at)}</td>
+                    <td className="text-[#8a8fa3] text-xs whitespace-nowrap">{fmtDate(log.created_at)}</td>
                   </tr>
                 ))}
               </tbody>

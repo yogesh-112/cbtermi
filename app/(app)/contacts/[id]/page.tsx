@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -80,7 +80,7 @@ export default function ContactDetailPage() {
               <span className="text-white font-bold text-sm">{initials}</span>
             </div>
             <div>
-              <p className="font-semibold text-[#111827]">{c.full_name}</p>
+              <p className="font-semibold text-[#0c1226]">{c.full_name}</p>
               <StatusBadge status={c.contact_type} />
             </div>
           </div>
@@ -131,30 +131,30 @@ export default function ContactDetailPage() {
             <dl className="space-y-2.5 text-sm">
               {c.email && (
                 <div className="flex items-center gap-2">
-                  <Mail size={13} className="text-[#9CA3AF] flex-shrink-0" />
+                  <Mail size={13} className="text-[#8a8fa3] flex-shrink-0" />
                   <a href={`mailto:${c.email}`} className="text-brand-navy hover:underline truncate">{c.email}</a>
                 </div>
               )}
               {c.phone && (
                 <div className="flex items-center gap-2">
-                  <Phone size={13} className="text-[#9CA3AF] flex-shrink-0" />
+                  <Phone size={13} className="text-[#8a8fa3] flex-shrink-0" />
                   <a href={`tel:${c.phone}`} className="text-brand-navy hover:underline">{c.phone}</a>
                 </div>
               )}
               {c.whatsapp && (
                 <div className="flex items-center gap-2">
-                  <MessageCircle size={13} className="text-[#9CA3AF] flex-shrink-0" />
+                  <MessageCircle size={13} className="text-[#8a8fa3] flex-shrink-0" />
                   <a href={`https://wa.me/${c.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer"
                     className="text-brand-navy hover:underline">{c.whatsapp}</a>
                 </div>
               )}
               {c.city && (
-                <p className="text-[#6B7280]">{[c.city, c.state, c.zip].filter(Boolean).join(", ")}</p>
+                <p className="text-[#4a5168]">{[c.city, c.state, c.zip].filter(Boolean).join(", ")}</p>
               )}
-              {c.source && <p className="text-[#6B7280]">Source: {c.source}</p>}
-              {c.lead_status && <p className="text-[#6B7280]">Status: {c.lead_status}</p>}
+              {c.source && <p className="text-[#4a5168]">Source: {c.source}</p>}
+              {c.lead_status && <p className="text-[#4a5168]">Status: {c.lead_status}</p>}
               {c.notes && (
-                <p className="text-[#374151] mt-2 p-3 bg-[#F9FAFB] rounded-xl text-xs leading-relaxed">{c.notes}</p>
+                <p className="text-[#4a5168] mt-2 p-3 bg-[#f6f6f3] rounded-xl text-xs leading-relaxed">{c.notes}</p>
               )}
             </dl>
           )}
@@ -167,17 +167,22 @@ export default function ContactDetailPage() {
 
           {tab === "Overview" && (
             <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: "Quotes",   val: data.quotes?.length ?? 0 },
-                { label: "Invoices", val: data.invoices?.length ?? 0 },
-                { label: "Projects", val: data.projects?.length ?? 0 },
-                { label: "Payments", val: fmt(data.payments?.reduce((s: number, p: any) => s + (p.amount ?? 0), 0) ?? 0) },
-              ].map(({ label, val }) => (
-                <div key={label} className="card p-4 text-center">
-                  <p className="text-2xl font-bold text-brand-navy">{val}</p>
-                  <p className="text-xs text-[#9CA3AF] mt-1">{label}</p>
-                </div>
-              ))}
+              <div className="mini-stat mini-stat-navy">
+                <span className="mini-stat-label">Quotes</span>
+                <span className="mini-stat-value">{data.quotes?.length ?? 0}</span>
+              </div>
+              <div className="mini-stat mini-stat-blue">
+                <span className="mini-stat-label">Invoices</span>
+                <span className="mini-stat-value">{data.invoices?.length ?? 0}</span>
+              </div>
+              <div className="mini-stat mini-stat-green">
+                <span className="mini-stat-label">Projects</span>
+                <span className="mini-stat-value">{data.projects?.length ?? 0}</span>
+              </div>
+              <div className="mini-stat mini-stat-amber">
+                <span className="mini-stat-label">Total Paid</span>
+                <span className="mini-stat-value text-[18px]">{fmt(data.payments?.reduce((s: number, p: any) => s + (p.amount ?? 0), 0) ?? 0)}</span>
+              </div>
             </div>
           )}
 
@@ -187,14 +192,14 @@ export default function ContactDetailPage() {
                 <thead><tr><th>Number</th><th>Title</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
                 <tbody>
                   {(data.quotes ?? []).length === 0
-                    ? <tr><td colSpan={5} className="text-center py-8 text-[#9CA3AF]">No quotes yet</td></tr>
+                    ? <tr><td colSpan={5} className="text-center py-8 text-[#8a8fa3]">No quotes yet</td></tr>
                     : (data.quotes ?? []).map((q: any) => (
                       <tr key={q.id}>
                         <td><Link href={`/quotes/${q.id}`} className="text-brand-navy hover:underline font-medium">{q.quote_number}</Link></td>
-                        <td className="text-[#374151]">{q.title || "—"}</td>
+                        <td className="text-[#4a5168]">{q.title || "—"}</td>
                         <td className="font-semibold">{fmt(q.total)}</td>
                         <td><StatusBadge status={q.status} /></td>
-                        <td className="text-[#9CA3AF] text-xs">{fmtDate(q.created_at)}</td>
+                        <td className="text-[#8a8fa3] text-xs">{fmtDate(q.created_at)}</td>
                       </tr>
                     ))}
                 </tbody>
@@ -208,7 +213,7 @@ export default function ContactDetailPage() {
                 <thead><tr><th>Number</th><th>Total</th><th>Due</th><th>Status</th></tr></thead>
                 <tbody>
                   {(data.invoices ?? []).length === 0
-                    ? <tr><td colSpan={4} className="text-center py-8 text-[#9CA3AF]">No invoices yet</td></tr>
+                    ? <tr><td colSpan={4} className="text-center py-8 text-[#8a8fa3]">No invoices yet</td></tr>
                     : (data.invoices ?? []).map((i: any) => (
                       <tr key={i.id}>
                         <td><Link href={`/invoices/${i.id}`} className="text-brand-navy hover:underline font-medium">{i.invoice_number}</Link></td>
@@ -228,12 +233,12 @@ export default function ContactDetailPage() {
                 <thead><tr><th>Name</th><th>Status</th><th>Date</th></tr></thead>
                 <tbody>
                   {(data.projects ?? []).length === 0
-                    ? <tr><td colSpan={3} className="text-center py-8 text-[#9CA3AF]">No projects yet</td></tr>
+                    ? <tr><td colSpan={3} className="text-center py-8 text-[#8a8fa3]">No projects yet</td></tr>
                     : (data.projects ?? []).map((p: any) => (
                       <tr key={p.id}>
                         <td><Link href={`/projects/${p.id}`} className="text-brand-navy hover:underline font-medium">{p.name}</Link></td>
                         <td><StatusBadge status={p.status} /></td>
-                        <td className="text-[#9CA3AF] text-xs">{fmtDate(p.created_at)}</td>
+                        <td className="text-[#8a8fa3] text-xs">{fmtDate(p.created_at)}</td>
                       </tr>
                     ))}
                 </tbody>
@@ -247,12 +252,12 @@ export default function ContactDetailPage() {
                 <thead><tr><th>Amount</th><th>Date</th><th>Method</th></tr></thead>
                 <tbody>
                   {(data.payments ?? []).length === 0
-                    ? <tr><td colSpan={3} className="text-center py-8 text-[#9CA3AF]">No payments yet</td></tr>
+                    ? <tr><td colSpan={3} className="text-center py-8 text-[#8a8fa3]">No payments yet</td></tr>
                     : (data.payments ?? []).map((p: any) => (
                       <tr key={p.id}>
                         <td className="font-semibold text-brand-green">{fmt(p.amount)}</td>
                         <td>{fmtDate(p.payment_date)}</td>
-                        <td className="capitalize text-[#6B7280]">{p.payment_method?.replace("_", " ")}</td>
+                        <td className="capitalize text-[#4a5168]">{p.payment_method?.replace("_", " ")}</td>
                       </tr>
                     ))}
                 </tbody>
@@ -263,15 +268,15 @@ export default function ContactDetailPage() {
           {tab === "Communications" && (
             <div className="space-y-3">
               {(data.communications ?? []).length === 0
-                ? <p className="text-sm text-[#9CA3AF] text-center py-8">No communications yet.</p>
+                ? <p className="text-sm text-[#8a8fa3] text-center py-8">No communications yet.</p>
                 : (data.communications ?? []).map((comm: any) => (
                   <div key={comm.id} className="card p-4">
                     <div className="flex justify-between mb-1">
                       <span className="text-xs font-bold text-brand-navy uppercase tracking-wide">{comm.type}</span>
-                      <span className="text-xs text-[#9CA3AF]">{fmtDate(comm.created_at)}</span>
+                      <span className="text-xs text-[#8a8fa3]">{fmtDate(comm.created_at)}</span>
                     </div>
-                    <p className="text-sm text-[#374151]">{comm.subject || comm.message}</p>
-                    <p className="text-xs text-[#9CA3AF] mt-1">via {comm.channel}</p>
+                    <p className="text-sm text-[#4a5168]">{comm.subject || comm.message}</p>
+                    <p className="text-xs text-[#8a8fa3] mt-1">via {comm.channel}</p>
                   </div>
                 ))}
             </div>

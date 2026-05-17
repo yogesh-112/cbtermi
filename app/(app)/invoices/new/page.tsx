@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -118,11 +118,11 @@ function InvoiceForm() {
             <h2 className="section-title">Bill To</h2>
             <div className="flex gap-2 mb-4">
               <button onClick={() => setContactMode("existing")}
-                className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-medium border transition-colors ${contactMode === "existing" ? "bg-brand-navy text-white border-brand-navy" : "border-[#E5E7EB] text-[#374151] hover:bg-[#F5F7FA]"}`}>
+                className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-medium border transition-colors ${contactMode === "existing" ? "bg-brand-navy text-white border-brand-navy" : "border-[#e7e6e1] text-[#4a5168] hover:bg-[#f6f6f3]"}`}>
                 <Users size={14} /> Select Existing
               </button>
               <button onClick={() => setContactMode("new")}
-                className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-medium border transition-colors ${contactMode === "new" ? "bg-brand-navy text-white border-brand-navy" : "border-[#E5E7EB] text-[#374151] hover:bg-[#F5F7FA]"}`}>
+                className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-medium border transition-colors ${contactMode === "new" ? "bg-brand-navy text-white border-brand-navy" : "border-[#e7e6e1] text-[#4a5168] hover:bg-[#f6f6f3]"}`}>
                 <UserPlus size={14} /> Add New Contact
               </button>
             </div>
@@ -217,19 +217,19 @@ function InvoiceForm() {
             <div className="overflow-x-auto -mx-1">
               <table className="w-full text-sm min-w-[560px]">
                 <thead>
-                  <tr className="border-b border-[#E5E7EB]">
-                    <th className="text-left py-2 px-1 text-xs text-[#6B7280] font-semibold">Item</th>
-                    <th className="text-left py-2 px-1 text-xs text-[#6B7280] font-semibold w-12">Qty</th>
-                    <th className="text-left py-2 px-1 text-xs text-[#6B7280] font-semibold w-14">Unit</th>
-                    <th className="text-left py-2 px-1 text-xs text-[#6B7280] font-semibold w-24">Price</th>
-                    <th className="text-left py-2 px-1 text-xs text-[#6B7280] font-semibold w-12">Tax%</th>
-                    <th className="text-right py-2 px-1 text-xs text-[#6B7280] font-semibold w-20">Total</th>
+                  <tr className="border-b border-[#e7e6e1]">
+                    <th className="text-left py-2 px-1 text-xs text-[#4a5168] font-semibold">Item</th>
+                    <th className="text-left py-2 px-1 text-xs text-[#4a5168] font-semibold w-12">Qty</th>
+                    <th className="text-left py-2 px-1 text-xs text-[#4a5168] font-semibold w-14">Unit</th>
+                    <th className="text-left py-2 px-1 text-xs text-[#4a5168] font-semibold w-24">Price</th>
+                    <th className="text-left py-2 px-1 text-xs text-[#4a5168] font-semibold w-12">Tax%</th>
+                    <th className="text-right py-2 px-1 text-xs text-[#4a5168] font-semibold w-20">Total</th>
                     <th className="w-6" />
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((item, i) => (
-                    <tr key={i} className="border-b border-[#F5F7FA]">
+                    <tr key={i} className="border-b border-[#f6f6f3]">
                       <td className="py-1.5 px-1">
                         <input value={item.item_name} onChange={e => setItem(i, "item_name", e.target.value)}
                           placeholder="Item name" className="field text-xs mb-1" />
@@ -257,7 +257,7 @@ function InvoiceForm() {
                       </td>
                       <td className="py-1.5 pl-1">
                         <button onClick={() => setItems(items.filter((_, idx) => idx !== i))}
-                          className="text-[#D1D5DB] hover:text-red-500 transition-colors">
+                          className="text-[#d8d6cf] hover:text-red-500 transition-colors">
                           <Trash2 size={13} />
                         </button>
                       </td>
@@ -291,20 +291,20 @@ function InvoiceForm() {
           <div className="card p-5 sticky top-6">
             <h2 className="section-title">Summary</h2>
             <div className="space-y-2.5 text-sm">
-              <div className="flex justify-between text-[#6B7280]">
+              <div className="flex justify-between text-[#4a5168]">
                 <span>Subtotal</span><span>{fmt(subtotal)}</span>
               </div>
-              <div className="flex justify-between text-[#6B7280]">
+              <div className="flex justify-between text-[#4a5168]">
                 <span>Tax</span><span>{fmt(taxAmount)}</span>
               </div>
-              <div className="flex justify-between font-bold text-base border-t border-[#E5E7EB] pt-3 mt-1">
+              <div className="flex justify-between font-bold text-base border-t border-[#e7e6e1] pt-3 mt-1">
                 <span>Total</span><span className="text-brand-navy">{fmt(total)}</span>
               </div>
             </div>
 
             <div className="mt-5 space-y-2">
               <button onClick={() => save("draft")} disabled={saving}
-                className="btn btn-ghost border border-[#E5E7EB] w-full">
+                className="btn btn-ghost border border-[#e7e6e1] w-full">
                 {saving ? "Saving…" : "Save as Draft"}
               </button>
               <button onClick={() => save("sent")} disabled={saving}

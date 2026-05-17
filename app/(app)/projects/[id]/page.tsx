@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -79,17 +79,22 @@ export default function ProjectDetailPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {[
-          { label: "Budget",         val: project.budget ? fmt(project.budget) : "Not set" },
-          { label: "Total Quoted",   val: fmt(stats?.totalQuoted ?? 0) },
-          { label: "Total Invoiced", val: fmt(stats?.totalInvoiced ?? 0) },
-          { label: "Amount Due",     val: fmt(stats?.totalDue ?? 0) },
-        ].map(({ label, val }) => (
-          <div key={label} className="card p-4 text-center">
-            <p className="text-lg font-bold text-brand-navy">{val}</p>
-            <p className="text-xs text-[#9CA3AF] mt-1">{label}</p>
-          </div>
-        ))}
+        <div className="mini-stat mini-stat-navy">
+          <span className="mini-stat-label">Budget</span>
+          <span className="mini-stat-value text-[18px]">{project.budget ? fmt(project.budget) : "—"}</span>
+        </div>
+        <div className="mini-stat mini-stat-blue">
+          <span className="mini-stat-label">Total Quoted</span>
+          <span className="mini-stat-value text-[18px]">{fmt(stats?.totalQuoted ?? 0)}</span>
+        </div>
+        <div className="mini-stat mini-stat-green">
+          <span className="mini-stat-label">Total Invoiced</span>
+          <span className="mini-stat-value text-[18px]">{fmt(stats?.totalInvoiced ?? 0)}</span>
+        </div>
+        <div className="mini-stat mini-stat-amber">
+          <span className="mini-stat-label">Amount Due</span>
+          <span className="mini-stat-value text-[18px]">{fmt(stats?.totalDue ?? 0)}</span>
+        </div>
       </div>
 
       <Tabs tabs={["Overview", "Quotes", "Invoices", "Payments", "Updates", "Feedback", "Item Lists"]}
@@ -107,17 +112,17 @@ export default function ProjectDetailPage() {
               ["Description", project.description],
             ].filter(([, v]) => v).map(([k, v]) => (
               <div key={k} className="flex gap-2">
-                <span className="text-[#9CA3AF] w-20 flex-shrink-0">{k}</span>
-                <span className="text-[#374151]">{v}</span>
+                <span className="text-[#8a8fa3] w-20 flex-shrink-0">{k}</span>
+                <span className="text-[#4a5168]">{v}</span>
               </div>
             ))}
           </div>
           {project.contacts && (
             <div className="card p-5 text-sm">
               <h3 className="section-title">Contact</h3>
-              <p className="font-semibold text-[#111827]">{project.contacts.full_name}</p>
-              {project.contacts.email && <p className="text-[#6B7280] mt-1">{project.contacts.email}</p>}
-              {project.contacts.phone && <p className="text-[#6B7280]">{project.contacts.phone}</p>}
+              <p className="font-semibold text-[#0c1226]">{project.contacts.full_name}</p>
+              {project.contacts.email && <p className="text-[#4a5168] mt-1">{project.contacts.email}</p>}
+              {project.contacts.phone && <p className="text-[#4a5168]">{project.contacts.phone}</p>}
               <Link href={`/contacts/${project.contact_id}`} className="btn btn-outline btn-sm mt-3 inline-flex">
                 View Contact
               </Link>
@@ -132,11 +137,11 @@ export default function ProjectDetailPage() {
             <thead><tr><th>Number</th><th>Title</th><th>Total</th><th>Status</th></tr></thead>
             <tbody>
               {quotes.length === 0
-                ? <tr><td colSpan={4} className="text-center py-8 text-[#9CA3AF]">No quotes yet</td></tr>
+                ? <tr><td colSpan={4} className="text-center py-8 text-[#8a8fa3]">No quotes yet</td></tr>
                 : quotes.map((q: any) => (
                   <tr key={q.id}>
                     <td><Link href={`/quotes/${q.id}`} className="text-brand-navy hover:underline font-medium">{q.quote_number}</Link></td>
-                    <td className="text-[#374151]">{q.title || "—"}</td>
+                    <td className="text-[#4a5168]">{q.title || "—"}</td>
                     <td className="font-semibold">{fmt(q.total)}</td>
                     <td><StatusBadge status={q.status} /></td>
                   </tr>
@@ -152,7 +157,7 @@ export default function ProjectDetailPage() {
             <thead><tr><th>Number</th><th>Total</th><th>Paid</th><th>Due</th><th>Status</th></tr></thead>
             <tbody>
               {invoices.length === 0
-                ? <tr><td colSpan={5} className="text-center py-8 text-[#9CA3AF]">No invoices yet</td></tr>
+                ? <tr><td colSpan={5} className="text-center py-8 text-[#8a8fa3]">No invoices yet</td></tr>
                 : invoices.map((i: any) => (
                   <tr key={i.id}>
                     <td><Link href={`/invoices/${i.id}`} className="text-brand-navy hover:underline font-medium">{i.invoice_number}</Link></td>
@@ -173,12 +178,12 @@ export default function ProjectDetailPage() {
             <thead><tr><th>Date</th><th>Amount</th><th>Method</th></tr></thead>
             <tbody>
               {payments.length === 0
-                ? <tr><td colSpan={3} className="text-center py-8 text-[#9CA3AF]">No payments yet</td></tr>
+                ? <tr><td colSpan={3} className="text-center py-8 text-[#8a8fa3]">No payments yet</td></tr>
                 : payments.map((p: any) => (
                   <tr key={p.id}>
                     <td>{fmtDate(p.payment_date)}</td>
                     <td className="font-semibold text-brand-green">{fmt(p.amount)}</td>
-                    <td className="capitalize text-[#6B7280]">{p.payment_method?.replace("_", " ")}</td>
+                    <td className="capitalize text-[#4a5168]">{p.payment_method?.replace("_", " ")}</td>
                   </tr>
                 ))}
             </tbody>
@@ -189,15 +194,15 @@ export default function ProjectDetailPage() {
       {tab === "Updates" && (
         <div className="space-y-3">
           {updates.length === 0
-            ? <p className="text-sm text-[#9CA3AF] text-center py-8">No updates yet.</p>
+            ? <p className="text-sm text-[#8a8fa3] text-center py-8">No updates yet.</p>
             : updates.map((u: any) => (
               <div key={u.id} className="card p-4">
                 <div className="flex justify-between mb-1">
-                  <p className="font-semibold text-[#111827]">{u.title}</p>
-                  <span className="text-xs text-[#9CA3AF]">{fmtDate(u.created_at)}</span>
+                  <p className="font-semibold text-[#0c1226]">{u.title}</p>
+                  <span className="text-xs text-[#8a8fa3]">{fmtDate(u.created_at)}</span>
                 </div>
                 {u.status_milestone && <span className="badge bg-blue-50 text-blue-700 mb-2">{u.status_milestone}</span>}
-                <p className="text-sm text-[#374151] leading-relaxed">{u.message}</p>
+                <p className="text-sm text-[#4a5168] leading-relaxed">{u.message}</p>
               </div>
             ))}
         </div>
@@ -206,13 +211,13 @@ export default function ProjectDetailPage() {
       {tab === "Feedback" && (
         <div className="space-y-3">
           {feedback.length === 0
-            ? <p className="text-sm text-[#9CA3AF] text-center py-8">No feedback yet.</p>
+            ? <p className="text-sm text-[#8a8fa3] text-center py-8">No feedback yet.</p>
             : feedback.map((f: any) => (
               <div key={f.id} className="card p-4">
                 <div className="flex items-center gap-1 mb-2">
-                  {"★".repeat(f.rating || 0)}<span className="text-[#D1D5DB]">{"★".repeat(5 - (f.rating || 0))}</span>
+                  {"★".repeat(f.rating || 0)}<span className="text-[#d8d6cf]">{"★".repeat(5 - (f.rating || 0))}</span>
                 </div>
-                <p className="text-sm text-[#374151]">{f.comments}</p>
+                <p className="text-sm text-[#4a5168]">{f.comments}</p>
               </div>
             ))}
         </div>
@@ -221,12 +226,12 @@ export default function ProjectDetailPage() {
       {tab === "Item Lists" && (
         <div className="space-y-3">
           {lists.length === 0
-            ? <p className="text-sm text-[#9CA3AF] text-center py-8">No requirement lists yet.</p>
+            ? <p className="text-sm text-[#8a8fa3] text-center py-8">No requirement lists yet.</p>
             : lists.map((l: any) => (
               <div key={l.id} className="card p-4 flex justify-between items-center">
                 <div>
-                  <p className="font-medium text-[#111827]">{l.title}</p>
-                  <p className="text-xs text-[#9CA3AF]">{fmtDate(l.created_at)}</p>
+                  <p className="font-medium text-[#0c1226]">{l.title}</p>
+                  <p className="text-xs text-[#8a8fa3]">{fmtDate(l.created_at)}</p>
                 </div>
               </div>
             ))}
@@ -266,7 +271,7 @@ export default function ProjectDetailPage() {
               onChange={e => setEditForm({ ...editForm, description: e.target.value })} rows={3} className="field resize-none" />
           </div>
         </div>
-        <div className="flex gap-3 justify-end mt-5 pt-4 border-t border-[#E5E7EB]">
+        <div className="flex gap-3 justify-end mt-5 pt-4 border-t border-[#e7e6e1]">
           <button className="btn btn-outline" onClick={() => setEditModal(false)}>Cancel</button>
           <button className="btn btn-primary" onClick={saveEdit} disabled={saving}>{saving ? "Saving…" : "Save"}</button>
         </div>
@@ -292,7 +297,7 @@ export default function ProjectDetailPage() {
               onChange={e => setUpdateForm({ ...updateForm, message: e.target.value })}
               rows={4} className="field resize-none" />
           </div>
-          <div className="flex gap-3 justify-end pt-2 border-t border-[#E5E7EB]">
+          <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
             <button className="btn btn-outline" onClick={() => setUpdateModal(false)}>Cancel</button>
             <button className="btn btn-green" onClick={saveUpdate} disabled={saving}>{saving ? "Saving…" : "Send Update"}</button>
           </div>

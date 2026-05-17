@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { Plus, Star, ThumbsUp, ThumbsDown, Minus } from "lucide-react";
-import { Modal, toast, StatCard, EmptyState } from "@/components/ui";
+import { Modal, toast, EmptyState } from "@/components/ui";
 import { fmtDate } from "@/lib/utils";
 
 export default function FeedbackPage() {
@@ -51,7 +51,7 @@ export default function FeedbackPage() {
   };
 
   const stars = (r: number) => Array.from({ length: 5 }, (_, i) => (
-    <Star key={i} size={12} className={i < r ? "text-amber-400 fill-amber-400" : "text-[#D1D5DB]"} />
+    <Star key={i} size={12} className={i < r ? "text-amber-400 fill-amber-400" : "text-[#d8d6cf]"} />
   ));
 
   const avg = feedback.length ? (feedback.reduce((s, f) => s + (f.rating ?? 0), 0) / feedback.length).toFixed(1) : null;
@@ -67,11 +67,24 @@ export default function FeedbackPage() {
       </div>
 
       {feedback.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          <StatCard label="Average Rating" value={avg ?? "—"} icon={<Star size={16} />} color="yellow" />
-          <StatCard label="Total Feedback" value={feedback.length} icon={<ThumbsUp size={16} />} color="navy" />
-          <StatCard label="Positive (4–5★)" value={feedback.filter(f => f.rating >= 4).length} icon={<ThumbsUp size={16} />} color="green" />
-          <StatCard label="Needs Attention" value={feedback.filter(f => f.rating <= 2).length} icon={<ThumbsDown size={16} />} color="red" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          <div className="mini-stat mini-stat-amber">
+            <span className="mini-stat-label">Avg Rating</span>
+            <span className="mini-stat-value">{avg ?? "—"}</span>
+            <span className="mini-stat-sub">out of 5 stars</span>
+          </div>
+          <div className="mini-stat mini-stat-navy">
+            <span className="mini-stat-label">Total Feedback</span>
+            <span className="mini-stat-value">{feedback.length}</span>
+          </div>
+          <div className="mini-stat mini-stat-green">
+            <span className="mini-stat-label">Positive (4–5★)</span>
+            <span className="mini-stat-value">{feedback.filter(f => f.rating >= 4).length}</span>
+          </div>
+          <div className="mini-stat mini-stat-rose">
+            <span className="mini-stat-label">Needs Attention</span>
+            <span className="mini-stat-value">{feedback.filter(f => f.rating <= 2).length}</span>
+          </div>
         </div>
       )}
 
@@ -91,14 +104,14 @@ export default function FeedbackPage() {
               <div key={f.id} className="mobile-card">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-[#111827]">{f.contacts?.full_name ?? "Anonymous"}</p>
-                    {f.projects?.name && <p className="text-xs text-[#9CA3AF]">{f.projects.name}</p>}
+                    <p className="font-semibold text-[#0c1226]">{f.contacts?.full_name ?? "Anonymous"}</p>
+                    {f.projects?.name && <p className="text-xs text-[#8a8fa3]">{f.projects.name}</p>}
                   </div>
                   <div className="flex items-center gap-0.5">{stars(f.rating)}</div>
                 </div>
-                <p className="text-sm text-[#374151] mt-2 leading-relaxed">{f.message}</p>
-                <div className="flex items-center gap-2 mt-2 text-xs text-[#9CA3AF]">
-                  <span className="badge bg-[#F3F4F6] text-[#6B7280] capitalize">{f.category}</span>
+                <p className="text-sm text-[#4a5168] mt-2 leading-relaxed">{f.message}</p>
+                <div className="flex items-center gap-2 mt-2 text-xs text-[#8a8fa3]">
+                  <span className="badge bg-[#f0efea] text-[#4a5168] capitalize">{f.category}</span>
                   <span>{fmtDate(f.created_at)}</span>
                 </div>
               </div>
@@ -122,16 +135,16 @@ export default function FeedbackPage() {
                 {feedback.map((f: any) => (
                   <tr key={f.id}>
                     <td className="font-medium">{f.contacts?.full_name ?? "—"}</td>
-                    <td className="text-[#6B7280]">{f.projects?.name ?? "—"}</td>
+                    <td className="text-[#4a5168]">{f.projects?.name ?? "—"}</td>
                     <td>
                       <div className="flex items-center gap-1.5">
                         {ratingIcon(f.rating)}
                         <span className="text-sm font-semibold">{f.rating}/5</span>
                       </div>
                     </td>
-                    <td><span className="badge bg-[#F3F4F6] text-[#6B7280] capitalize">{f.category}</span></td>
-                    <td className="max-w-xs"><p className="truncate text-[#374151] text-sm">{f.message}</p></td>
-                    <td className="text-[#9CA3AF] text-xs">{fmtDate(f.created_at)}</td>
+                    <td><span className="badge bg-[#f0efea] text-[#4a5168] capitalize">{f.category}</span></td>
+                    <td className="max-w-xs"><p className="truncate text-[#4a5168] text-sm">{f.message}</p></td>
+                    <td className="text-[#8a8fa3] text-xs">{fmtDate(f.created_at)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -184,10 +197,10 @@ export default function FeedbackPage() {
           <div className="flex items-center gap-2">
             <input type="checkbox" id="is_public" checked={form.is_public}
               onChange={e => setForm({ ...form, is_public: e.target.checked })}
-              className="rounded border-[#D1D5DB]" />
-            <label htmlFor="is_public" className="text-sm text-[#374151] cursor-pointer">Mark as public testimonial</label>
+              className="rounded border-[#d8d6cf]" />
+            <label htmlFor="is_public" className="text-sm text-[#4a5168] cursor-pointer">Mark as public testimonial</label>
           </div>
-          <div className="flex gap-3 justify-end pt-2 border-t border-[#E5E7EB]">
+          <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
             <button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button>
             <button className="btn btn-green" onClick={save} disabled={saving}>{saving ? "Saving…" : "Record Feedback"}</button>
           </div>

@@ -1,15 +1,17 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Briefcase, Eye } from "lucide-react";
+import { Plus, Briefcase, Eye, MapPin, Calendar, DollarSign } from "lucide-react";
 import { StatusBadge, Modal, EmptyState, toast, ActionMenu } from "@/components/ui";
 import { fmt, fmtDate } from "@/lib/utils";
 
 const EMPTY = { name: "", contact_id: "", project_type: "", address: "", start_date: "", end_date: "", status: "active", description: "", budget: "" };
 const STATUS_FILTERS = ["", "active", "on_hold", "completed", "cancelled"];
+const STATUS_LABELS: Record<string, string> = { "": "All", active: "Active", on_hold: "On Hold", completed: "Completed", cancelled: "Cancelled" };
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([]);
+  const [all, setAll] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
   const [contacts, setContacts] = useState<any[]>([]);
@@ -19,13 +21,24 @@ export default function ProjectsPage() {
 
   const load = () => {
     setLoading(true);
-    const q = filter ? `?status=${filter}` : "";
-    fetch(`/api/projects${q}`).then(r => r.json()).then(d => setProjects(d.projects ?? [])).finally(() => setLoading(false));
+    Promise.all([
+      fetch("/api/projects").then(r => r.json()),
+    ]).then(([d]) => {
+      setAll(d.projects ?? []);
+      setProjects(filter ? (d.projects ?? []).filter((p: any) => p.status === filter) : (d.projects ?? []));
+    }).finally(() => setLoading(false));
   };
-  useEffect(() => { load(); }, [filter]);
-  useEffect(() => { fetch("/api/contacts").then(r => r.json()).then(d => setContacts(d.contacts ?? [])); }, []);
 
-  const set = (k: keyof typeof form) =>
+  useEffect(() => {
+    load();
+    fetch("/api/contacts").then(r => r.json()).then(d => setContacts(d.contacts ?? []));
+  }, []);
+
+  useEffect(() => {
+    setProjects(filter ? all.filter(p => p.status === filter) : all);
+  }, [filter, all]);
+
+  const set = (k: keyof typeof EMPTY) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
       setForm({ ...form, [k]: e.target.value });
 
@@ -41,23 +54,48 @@ export default function ProjectsPage() {
     else toast("Failed to create project", "error");
   };
 
-  const STATUS_LABELS: Record<string, string> = { "": "All", active: "Active", on_hold: "On Hold", completed: "Completed", cancelled: "Cancelled" };
+  const counts = {
+    active:    all.filter(p => p.status === "active").length,
+    on_hold:   all.filter(p => p.status === "on_hold").length,
+    completed: all.filter(p => p.status === "completed").length,
+    cancelled: all.filter(p => p.status === "cancelled").length,
+  };
 
   return (
     <div>
       <div className="page-header">
         <div>
           <h1 className="page-title">Projects</h1>
-          <p className="page-desc">{projects.length} projects</p>
+          <p className="page-desc">{all.length} total projects</p>
         </div>
         <button className="btn btn-green" onClick={() => setModal(true)}><Plus size={15} /> New Project</button>
       </div>
 
-      {/* Filter chips */}
-      <div className="flex gap-2 mb-5 flex-wrap">
+      {/* Mini stat cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+        <div className="mini-stat mini-stat-green">
+          <span className="mini-stat-label">Active</span>
+          <span className="mini-stat-value">{counts.active}</span>
+        </div>
+        <div className="mini-stat mini-stat-amber">
+          <span className="mini-stat-label">On Hold</span>
+          <span className="mini-stat-value">{counts.on_hold}</span>
+        </div>
+        <div className="mini-stat mini-stat-navy">
+          <span className="mini-stat-label">Completed</span>
+          <span className="mini-stat-value">{counts.completed}</span>
+        </div>
+        <div className="mini-stat mini-stat-rose">
+          <span className="mini-stat-label">Cancelled</span>
+          <span className="mini-stat-value">{counts.cancelled}</span>
+        </div>
+      </div>
+
+      {/* Filter tabs */}
+      <div className="tabs-bar mb-5">
         {STATUS_FILTERS.map(s => (
           <button key={s} onClick={() => setFilter(s)}
-            className={`btn btn-sm ${filter === s ? "btn-primary" : "btn-outline"}`}>
+            className={`tab-btn ${filter === s ? "active" : ""}`}>
             {STATUS_LABELS[s]}
           </button>
         ))}
@@ -74,60 +112,68 @@ export default function ProjectsPage() {
           <Link key={p.id} href={`/projects/${p.id}`} className="mobile-card block hover:shadow-card-md transition-shadow">
             <div className="mobile-card-row">
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-[#111827] truncate">{p.name}</p>
-                <p className="text-xs text-[#9CA3AF]">{p.project_number}</p>
+                <p className="font-semibold text-[#0c1226] truncate">{p.name}</p>
+                <p className="text-xs text-[#8a8fa3]">{p.project_number}</p>
               </div>
               <StatusBadge status={p.status} />
             </div>
-            <div className="flex items-center gap-3 mt-2 text-xs text-[#9CA3AF]">
+            <div className="flex items-center gap-3 mt-2 text-xs text-[#8a8fa3]">
               {p.contacts?.full_name && <span>{p.contacts.full_name}</span>}
-              {p.budget && <span className="font-medium text-[#374151]">{fmt(p.budget)}</span>}
+              {p.budget && <span className="font-medium text-[#4a5168]">{fmt(p.budget)}</span>}
               {p.start_date && <span>{fmtDate(p.start_date)}</span>}
             </div>
           </Link>
         ))}
       </div>
 
-      {/* Desktop table */}
-      <div className="hidden lg:block table-wrapper">
-        <table className="table-base">
-          <thead>
-            <tr>
-              <th>Project</th>
-              <th>Contact</th>
-              <th>Budget</th>
-              <th>Status</th>
-              <th>Start Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={6} className="text-center py-10 text-[#9CA3AF]">Loading…</td></tr>
-            ) : projects.length === 0 ? (
-              <tr><td colSpan={6}>
-                <EmptyState icon={<Briefcase size={40} />} title="No projects yet" description="Create your first project."
-                  action={<button className="btn btn-green btn-sm" onClick={() => setModal(true)}><Plus size={14} /> New Project</button>} />
-              </td></tr>
-            ) : projects.map(p => (
-              <tr key={p.id}>
-                <td>
-                  <Link href={`/projects/${p.id}`} className="font-medium text-brand-navy hover:underline">{p.name}</Link>
-                  <p className="text-xs text-[#9CA3AF]">{p.project_number}</p>
-                </td>
-                <td className="text-[#6B7280]">{p.contacts?.full_name || "—"}</td>
-                <td>{p.budget ? fmt(p.budget) : "—"}</td>
-                <td><StatusBadge status={p.status} /></td>
-                <td className="text-[#9CA3AF] text-xs">{fmtDate(p.start_date)}</td>
-                <td>
-                  <ActionMenu items={[
-                    { label: "View", icon: <Eye size={14} />, onClick: () => window.location.href = `/projects/${p.id}` },
-                  ]} />
-                </td>
-              </tr>
+      {/* Desktop card grid */}
+      <div className="hidden lg:block">
+        {loading ? (
+          <div className="grid grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => <div key={i} className="card h-40 animate-pulse skeleton" />)}
+          </div>
+        ) : projects.length === 0 ? (
+          <EmptyState icon={<Briefcase size={40} />} title="No projects yet" description="Create your first project."
+            action={<button className="btn btn-green btn-sm" onClick={() => setModal(true)}><Plus size={14} /> New Project</button>} />
+        ) : (
+          <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
+            {projects.map(p => (
+              <Link key={p.id} href={`/projects/${p.id}`} className="project-card">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[#0c1226] leading-snug">{p.name}</p>
+                    <p className="text-xs text-[#8a8fa3] mt-0.5">{p.project_number}</p>
+                  </div>
+                  <StatusBadge status={p.status} />
+                </div>
+                {p.contacts?.full_name && (
+                  <p className="text-sm text-[#4a5168] mb-2">{p.contacts.full_name}</p>
+                )}
+                {p.address && (
+                  <div className="flex items-center gap-1.5 text-xs text-[#8a8fa3] mb-1">
+                    <MapPin size={11} className="flex-shrink-0" />
+                    <span className="truncate">{p.address}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#f0efea]">
+                  <div className="flex items-center gap-1 text-sm font-semibold text-brand-navy">
+                    {p.budget ? (
+                      <><DollarSign size={13} />{fmt(p.budget)}</>
+                    ) : (
+                      <span className="text-[#8a8fa3] font-normal text-xs">No budget</span>
+                    )}
+                  </div>
+                  {p.start_date && (
+                    <div className="flex items-center gap-1 text-xs text-[#8a8fa3]">
+                      <Calendar size={11} />
+                      {fmtDate(p.start_date)}
+                    </div>
+                  )}
+                </div>
+              </Link>
             ))}
-          </tbody>
-        </table>
+          </div>
+        )}
       </div>
 
       <Modal open={modal} onClose={() => setModal(false)} title="New Project" size="lg">
@@ -177,7 +223,7 @@ export default function ProjectsPage() {
             <textarea value={form.description} onChange={set("description")} rows={2} className="field resize-none" />
           </div>
         </div>
-        <div className="flex gap-3 justify-end mt-5 pt-4 border-t border-[#E5E7EB]">
+        <div className="flex gap-3 justify-end mt-5 pt-4 border-t border-[#e7e6e1]">
           <button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button>
           <button className="btn btn-green" onClick={save} disabled={saving}>{saving ? "Saving…" : "Create Project"}</button>
         </div>

@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
-import { Plus, CreditCard, TrendingUp } from "lucide-react";
-import { Modal, EmptyState, toast, StatCard } from "@/components/ui";
+import { Plus, CreditCard } from "lucide-react";
+import { Modal, EmptyState, toast } from "@/components/ui";
 import { fmt, fmtDate } from "@/lib/utils";
 
 const METHODS = [
@@ -64,9 +64,19 @@ export default function PaymentsPage() {
         <button className="btn btn-green" onClick={() => setModal(true)}><Plus size={15} /> Record Payment</button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <StatCard label="Total Received" value={fmt(total)} icon={<TrendingUp size={16} />} color="green" />
-        <StatCard label="This Month" value={fmt(thisMonth)} icon={<CreditCard size={16} />} color="navy" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
+        <div className="mini-stat mini-stat-green">
+          <span className="mini-stat-label">Total Received</span>
+          <span className="mini-stat-value text-[18px]">{fmt(total)}</span>
+        </div>
+        <div className="mini-stat mini-stat-navy">
+          <span className="mini-stat-label">This Month</span>
+          <span className="mini-stat-value text-[18px]">{fmt(thisMonth)}</span>
+        </div>
+        <div className="mini-stat mini-stat-blue col-span-2 sm:col-span-1">
+          <span className="mini-stat-label">Total Payments</span>
+          <span className="mini-stat-value">{payments.length}</span>
+        </div>
       </div>
 
       {/* Mobile cards */}
@@ -81,15 +91,15 @@ export default function PaymentsPage() {
             <div className="mobile-card-row">
               <div>
                 <p className="font-semibold text-brand-green">{fmt(p.amount)}</p>
-                <p className="text-xs text-[#9CA3AF] mt-0.5">{p.contacts?.full_name || "—"}</p>
+                <p className="text-xs text-[#8a8fa3] mt-0.5">{p.contacts?.full_name || "—"}</p>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-[#374151] capitalize">{p.payment_method?.replace("_", " ")}</p>
-                <p className="text-xs text-[#9CA3AF]">{fmtDate(p.payment_date)}</p>
+                <p className="text-sm font-medium text-[#4a5168] capitalize">{p.payment_method?.replace("_", " ")}</p>
+                <p className="text-xs text-[#8a8fa3]">{fmtDate(p.payment_date)}</p>
               </div>
             </div>
             {(p.invoices?.invoice_number || p.reference_number) && (
-              <div className="flex gap-3 mt-2 text-xs text-[#9CA3AF]">
+              <div className="flex gap-3 mt-2 text-xs text-[#8a8fa3]">
                 {p.invoices?.invoice_number && <span>Invoice: {p.invoices.invoice_number}</span>}
                 {p.reference_number && <span>Ref: {p.reference_number}</span>}
               </div>
@@ -113,7 +123,7 @@ export default function PaymentsPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} className="text-center py-10 text-[#9CA3AF]">Loading…</td></tr>
+              <tr><td colSpan={6} className="text-center py-10 text-[#8a8fa3]">Loading…</td></tr>
             ) : payments.length === 0 ? (
               <tr><td colSpan={6}>
                 <EmptyState icon={<CreditCard size={40} />} title="No payments yet" description="Record your first payment."
@@ -122,11 +132,11 @@ export default function PaymentsPage() {
             ) : payments.map(p => (
               <tr key={p.id}>
                 <td>{fmtDate(p.payment_date)}</td>
-                <td className="text-[#6B7280]">{p.contacts?.full_name || "—"}</td>
-                <td className="text-[#6B7280]">{p.invoices?.invoice_number || "—"}</td>
+                <td className="text-[#4a5168]">{p.contacts?.full_name || "—"}</td>
+                <td className="text-[#4a5168]">{p.invoices?.invoice_number || "—"}</td>
                 <td className="font-semibold text-brand-green">{fmt(p.amount)}</td>
-                <td className="capitalize text-[#6B7280]">{p.payment_method?.replace("_", " ")}</td>
-                <td className="text-[#9CA3AF] text-xs">{p.reference_number || "—"}</td>
+                <td className="capitalize text-[#4a5168]">{p.payment_method?.replace("_", " ")}</td>
+                <td className="text-[#8a8fa3] text-xs">{p.reference_number || "—"}</td>
               </tr>
             ))}
           </tbody>
@@ -177,7 +187,7 @@ export default function PaymentsPage() {
             <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={2} className="field resize-none" />
           </div>
         </div>
-        <div className="flex gap-3 justify-end mt-5 pt-4 border-t border-[#E5E7EB]">
+        <div className="flex gap-3 justify-end mt-5 pt-4 border-t border-[#e7e6e1]">
           <button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button>
           <button className="btn btn-green" onClick={save} disabled={saving}>{saving ? "Saving…" : "Record Payment"}</button>
         </div>

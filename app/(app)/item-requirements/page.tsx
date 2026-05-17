@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { Plus, ChevronDown, ChevronRight, Trash2, ClipboardList } from "lucide-react";
 import { Modal, toast, EmptyState } from "@/components/ui";
@@ -74,22 +74,22 @@ export default function ItemRequirementsPage() {
           {lists.map((list: any) => (
             <div key={list.id} className="card overflow-hidden">
               <button
-                className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[#F9FAFB] transition-colors"
+                className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[#f6f6f3] transition-colors"
                 onClick={() => toggle(list.id)}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-brand-navy-light rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-brand-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
                     {expanded.includes(list.id)
                       ? <ChevronDown size={15} className="text-brand-navy" />
                       : <ChevronRight size={15} className="text-brand-navy" />}
                   </div>
                   <div>
-                    <p className="font-semibold text-[#111827]">{list.title}</p>
-                    <p className="text-xs text-[#9CA3AF] mt-0.5 flex items-center gap-3">
+                    <p className="font-semibold text-[#0c1226]">{list.title}</p>
+                    <p className="text-xs text-[#8a8fa3] mt-0.5 flex items-center gap-3">
                       {list.projects?.name && <span>Project: {list.projects.name}</span>}
                       {list.contacts?.full_name && <span>Contact: {list.contacts.full_name}</span>}
                       <span>{fmtDate(list.created_at)}</span>
-                      <span className="font-medium text-[#374151]">
+                      <span className="font-medium text-[#4a5168]">
                         {(list.item_requirements ?? []).length} item{(list.item_requirements ?? []).length !== 1 ? "s" : ""}
                       </span>
                     </p>
@@ -98,18 +98,18 @@ export default function ItemRequirementsPage() {
               </button>
 
               {expanded.includes(list.id) && (
-                <div className="border-t border-[#F3F4F6] px-5 pb-4">
-                  {list.notes && <p className="text-sm text-[#6B7280] mt-3 mb-3 bg-[#F9FAFB] rounded-xl px-3 py-2">{list.notes}</p>}
+                <div className="border-t border-[#f0efea] px-5 pb-4">
+                  {list.notes && <p className="text-sm text-[#4a5168] mt-3 mb-3 bg-[#f6f6f3] rounded-xl px-3 py-2">{list.notes}</p>}
                   <div className="mt-3 space-y-2">
                     {(list.item_requirements ?? []).length === 0 ? (
-                      <p className="text-sm text-[#9CA3AF] text-center py-4">No items in this list</p>
+                      <p className="text-sm text-[#8a8fa3] text-center py-4">No items in this list</p>
                     ) : (list.item_requirements ?? []).map((item: any) => (
-                      <div key={item.id} className="flex items-center gap-3 px-3 py-2.5 bg-[#F9FAFB] rounded-xl">
-                        <div className="w-6 h-6 bg-brand-navy-light rounded-full flex items-center justify-center flex-shrink-0">
+                      <div key={item.id} className="flex items-center gap-3 px-3 py-2.5 bg-[#f6f6f3] rounded-xl">
+                        <div className="w-6 h-6 bg-brand-blue-50 rounded-full flex items-center justify-center flex-shrink-0">
                           <span className="text-brand-navy text-[10px] font-bold">{item.quantity}</span>
                         </div>
-                        <span className="font-medium text-[#374151] flex-1">{item.item_name}</span>
-                        {item.notes && <span className="text-xs text-[#9CA3AF]">{item.notes}</span>}
+                        <span className="font-medium text-[#4a5168] flex-1">{item.item_name}</span>
+                        {item.notes && <span className="text-xs text-[#8a8fa3]">{item.notes}</span>}
                       </div>
                     ))}
                   </div>
@@ -168,7 +168,7 @@ export default function ItemRequirementsPage() {
               ))}
             </div>
           </div>
-          <div className="flex gap-3 justify-end pt-2 border-t border-[#E5E7EB]">
+          <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
             <button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button>
             <button className="btn btn-green" onClick={save} disabled={saving}>{saving ? "Saving…" : "Create List"}</button>
           </div>

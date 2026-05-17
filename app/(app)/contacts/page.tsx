@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import {
@@ -145,6 +145,9 @@ export default function ContactsPage() {
   const AVATAR_COLORS = ["bg-brand-navy", "bg-brand-green", "bg-[#7C3AED]", "bg-[#D97706]", "bg-[#0D9488]", "bg-[#2563EB]"];
   const avatarColor = (name: string) => AVATAR_COLORS[name?.charCodeAt(0) % AVATAR_COLORS.length] ?? "bg-brand-navy";
 
+  const leads     = contacts.filter(c => c.contact_type === "lead").length;
+  const customers = contacts.filter(c => c.contact_type === "customer").length;
+
   return (
     <div>
       <div className="page-header">
@@ -155,6 +158,22 @@ export default function ContactsPage() {
         <button className="btn btn-primary" onClick={openAdd}>
           <Plus size={15} /> Add Contact
         </button>
+      </div>
+
+      {/* Mini stat cards */}
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        <div className="mini-stat mini-stat-navy">
+          <span className="mini-stat-label">Total</span>
+          <span className="mini-stat-value">{contacts.length}</span>
+        </div>
+        <div className="mini-stat mini-stat-blue">
+          <span className="mini-stat-label">Leads</span>
+          <span className="mini-stat-value">{leads}</span>
+        </div>
+        <div className="mini-stat mini-stat-green">
+          <span className="mini-stat-label">Customers</span>
+          <span className="mini-stat-value">{customers}</span>
+        </div>
       </div>
 
       {/* Tabs + Search */}
@@ -195,10 +214,10 @@ export default function ContactsPage() {
                 <span className="text-white text-xs font-bold">{getInitials(c.full_name)}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <Link href={`/contacts/${c.id}`} className="font-semibold text-[#111827] hover:text-brand-navy truncate block">
+                <Link href={`/contacts/${c.id}`} className="font-semibold text-[#0c1226] hover:text-brand-navy truncate block">
                   {c.full_name}
                 </Link>
-                {c.business_name && <p className="text-xs text-[#9CA3AF] truncate">{c.business_name}</p>}
+                {c.business_name && <p className="text-xs text-[#8a8fa3] truncate">{c.business_name}</p>}
               </div>
               <ActionMenu items={[
                 { label: "View", icon: <Eye size={14} />, onClick: () => window.location.href = `/contacts/${c.id}` },
@@ -209,11 +228,11 @@ export default function ContactsPage() {
             </div>
             <div className="flex items-center gap-2 mt-3 flex-wrap">
               <StatusBadge status={c.contact_type} />
-              <span className="badge bg-[#F3F4F6] text-[#6B7280]">{c.lead_status || "New Lead"}</span>
+              <span className="badge bg-[#f0efea] text-[#4a5168]">{c.lead_status || "New Lead"}</span>
             </div>
-            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[#F3F4F6]">
-              {c.phone && <a href={`tel:${c.phone}`} className="flex items-center gap-1.5 text-xs text-[#6B7280]"><Phone size={12} /> {c.phone}</a>}
-              {c.email && <a href={`mailto:${c.email}`} className="flex items-center gap-1.5 text-xs text-[#6B7280] truncate"><Mail size={12} /> {c.email}</a>}
+            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[#f0efea]">
+              {c.phone && <a href={`tel:${c.phone}`} className="flex items-center gap-1.5 text-xs text-[#4a5168]"><Phone size={12} /> {c.phone}</a>}
+              {c.email && <a href={`mailto:${c.email}`} className="flex items-center gap-1.5 text-xs text-[#4a5168] truncate"><Mail size={12} /> {c.email}</a>}
             </div>
           </div>
         ))}
@@ -234,7 +253,7 @@ export default function ContactsPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} className="text-center py-10 text-[#9CA3AF]">Loading…</td></tr>
+              <tr><td colSpan={6} className="text-center py-10 text-[#8a8fa3]">Loading…</td></tr>
             ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={6}>
@@ -254,23 +273,23 @@ export default function ContactsPage() {
                       <Link href={`/contacts/${c.id}`} className="font-medium text-brand-navy hover:underline">
                         {c.full_name}
                       </Link>
-                      {c.business_name && <p className="text-xs text-[#9CA3AF]">{c.business_name}</p>}
+                      {c.business_name && <p className="text-xs text-[#8a8fa3]">{c.business_name}</p>}
                     </div>
                   </div>
                 </td>
-                <td className="text-[#6B7280]">{c.email || "—"}</td>
-                <td className="text-[#6B7280]">{c.phone || "—"}</td>
+                <td className="text-[#4a5168]">{c.email || "—"}</td>
+                <td className="text-[#4a5168]">{c.phone || "—"}</td>
                 <td>
                   <div className="relative" ref={statusPopup === c.id ? popupRef : undefined}>
                     <button onClick={() => setStatusPopup(statusPopup === c.id ? null : c.id)}
-                      className="flex items-center gap-1 text-xs font-medium text-[#374151] hover:text-brand-navy border border-[#E5E7EB] rounded-lg px-2.5 py-1 bg-white hover:bg-[#F9FAFB] transition-colors">
+                      className="flex items-center gap-1 text-xs font-medium text-[#4a5168] hover:text-brand-navy border border-[#e7e6e1] rounded-lg px-2.5 py-1 bg-white hover:bg-[#f6f6f3] transition-colors">
                       {c.lead_status || "New Lead"} <ChevronDown size={10} />
                     </button>
                     {statusPopup === c.id && (
-                      <div className="absolute top-full left-0 mt-1 bg-white border border-[#E5E7EB] rounded-xl shadow-dropdown z-20 min-w-[160px] overflow-hidden animate-scale-in">
+                      <div className="absolute top-full left-0 mt-1 bg-white border border-[#e7e6e1] rounded-xl shadow-dropdown z-20 min-w-[160px] overflow-hidden animate-scale-in">
                         {LEAD_STATUSES.map((s) => (
                           <button key={s} onClick={() => updateStatus(c.id, s)}
-                            className={`w-full text-left px-3.5 py-2 text-xs hover:bg-[#F9FAFB] transition-colors ${c.lead_status === s ? "text-brand-navy font-semibold bg-brand-navy-light" : "text-[#374151]"}`}>
+                            className={`w-full text-left px-3.5 py-2 text-xs hover:bg-[#f6f6f3] transition-colors ${c.lead_status === s ? "text-brand-navy font-semibold bg-brand-blue-50" : "text-[#4a5168]"}`}>
                             {s}
                           </button>
                         ))}
@@ -327,7 +346,7 @@ export default function ContactsPage() {
               WhatsApp Number
               <label className="inline-flex items-center gap-1.5 ml-3 cursor-pointer">
                 <input type="checkbox" checked={form.whatsapp_same} onChange={toggleWhatsappSame} className="rounded" />
-                <span className="text-xs text-[#6B7280] font-normal">Same as phone</span>
+                <span className="text-xs text-[#4a5168] font-normal">Same as phone</span>
               </label>
             </label>
             <input
@@ -357,7 +376,7 @@ export default function ContactsPage() {
             <textarea value={form.notes} onChange={set("notes")} rows={3} className="field resize-none" placeholder="Additional notes…" />
           </div>
         </div>
-        <div className="flex gap-3 justify-end mt-5 pt-4 border-t border-[#E5E7EB]">
+        <div className="flex gap-3 justify-end mt-5 pt-4 border-t border-[#e7e6e1]">
           <button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button>
           <button className="btn btn-primary" onClick={save} disabled={saving}>
             {saving ? "Saving…" : editContact ? "Update Contact" : "Add Contact"}

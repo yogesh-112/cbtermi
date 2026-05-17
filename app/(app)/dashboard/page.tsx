@@ -2,10 +2,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fmt, fmtDate } from "@/lib/utils";
-import { StatCard, PageSkeleton } from "@/components/ui";
+import { PageSkeleton } from "@/components/ui";
 import {
   UserPlus, FileText, Receipt, Briefcase, Bell, ClipboardList,
-  TrendingUp, DollarSign, Clock, BarChart2, ArrowRight,
+  TrendingUp, DollarSign, Clock, ArrowRight, BarChart2,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -21,12 +21,12 @@ export default function DashboardPage() {
   }, []);
 
   const quickActions = [
-    { href: "/contacts?new=1",          icon: UserPlus,      label: "Add Contact",         color: "bg-brand-navy",   text: "text-white" },
-    { href: "/quotes?new=1",            icon: FileText,      label: "Create Quote",         color: "bg-brand-green",  text: "text-white" },
-    { href: "/invoices?new=1",          icon: Receipt,       label: "Create Invoice",       color: "bg-[#2563EB]",    text: "text-white" },
-    { href: "/projects?new=1",          icon: Briefcase,     label: "Create Project",       color: "bg-[#7C3AED]",    text: "text-white" },
-    { href: "/notifications?new=1",     icon: Bell,          label: "Send Notification",    color: "bg-[#D97706]",    text: "text-white" },
-    { href: "/item-requirements?new=1", icon: ClipboardList, label: "Item Requirements",    color: "bg-[#0D9488]",    text: "text-white" },
+    { href: "/contacts",     icon: UserPlus,      label: "Add Contact",     color: "bg-brand-navy",        text: "text-white" },
+    { href: "/quotes/new",   icon: FileText,       label: "Create Quote",    color: "bg-brand-green",       text: "text-white" },
+    { href: "/invoices/new", icon: Receipt,        label: "Create Invoice",  color: "bg-[#2453E4]",         text: "text-white" },
+    { href: "/projects",     icon: Briefcase,      label: "New Project",     color: "bg-[#7C3AED]",         text: "text-white" },
+    { href: "/notifications",icon: Bell,           label: "Send Message",    color: "bg-[#D97706]",         text: "text-white" },
+    { href: "/item-requirements", icon: ClipboardList, label: "Requirements", color: "bg-[#0D9488]",        text: "text-white" },
   ];
 
   if (loading) return <PageSkeleton />;
@@ -40,44 +40,50 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4">
-        <StatCard
-          label="Active Projects"
-          value={stats?.activeProjects ?? 0}
-          icon={<Briefcase size={16} />}
-          color="navy"
-        />
-        <StatCard
-          label="Pending Quotes"
-          value={stats?.pendingQuotes ?? 0}
-          icon={<FileText size={16} />}
-          color="navy"
-        />
-        <StatCard
-          label="Pending Invoices"
-          value={stats?.pendingInvoices ?? 0}
-          icon={<Receipt size={16} />}
-          color="navy"
-        />
-        <StatCard
-          label="Outstanding"
-          value={fmt(stats?.outstandingAmount ?? 0)}
-          icon={<Clock size={16} />}
-          color="yellow"
-        />
-        <StatCard
-          label="Received"
-          value={fmt(stats?.receivedAmount ?? 0)}
-          icon={<DollarSign size={16} />}
-          color="green"
-        />
-        <StatCard
-          label="Feedback"
-          value={stats?.pendingFeedback ?? 0}
-          icon={<BarChart2 size={16} />}
-          color="navy"
-        />
+      {/* Key stats — 4 cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        <div className="mini-stat mini-stat-navy">
+          <span className="mini-stat-label">Active Projects</span>
+          <span className="mini-stat-value">{stats?.activeProjects ?? 0}</span>
+        </div>
+        <div className="mini-stat mini-stat-blue">
+          <span className="mini-stat-label">Pending Quotes</span>
+          <span className="mini-stat-value">{stats?.pendingQuotes ?? 0}</span>
+        </div>
+        <div className="mini-stat mini-stat-amber">
+          <span className="mini-stat-label">Outstanding</span>
+          <span className="mini-stat-value text-[18px]">{fmt(stats?.outstandingAmount ?? 0)}</span>
+        </div>
+        <div className="mini-stat mini-stat-green">
+          <span className="mini-stat-label">Received</span>
+          <span className="mini-stat-value text-[18px]">{fmt(stats?.receivedAmount ?? 0)}</span>
+        </div>
+      </div>
+
+      {/* Secondary stats */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="card p-4 flex items-center gap-3">
+          <div className="w-9 h-9 bg-brand-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Receipt size={15} className="text-brand-navy" />
+          </div>
+          <div>
+            <p className="text-[12px] text-[#8a8fa3] font-medium">Pending Invoices</p>
+            <p className="text-[22px] font-semibold text-[#0c1226] leading-tight tabular-nums" style={{ letterSpacing: "-0.02em" }}>
+              {stats?.pendingInvoices ?? 0}
+            </p>
+          </div>
+        </div>
+        <div className="card p-4 flex items-center gap-3">
+          <div className="w-9 h-9 bg-violet-50 rounded-xl flex items-center justify-center flex-shrink-0">
+            <BarChart2 size={15} className="text-violet-600" />
+          </div>
+          <div>
+            <p className="text-[12px] text-[#8a8fa3] font-medium">Pending Feedback</p>
+            <p className="text-[22px] font-semibold text-[#0c1226] leading-tight tabular-nums" style={{ letterSpacing: "-0.02em" }}>
+              {stats?.pendingFeedback ?? 0}
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -108,23 +114,23 @@ export default function DashboardPage() {
           </div>
           {activity.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
-              <div className="w-10 h-10 bg-[#F3F4F6] rounded-2xl flex items-center justify-center mb-3">
-                <TrendingUp size={18} className="text-[#D1D5DB]" />
+              <div className="w-10 h-10 bg-[#f0efea] rounded-2xl flex items-center justify-center mb-3">
+                <TrendingUp size={18} className="text-[#d8d6cf]" />
               </div>
-              <p className="text-sm font-medium text-[#374151]">No recent activity</p>
-              <p className="text-xs text-[#9CA3AF] mt-0.5">Activity will appear here as you use the app.</p>
+              <p className="text-sm font-medium text-[#4a5168]">No recent activity</p>
+              <p className="text-xs text-[#8a8fa3] mt-0.5">Activity will appear here as you use the app.</p>
             </div>
           ) : (
             <div className="space-y-1">
               {activity.map((a: any, i: number) => (
                 <div key={a.id ?? i}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#F9FAFB] transition-colors">
-                  <div className="w-8 h-8 bg-brand-navy-light rounded-full flex items-center justify-center flex-shrink-0">
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#f6f6f3] transition-colors">
+                  <div className="w-8 h-8 bg-brand-blue-50 rounded-full flex items-center justify-center flex-shrink-0">
                     <Bell size={13} className="text-brand-navy" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[#111827] truncate">{a.subject || a.type}</p>
-                    <p className="text-xs text-[#9CA3AF]">{fmtDate(a.created_at)} · {a.channel}</p>
+                    <p className="text-sm font-medium text-[#0c1226] truncate">{a.subject || a.type}</p>
+                    <p className="text-xs text-[#8a8fa3]">{fmtDate(a.created_at)} · {a.channel}</p>
                   </div>
                 </div>
               ))}

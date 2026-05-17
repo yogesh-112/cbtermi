@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { toast, Tabs } from "@/components/ui";
 
@@ -145,7 +145,7 @@ export default function SettingsPage() {
 
       {tab === "Numbering" && (
         <div className="form-section max-w-lg">
-          <p className="text-sm text-[#6B7280] mb-5">Prefixes are automatically added to new quotes, invoices, and projects.</p>
+          <p className="text-sm text-[#4a5168] mb-5">Prefixes are automatically added to new quotes, invoices, and projects.</p>
           <div className="space-y-4">
             <div>
               <label className="label">Quote prefix</label>

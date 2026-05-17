@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -32,20 +32,20 @@ export default function BusinessSetupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] flex items-center justify-center p-4">
-      <div className="bg-white border border-[#E5E7EB] rounded-lg w-full max-w-2xl">
-        <div className="p-6 border-b border-[#E5E7EB]">
-          <div className="flex items-center gap-3">
-            <Image src="/logo.png" alt="Clear Build USA" width={40} height={40} className="rounded-lg object-cover" />
+    <div className="min-h-screen bg-[#f6f6f3] flex items-center justify-center p-4">
+      <div className="bg-white border border-[#e7e6e1] rounded-[20px] shadow-card w-full max-w-2xl">
+        <div className="px-7 pt-7 pb-5 border-b border-[#e7e6e1]">
+          <div className="flex items-center gap-3.5">
+            <Image src="/logo.png" alt="Clear Build USA" width={36} height={36} className="rounded-xl object-contain" />
             <div>
-              <h1 className="text-lg font-bold text-[#1F2937]">Set up your business</h1>
-              <p className="text-sm text-[#6B7280]">This helps personalize your experience on Clear Build USA</p>
+              <h1 className="text-lg font-bold text-[#0c1226]" style={{ letterSpacing: "-0.02em" }}>Set up your business</h1>
+              <p className="text-sm text-[#8a8fa3]">Personalize your Clear Build USA experience</p>
             </div>
           </div>
         </div>
 
-        <form onSubmit={submit} className="p-6 space-y-6">
-          {err && <div className="p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm">{err}</div>}
+        <form onSubmit={submit} className="px-7 py-6 space-y-6">
+          {err && <div className="p-3.5 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm">{err}</div>}
 
           <div>
             <p className="section-title">Business details <span className="text-red-400">*required</span></p>
@@ -127,7 +127,7 @@ export default function BusinessSetupPage() {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={loading} className="btn btn-primary py-2.5 flex-1">{loading ? "Creating…" : "Create business & continue"}</button>
+            <button type="submit" disabled={loading} className="btn btn-primary btn-lg w-full">{loading ? "Creating…" : "Create Business & Continue"}</button>
           </div>
         </form>
       </div>

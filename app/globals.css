@@ -14,21 +14,21 @@
   * { box-sizing: border-box; }
 
   body {
-    @apply bg-surface text-[#111827] antialiased;
-    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    @apply bg-surface text-[#0c1226] antialiased;
+    font-family: var(--font-geist-sans, "Inter", ui-sans-serif, system-ui, sans-serif);
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
-  h1, h2, h3, h4 { @apply text-[#111827] font-semibold; }
+  h1, h2, h3, h4 { @apply text-[#0c1226] font-semibold; }
 
-  ::selection { @apply bg-brand-navy/15; }
+  ::selection { @apply bg-brand-blue/15; }
 
-  /* Smooth scrollbar */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { @apply bg-transparent; }
-  ::-webkit-scrollbar-thumb { @apply bg-[#D1D5DB] rounded-full; }
-  ::-webkit-scrollbar-thumb:hover { @apply bg-[#9CA3AF]; }
+  ::-webkit-scrollbar-thumb { @apply bg-[#d8d6cf] rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-[#8a8fa3]; }
 }
 
 @layer components {
@@ -38,30 +38,35 @@
   ═══════════════════════════════════════════════════════════ */
   .btn {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-btn
-           text-sm font-semibold transition-all duration-150 select-none
+           text-sm font-medium transition-all duration-150 select-none
            disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap;
     letter-spacing: -0.01em;
   }
+  .btn:active { transform: translateY(0.5px); }
   .btn-primary {
     @apply bg-brand-navy text-white hover:bg-brand-navy-dark active:scale-[0.98] shadow-sm;
+  }
+  .btn-accent {
+    @apply bg-brand-blue text-white hover:bg-brand-blue-dark active:scale-[0.98] shadow-sm;
   }
   .btn-green {
     @apply bg-brand-green text-white hover:bg-brand-green-dark active:scale-[0.98] shadow-sm;
   }
   .btn-outline {
-    @apply border border-[#E5E7EB] bg-white text-[#374151] hover:bg-surface hover:border-[#D1D5DB] active:scale-[0.98];
+    @apply border border-[#e7e6e1] bg-white text-[#4a5168] hover:bg-surface-alt hover:border-[#d8d6cf] active:scale-[0.98];
   }
   .btn-ghost {
-    @apply text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#111827] active:scale-[0.98];
+    @apply text-[#4a5168] hover:bg-surface-alt hover:text-[#0c1226] active:scale-[0.98];
+    border: 1px solid #d8d6cf;
   }
   .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700 active:scale-[0.98] shadow-sm;
+    @apply bg-brand-rose text-white hover:opacity-90 active:scale-[0.98] shadow-sm;
   }
   .btn-sm {
     @apply px-3 py-1.5 text-xs rounded-[8px];
   }
   .btn-lg {
-    @apply px-6 py-3.5 text-base rounded-[12px];
+    @apply px-6 py-3 text-[15px] rounded-[12px];
   }
   .btn-icon {
     @apply p-2 rounded-[8px];
@@ -71,18 +76,18 @@
      FORM ELEMENTS
   ═══════════════════════════════════════════════════════════ */
   .field {
-    @apply w-full border border-[#E5E7EB] rounded-input px-3.5 py-2.5 text-sm
-           text-[#111827] bg-white placeholder-[#9CA3AF]
-           focus:outline-none focus:ring-2 focus:ring-brand-navy/20 focus:border-brand-navy
+    @apply w-full border border-[#d8d6cf] rounded-input px-3.5 py-2.5 text-sm
+           text-[#0c1226] bg-white placeholder-[#8a8fa3]
+           focus:outline-none focus:ring-[3px] focus:ring-brand-blue/15 focus:border-brand-blue
            transition-all duration-150;
-    min-height: 42px;
+    min-height: 40px;
   }
-  .field:disabled { @apply bg-surface opacity-60 cursor-not-allowed; }
+  .field:disabled { @apply bg-surface-alt opacity-60 cursor-not-allowed; }
   textarea.field { min-height: unset; }
   select.field { @apply cursor-pointer; }
 
   .label {
-    @apply block text-sm font-medium text-[#374151] mb-1.5;
+    @apply block text-[13px] font-medium text-[#4a5168] mb-1.5;
     letter-spacing: -0.01em;
   }
 
@@ -90,41 +95,44 @@
      CARDS
   ═══════════════════════════════════════════════════════════ */
   .card {
-    @apply bg-white border border-[#E5E7EB] rounded-card shadow-card;
+    @apply bg-white border border-[#e7e6e1] rounded-card shadow-card;
   }
   .card-hover {
     @apply card transition-all duration-200 hover:shadow-card-md hover:-translate-y-0.5;
   }
   .card-sm {
-    @apply bg-white border border-[#E5E7EB] rounded-xl shadow-card;
+    @apply bg-white border border-[#e7e6e1] rounded-xl shadow-card;
   }
 
   /* ═══════════════════════════════════════════════════════════
      BADGES
   ═══════════════════════════════════════════════════════════ */
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-tight;
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[12px] font-medium;
+  }
+  .badge-dot {
+    @apply w-1.5 h-1.5 rounded-full flex-shrink-0;
   }
 
   /* ═══════════════════════════════════════════════════════════
      LAYOUT
   ═══════════════════════════════════════════════════════════ */
   .stat-card   { @apply card p-5 flex flex-col gap-1.5; }
-  .stat-label  { @apply text-xs font-medium text-[#6B7280] uppercase tracking-wide; }
-  .stat-value  { @apply text-2xl font-bold text-[#111827]; }
+  .stat-label  { @apply text-[12px] font-medium text-[#8a8fa3]; }
+  .stat-value  { @apply text-[26px] font-semibold text-[#0c1226] tabular-nums; letter-spacing: -0.02em; }
 
   .page-header {
     @apply flex items-start sm:items-center justify-between mb-6 gap-3 flex-wrap;
   }
   .page-title {
-    @apply text-2xl font-bold text-[#111827];
-    letter-spacing: -0.03em;
+    @apply text-[28px] font-semibold text-[#0c1226];
+    letter-spacing: -0.02em;
   }
   .page-desc {
-    @apply text-sm text-[#6B7280] mt-0.5;
+    @apply text-sm text-[#4a5168] mt-1;
   }
   .section-title {
-    @apply text-[11px] font-bold text-[#9CA3AF] uppercase tracking-widest mb-3;
+    @apply text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-widest mb-3;
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -134,27 +142,32 @@
     @apply card overflow-hidden;
   }
   .table-base {
-    @apply w-full text-sm;
+    @apply w-full;
+    font-size: 13.5px;
+    border-collapse: separate;
+    border-spacing: 0;
   }
   .table-base thead {
-    @apply bg-[#F9FAFB] border-b border-[#E5E7EB];
+    @apply bg-surface border-b border-[#e7e6e1];
   }
   .table-base th {
-    @apply px-4 py-3 text-left text-[11px] font-bold text-[#9CA3AF] uppercase tracking-wide;
-    letter-spacing: 0.06em;
+    @apply px-4 py-3 text-left font-medium text-[#8a8fa3] uppercase;
+    font-size: 12px;
+    letter-spacing: 0.04em;
   }
   .table-base td {
-    @apply px-4 py-3.5 text-[#374151];
+    @apply px-4 py-3.5 text-[#0c1226];
+    vertical-align: middle;
   }
   .table-base tbody tr {
-    @apply border-b border-[#F3F4F6] hover:bg-[#FAFAFA] transition-colors duration-100 last:border-0;
+    @apply border-b border-[#e7e6e1] hover:bg-surface transition-colors duration-100 last:border-0;
   }
 
   /* ═══════════════════════════════════════════════════════════
      MOBILE CARDS (list pages)
   ═══════════════════════════════════════════════════════════ */
   .mobile-card {
-    @apply bg-white border border-[#E5E7EB] rounded-xl p-4 shadow-card;
+    @apply bg-white border border-[#e7e6e1] rounded-xl p-4 shadow-card;
   }
   .mobile-card-row {
     @apply flex items-center justify-between;
@@ -164,15 +177,16 @@
      SIDEBAR
   ═══════════════════════════════════════════════════════════ */
   .sidebar-link {
-    @apply flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium
-           transition-all duration-150 text-[#93BBDA] hover:bg-white/10 hover:text-white
+    @apply flex items-center gap-2.5 px-2.5 py-2 rounded-[8px] text-[13.5px] font-medium
+           transition-all duration-150 text-white/70 hover:bg-white/[0.06] hover:text-white
            cursor-pointer;
+    height: 36px;
   }
   .sidebar-link.active {
-    @apply bg-white/15 text-white;
+    @apply bg-white/10 text-white;
   }
   .sidebar-section {
-    @apply px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white/30 mt-4 mb-1;
+    @apply px-2 py-1 text-[11px] font-semibold uppercase tracking-widest text-white/35 mt-4 mb-1;
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -188,26 +202,27 @@
      SKELETON LOADING
   ═══════════════════════════════════════════════════════════ */
   .skeleton {
-    @apply bg-[#F3F4F6] rounded-lg animate-pulse;
+    @apply bg-surface-alt rounded-lg animate-pulse;
   }
 
   /* ═══════════════════════════════════════════════════════════
-     TABS (horizontal scroll on mobile)
+     TABS
   ═══════════════════════════════════════════════════════════ */
   .tabs-bar {
-    @apply flex gap-1 border-b border-[#E5E7EB] mb-5 overflow-x-auto;
+    @apply flex gap-1 border-b border-[#e7e6e1] mb-5 overflow-x-auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
   .tabs-bar::-webkit-scrollbar { display: none; }
   .tab-btn {
-    @apply px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0;
+    @apply px-3.5 py-3 text-[13.5px] font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0;
+    margin-bottom: -1px;
   }
   .tab-btn.active {
-    @apply border-brand-navy text-brand-navy;
+    @apply border-brand-navy text-[#0c1226];
   }
   .tab-btn:not(.active) {
-    @apply border-transparent text-[#6B7280] hover:text-[#111827];
+    @apply border-transparent text-[#4a5168] hover:text-[#0c1226];
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -217,10 +232,34 @@
     @apply relative;
   }
   .input-group .input-icon {
-    @apply absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none;
+    @apply absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8a8fa3] pointer-events-none;
   }
   .input-group .field {
     @apply pl-10;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     MINI STAT CARDS (list page summaries)
+  ═══════════════════════════════════════════════════════════ */
+  .mini-stat {
+    @apply bg-white border border-[#e7e6e1] rounded-xl p-4 flex flex-col gap-1 shadow-card;
+    border-left-width: 3px;
+    border-left-style: solid;
+  }
+  .mini-stat-green  { border-left-color: #2f8a4a; }
+  .mini-stat-navy   { border-left-color: #16265a; }
+  .mini-stat-amber  { border-left-color: #b6750a; }
+  .mini-stat-rose   { border-left-color: #b53a4b; }
+  .mini-stat-blue   { border-left-color: #2453E4; }
+  .mini-stat-label  { @apply text-[12px] font-medium text-[#8a8fa3]; }
+  .mini-stat-value  { @apply text-[22px] font-semibold text-[#0c1226] tabular-nums; letter-spacing: -0.02em; }
+  .mini-stat-sub    { @apply text-[11px] text-[#8a8fa3] mt-0.5; }
+
+  /* ═══════════════════════════════════════════════════════════
+     PROJECT CARDS (grid layout)
+  ═══════════════════════════════════════════════════════════ */
+  .project-card {
+    @apply card-hover p-5 block;
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -232,32 +271,65 @@
   .bottom-nav-spacer {
     height: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px));
   }
+
+  /* ═══════════════════════════════════════════════════════════
+     AUTH HERO PANEL
+  ═══════════════════════════════════════════════════════════ */
+  .auth-hero {
+    flex: 1;
+    background: linear-gradient(160deg, #16265a 0%, #1d3074 60%, #2453E4 130%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 48px;
+    color: #fff;
+  }
+  .auth-hero-grid {
+    position: absolute;
+    inset: 0;
+    opacity: 0.10;
+    background-image: linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .auth-hero-glow {
+    position: absolute;
+    top: 80px;
+    right: 60px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: rgba(123, 216, 154, 0.10);
+    filter: blur(20px);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
    STATUS BADGE VARIANTS
 ═══════════════════════════════════════════════════════════ */
-.badge-draft         { @apply badge bg-[#F3F4F6] text-[#6B7280]; }
-.badge-sent          { @apply badge bg-blue-50 text-blue-700; }
+.badge-draft         { @apply badge bg-surface-alt text-[#4a5168]; }
+.badge-sent          { @apply badge bg-brand-blue-50 text-brand-blue; }
 .badge-viewed        { @apply badge bg-violet-50 text-violet-700; }
 .badge-approved      { @apply badge bg-brand-green-light text-brand-green; }
-.badge-rejected      { @apply badge bg-red-50 text-red-700; }
+.badge-rejected      { @apply badge bg-brand-rose-50 text-brand-rose; }
 .badge-converted     { @apply badge bg-teal-50 text-teal-700; }
 .badge-paid          { @apply badge bg-brand-green-light text-brand-green; }
-.badge-partial       { @apply badge bg-amber-50 text-amber-700; }
-.badge-overdue       { @apply badge bg-red-50 text-red-700; }
-.badge-voided        { @apply badge bg-[#F3F4F6] text-[#9CA3AF]; }
+.badge-partial       { @apply badge bg-brand-amber-50 text-brand-amber; }
+.badge-overdue       { @apply badge bg-brand-rose-50 text-brand-rose; }
+.badge-voided        { @apply badge bg-surface-alt text-[#8a8fa3]; }
 .badge-active        { @apply badge bg-brand-green-light text-brand-green; }
-.badge-on_hold       { @apply badge bg-amber-50 text-amber-700; }
-.badge-completed     { @apply badge bg-blue-50 text-blue-700; }
-.badge-cancelled     { @apply badge bg-red-50 text-red-700; }
+.badge-on_hold       { @apply badge bg-brand-amber-50 text-brand-amber; }
+.badge-completed     { @apply badge bg-brand-blue-50 text-brand-blue; }
+.badge-cancelled     { @apply badge bg-brand-rose-50 text-brand-rose; }
 .badge-lead          { @apply badge bg-violet-50 text-violet-700; }
 .badge-customer      { @apply badge bg-brand-green-light text-brand-green; }
-.badge-direct_contact{ @apply badge bg-blue-50 text-blue-700; }
-.badge-trial         { @apply badge bg-amber-50 text-amber-700; }
+.badge-direct_contact{ @apply badge bg-brand-blue-50 text-brand-blue; }
+.badge-trial         { @apply badge bg-brand-amber-50 text-brand-amber; }
 
 /* ═══════════════════════════════════════════════════════════
-   MOBILE LAYOUT HELPERS
+   PRINT
 ═══════════════════════════════════════════════════════════ */
 @media print {
   body * { visibility: hidden; }

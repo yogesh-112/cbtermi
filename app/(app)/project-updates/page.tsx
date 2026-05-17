@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { Plus, MessageSquare } from "lucide-react";
 import { Modal, toast, EmptyState } from "@/components/ui";
@@ -8,7 +8,7 @@ const TYPE_COLORS: Record<string, string> = {
   progress:  "bg-blue-50 text-blue-700",
   milestone: "bg-brand-green-light text-brand-green",
   issue:     "bg-red-50 text-red-700",
-  note:      "bg-[#F3F4F6] text-[#6B7280]",
+  note:      "bg-[#f0efea] text-[#4a5168]",
 };
 
 export default function ProjectUpdatesPage() {
@@ -73,19 +73,19 @@ export default function ProjectUpdatesPage() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <span className={`badge capitalize ${TYPE_COLORS[u.update_type] ?? "bg-[#F3F4F6] text-[#6B7280]"}`}>
+                    <span className={`badge capitalize ${TYPE_COLORS[u.update_type] ?? "bg-[#f0efea] text-[#4a5168]"}`}>
                       {u.update_type}
                     </span>
                     {u.projects?.name && (
-                      <span className="text-sm font-medium text-[#374151]">{u.projects.name}</span>
+                      <span className="text-sm font-medium text-[#4a5168]">{u.projects.name}</span>
                     )}
                     {u.is_client_visible && (
                       <span className="badge bg-brand-green-light text-brand-green text-xs">Client visible</span>
                     )}
                   </div>
-                  <p className="text-[#374151] leading-relaxed">{u.message}</p>
+                  <p className="text-[#4a5168] leading-relaxed">{u.message}</p>
                 </div>
-                <span className="text-xs text-[#9CA3AF] whitespace-nowrap flex-shrink-0">{fmtDate(u.created_at)}</span>
+                <span className="text-xs text-[#8a8fa3] whitespace-nowrap flex-shrink-0">{fmtDate(u.created_at)}</span>
               </div>
             </div>
           ))}
@@ -118,10 +118,10 @@ export default function ProjectUpdatesPage() {
           <div className="flex items-center gap-2">
             <input type="checkbox" id="client_visible" checked={form.is_client_visible}
               onChange={e => setForm({ ...form, is_client_visible: e.target.checked })}
-              className="rounded border-[#D1D5DB]" />
-            <label htmlFor="client_visible" className="text-sm text-[#374151] cursor-pointer">Visible to client</label>
+              className="rounded border-[#d8d6cf]" />
+            <label htmlFor="client_visible" className="text-sm text-[#4a5168] cursor-pointer">Visible to client</label>
           </div>
-          <div className="flex gap-3 justify-end pt-2 border-t border-[#E5E7EB]">
+          <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
             <button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button>
             <button className="btn btn-green" onClick={save} disabled={saving}>{saving ? "Posting…" : "Post Update"}</button>
           </div>

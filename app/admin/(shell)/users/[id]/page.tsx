@@ -5,7 +5,7 @@ import {
   MonoId, StatusPill, AdminTable, AdminTr, AdminTd,
   AdminModal, AdminInput, AdminLabel, AdminBtn, AdminEmpty, InfoCard,
 } from "@/components/admin/ui";
-import { ArrowLeft, Ban, CheckCircle, MailCheck, StickyNote } from "lucide-react";
+import { ArrowLeft, Ban, CheckCircle, MailCheck, StickyNote, LogOut, UserCheck } from "lucide-react";
 
 export default function AdminUserDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +17,7 @@ export default function AdminUserDetailPage() {
   const [reason, setReason] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [impersonating, setImpersonating] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -37,6 +38,19 @@ export default function AdminUserDetailPage() {
     });
     if (res.ok) { load(); setBanModal(false); setNotesModal(false); }
     setSaving(false);
+  }
+
+  async function handleImpersonate() {
+    if (!confirm(`Impersonate ${data?.user?.name}? You will be logged into their account in a new tab.`)) return;
+    setImpersonating(true);
+    const res = await fetch(`/api/admin/users/${id}/impersonate`, { method: "POST" });
+    if (res.ok) {
+      window.open("/dashboard", "_blank");
+    } else {
+      const d = await res.json();
+      alert(d.message ?? "Failed to impersonate");
+    }
+    setImpersonating(false);
   }
 
   if (loading) return <div className="flex items-center justify-center h-64 text-[#9399a8] text-[13px]">Loading…</div>;
@@ -75,6 +89,12 @@ export default function AdminUserDetailPage() {
           )}
           <AdminBtn onClick={() => setNotesModal(true)}>
             <StickyNote size={12} /> Notes
+          </AdminBtn>
+          <AdminBtn onClick={handleImpersonate} disabled={impersonating} variant="purple">
+            <UserCheck size={12} /> {impersonating ? "Opening…" : "Impersonate"}
+          </AdminBtn>
+          <AdminBtn onClick={() => { if (confirm(`Force logout ${user.name}? Their current sessions will be invalidated immediately.`)) doAction("force_logout"); }} disabled={saving}>
+            <LogOut size={12} /> Force Logout
           </AdminBtn>
           {user.is_banned ? (
             <AdminBtn onClick={() => doAction("unban")} disabled={saving}>

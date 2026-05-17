@@ -6,6 +6,7 @@ export interface SessionPayload {
   email: string;
   businessId?: string;
   role?: string;
+  impersonatedBy?: string; // adminId — set when admin is impersonating this user
 }
 
 export const SESSION_COOKIE = "cb_session";

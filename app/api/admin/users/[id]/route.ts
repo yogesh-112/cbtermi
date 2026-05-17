@@ -35,6 +35,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     update = { email_verified: true };
   } else if (action === "notes") {
     update = { admin_notes: notes };
+  } else if (action === "force_logout") {
+    update = { force_logout_at: new Date().toISOString() };
   } else {
     return NextResponse.json({ message: "Unknown action" }, { status: 400 });
   }

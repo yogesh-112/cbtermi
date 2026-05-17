@@ -6,6 +6,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import MobileHeader from "@/components/layout/MobileHeader";
 import MobileNav from "@/components/layout/MobileNav";
 import Topbar from "@/components/layout/Topbar";
+import ImpersonationBanner from "@/components/layout/ImpersonationBanner";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
@@ -25,8 +26,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const currentBusiness = businesses.find((b) => b.id === session.businessId) ?? null;
   const userProps = { name: session.name, email: session.email };
 
+  const impersonatedBy = (session as any).impersonatedBy as string | undefined;
+
   return (
-    <div className="flex min-h-screen bg-surface">
+    <div className={`flex min-h-screen bg-surface ${impersonatedBy ? "pt-[38px]" : ""}`}>
+      {impersonatedBy && <ImpersonationBanner adminId={impersonatedBy} />}
       <Sidebar user={userProps} businesses={businesses} currentBusiness={currentBusiness} />
       <MobileHeader user={userProps} businesses={businesses} currentBusiness={currentBusiness} />
       <Topbar user={userProps} businesses={businesses} currentBusiness={currentBusiness} />

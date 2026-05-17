@@ -4,13 +4,14 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Building2, Users, CreditCard, Receipt,
-  ClipboardList, Shield, Settings, LogOut, ChevronDown,
-  Activity, Layers,
+  ClipboardList, Shield, Settings, LogOut,
+  Activity, Layers, BarChart2, Megaphone,
 } from "lucide-react";
 
 const NAV = [
   { section: "Overview", items: [
     { href: "/admin/dashboard",  icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/admin/analytics",  icon: BarChart2,        label: "Analytics" },
   ]},
   { section: "Customers", items: [
     { href: "/admin/businesses", icon: Building2,       label: "Businesses" },
@@ -20,6 +21,9 @@ const NAV = [
     { href: "/admin/subscriptions", icon: Layers,       label: "Subscriptions" },
     { href: "/admin/payments",   icon: Receipt,         label: "Payments" },
     { href: "/admin/plans",      icon: CreditCard,      label: "Plans" },
+  ]},
+  { section: "Tools", items: [
+    { href: "/admin/broadcasts", icon: Megaphone,       label: "Broadcasts" },
   ]},
   { section: "System", items: [
     { href: "/admin/audit-logs", icon: ClipboardList,   label: "Audit Logs" },

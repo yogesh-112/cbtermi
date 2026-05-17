@@ -1,49 +1,139 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Plus, CheckCircle, Edit2, MapPin, Calendar, DollarSign, Clock } from "lucide-react";
-import { StatusBadge, Tabs, Modal, toast, PageSkeleton } from "@/components/ui";
+import {
+  ArrowLeft, Plus, Edit2, MapPin, Calendar, UserPlus, X,
+  FileText, Upload, MoreHorizontal, CheckSquare, Square,
+} from "lucide-react";
+import { StatusBadge, Modal, toast, PageSkeleton } from "@/components/ui";
 import { fmt, fmtDate } from "@/lib/utils";
 
-function ProgressBar({ start, end }: { start: string; end: string }) {
-  if (!start || !end) return null;
-  const s   = new Date(start).getTime();
-  const e   = new Date(end).getTime();
+/* ── Gantt helpers ───────────────────────────────────────────────── */
+const GANTT_COLORS = [
+  "bg-brand-green", "bg-[#2453E4]", "bg-[#7C3AED]",
+  "bg-[#D97706]", "bg-[#0D9488]", "bg-[#DC2626]", "bg-[#8a8fa3]",
+];
+
+function GanttBar({ tasks, start, end }: { tasks: string[]; start: string; end: string }) {
+  if (!start || !end || tasks.length === 0) return null;
+  const s = new Date(start).getTime();
+  const e = new Date(end).getTime();
+  const total = e - s;
+  const segLen = total / tasks.length;
   const now = Date.now();
-  const total   = Math.ceil((e - s) / 86400000);
-  const elapsed = Math.max(0, Math.min(Math.ceil((now - s) / 86400000), total));
-  const pct     = total > 0 ? Math.round((elapsed / total) * 100) : 0;
-  const overdue = now > e;
+  const nowPct = Math.max(0, Math.min(100, ((now - s) / total) * 100));
+
+  const cols: string[] = [];
+  for (let d = new Date(s); d <= new Date(e); d.setDate(d.getDate() + 4)) {
+    cols.push(`${d.toLocaleString("default", { month: "short" })} ${d.getDate()}`);
+  }
+  const displayCols = cols.slice(0, 7);
 
   return (
-    <div className="mt-4 pt-4 border-t border-[#f0efea]">
-      <div className="flex justify-between text-[12px] mb-1.5">
-        <span className="text-[#8a8fa3]">Day {elapsed} of {total}</span>
-        <span className={`font-semibold ${overdue ? "text-red-500" : pct >= 80 ? "text-amber-600" : "text-brand-green"}`}>{pct}%</span>
+    <div className="overflow-x-auto">
+      {/* Column headers */}
+      <div className="flex mb-2 ml-[140px]">
+        {displayCols.map((c, i) => (
+          <div key={i} className="flex-1 text-[10px] text-[#8a8fa3] text-center truncate">{c}</div>
+        ))}
       </div>
-      <div className="h-2 bg-[#f0efea] rounded-full overflow-hidden">
-        <div className={`h-full rounded-full transition-all ${overdue ? "bg-red-400" : pct >= 80 ? "bg-amber-400" : "bg-brand-green"}`}
-          style={{ width: `${pct}%` }} />
+      {/* Today line + rows */}
+      <div className="relative">
+        {/* Today marker */}
+        {nowPct > 0 && nowPct < 100 && (
+          <div className="absolute top-0 bottom-0 w-px bg-brand-navy/30 z-10"
+            style={{ left: `calc(140px + ${nowPct}% * (100% - 140px) / 100)` }} />
+        )}
+        <div className="space-y-1.5">
+          {tasks.map((task, i) => {
+            const barStart = (i * segLen) / total;
+            const barEnd = ((i + 1) * segLen) / total;
+            const isActive = now >= s + i * segLen && now < s + (i + 1) * segLen;
+            const isDone = now >= s + (i + 1) * segLen;
+            const color = isDone ? "bg-brand-green" : isActive ? "bg-[#2453E4]" : "bg-[#d8d6cf]";
+            return (
+              <div key={i} className="flex items-center gap-3">
+                <span className="w-[132px] text-[12px] text-[#4a5168] truncate flex-shrink-0">{task}</span>
+                <div className="flex-1 h-6 bg-[#f0efea] rounded relative overflow-hidden">
+                  <div
+                    className={`absolute top-0 h-full ${color} rounded transition-all`}
+                    style={{ left: `${barStart * 100}%`, width: `${(barEnd - barStart) * 100}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
-      {overdue && <p className="text-[11px] text-red-500 mt-1">Project is past end date</p>}
     </div>
   );
 }
 
+/* ── Progress bar ────────────────────────────────────────────────── */
+function ProgressBar({ start, end }: { start: string; end: string }) {
+  if (!start || !end) return null;
+  const s = new Date(start).getTime();
+  const e = new Date(end).getTime();
+  const now = Date.now();
+  const total = Math.ceil((e - s) / 86400000);
+  const elapsed = Math.max(0, Math.min(Math.ceil((now - s) / 86400000), total));
+  const pct = total > 0 ? Math.round((elapsed / total) * 100) : 0;
+  const overdue = now > e;
+  const daysLeft = Math.ceil((e - now) / 86400000);
+
+  return (
+    <div>
+      <div className="flex items-baseline justify-between mb-1">
+        <p className="text-[28px] font-bold text-[#0c1226]">Day {elapsed} of {total}</p>
+        <span className="text-[12px] text-[#8a8fa3]">
+          {overdue ? "Overdue" : `${pct}% complete · ${daysLeft} days ${daysLeft >= 0 ? "ahead" : "behind"}`}
+        </span>
+      </div>
+      <div className="h-2 bg-[#f0efea] rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full ${overdue ? "bg-red-400" : pct >= 80 ? "bg-amber-400" : "bg-brand-green"}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ── Main page ───────────────────────────────────────────────────── */
 export default function ProjectDetailPage() {
-  const { id }  = useParams();
-  const [data, setData]           = useState<any>(null);
-  const [tab, setTab]             = useState("Overview");
+  const { id } = useParams<{ id: string }>();
+  const [data, setData] = useState<any>(null);
+  const [tab, setTab] = useState("Overview");
   const [editModal, setEditModal] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
-  const [editForm, setEditForm]   = useState<any>({});
+  const [editForm, setEditForm] = useState<any>({});
   const [updateForm, setUpdateForm] = useState({ title: "", message: "", status_milestone: "" });
-  const [saving, setSaving]       = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [assignedTeam, setAssignedTeam] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<Array<{ id: string; label: string; done: boolean }>>([]);
+  const [newTask, setNewTask] = useState("");
+  const [docs, setDocs] = useState<Array<{ name: string; size: string }>>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const load = () =>
-    fetch(`/api/projects/${id}`).then(r => r.json()).then(d => { setData(d); setEditForm(d.project ?? {}); });
-  useEffect(() => { load(); }, [id]);
+    fetch(`/api/projects/${id}`).then(r => r.json()).then(d => {
+      setData(d);
+      setEditForm(d.project ?? {});
+    });
+
+  useEffect(() => {
+    load();
+    fetch("/api/team").then(r => r.json()).then(d => {
+      setTeamMembers((d.members ?? []).map((m: any) => ({
+        id: m.user_id,
+        name: m.users?.full_name ?? m.users?.email ?? "Member",
+        role: m.role,
+      })));
+    });
+  }, [id]);
 
   const saveEdit = async () => {
     setSaving(true);
@@ -64,276 +154,471 @@ export default function ProjectDetailPage() {
     setUpdateForm({ title: "", message: "", status_milestone: "" }); load();
   };
 
-  const markComplete = async () => {
-    await fetch(`/api/projects/${id}`, {
-      method: "PATCH", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "completed" }),
-    });
-    toast("Project completed"); load();
+  const addTask = () => {
+    if (!newTask.trim()) return;
+    setTasks(t => [...t, { id: crypto.randomUUID(), label: newTask.trim(), done: false }]);
+    setNewTask("");
+  };
+
+  const toggleTask = (taskId: string) =>
+    setTasks(t => t.map(x => x.id === taskId ? { ...x, done: !x.done } : x));
+
+  const assignMember = (m: any) => {
+    if (!assignedTeam.find(t => t.id === m.id)) setAssignedTeam(p => [...p, m]);
+    setAssignOpen(false);
+  };
+
+  const handleFileAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    setDocs(d => [...d, ...files.map(f => ({ name: f.name, size: `${(f.size / 1024).toFixed(0)} KB` }))]);
+    if (fileRef.current) fileRef.current.value = "";
   };
 
   if (!data) return <PageSkeleton />;
-  const { project, quotes, invoices, payments, updates, feedback, lists, stats } = data;
-
+  const { project, quotes, invoices, payments, updates, feedback, stats } = data;
   const initials = project.contacts?.full_name?.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase() || "?";
+
+  const ganttTasks = quotes
+    .flatMap((q: any) => q.quote_items ?? [])
+    .map((i: any) => i.item_name)
+    .filter(Boolean)
+    .slice(0, 8);
+
+  const TABS = ["Overview", "Tasks", "Updates", "Files", "Financials"];
 
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-5 flex-wrap">
-        <Link href="/projects" className="btn btn-ghost btn-sm p-2"><ArrowLeft size={15} /></Link>
+      <div className="flex items-start gap-3 mb-4 flex-wrap">
+        <Link href="/projects" className="w-8 h-8 flex items-center justify-center rounded-lg text-[#4a5168] hover:bg-[#f6f6f3] mt-0.5">
+          <ArrowLeft size={15} />
+        </Link>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="page-title truncate">{project.name}</h1>
             <StatusBadge status={project.status} />
           </div>
-          <p className="page-desc">
-            {project.project_number}
-            {project.project_type ? ` · ${project.project_type}` : ""}
-            {project.contacts?.full_name ? ` · ${project.contacts.full_name}` : ""}
-          </p>
+          <div className="flex items-center gap-3 mt-1 text-[12px] text-[#8a8fa3] flex-wrap">
+            {project.address && (
+              <span className="flex items-center gap-1"><MapPin size={11} />{project.address}</span>
+            )}
+            {project.start_date && project.end_date && (
+              <span className="flex items-center gap-1">
+                <Calendar size={11} />{fmtDate(project.start_date)} – {fmtDate(project.end_date)}
+              </span>
+            )}
+            {project.contacts?.full_name && (
+              <Link href={`/contacts/${project.contact_id}`}
+                className="flex items-center gap-1.5 hover:text-brand-navy transition-colors">
+                <div className="w-4 h-4 bg-brand-navy rounded-full flex items-center justify-center">
+                  <span className="text-white text-[8px] font-bold">{initials}</span>
+                </div>
+                {project.contacts.full_name}
+              </Link>
+            )}
+          </div>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {project.status !== "completed" && (
-            <button onClick={markComplete} className="btn btn-green btn-sm">
-              <CheckCircle size={13} /> Complete
-            </button>
-          )}
-          <button onClick={() => setUpdateModal(true)} className="btn btn-outline btn-sm">
-            <Plus size={13} /> Update
+          <button onClick={() => setUpdateModal(true)} className="btn btn-outline btn-sm gap-1.5">
+            <Plus size={13} /> Add update
           </button>
-          <Link href={`/quotes/new?contactId=${project.contact_id}`} className="btn btn-outline btn-sm">+ Quote</Link>
-          <Link href={`/invoices/new?contactId=${project.contact_id}`} className="btn btn-outline btn-sm">+ Invoice</Link>
-          <button onClick={() => setEditModal(true)} className="btn btn-outline btn-sm">
+          <button onClick={() => setEditModal(true)} className="btn btn-primary btn-sm gap-1.5">
             <Edit2 size={13} /> Edit
           </button>
         </div>
       </div>
 
-      {/* 4 stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-        <div className="mini-stat mini-stat-navy">
-          <span className="mini-stat-label">Budget</span>
-          <span className="mini-stat-value text-[18px]">{project.budget ? fmt(project.budget) : "—"}</span>
-        </div>
-        <div className="mini-stat mini-stat-blue">
-          <span className="mini-stat-label">Total quoted</span>
-          <span className="mini-stat-value text-[18px]">{fmt(stats?.totalQuoted ?? 0)}</span>
-        </div>
-        <div className="mini-stat mini-stat-green">
-          <span className="mini-stat-label">Total invoiced</span>
-          <span className="mini-stat-value text-[18px]">{fmt(stats?.totalInvoiced ?? 0)}</span>
-        </div>
-        <div className="mini-stat mini-stat-amber">
-          <span className="mini-stat-label">Amount due</span>
-          <span className="mini-stat-value text-[18px]">{fmt(stats?.totalDue ?? 0)}</span>
-        </div>
+      {/* Tabs */}
+      <div className="tabs-bar mb-5">
+        {TABS.map(t => (
+          <button key={t} onClick={() => setTab(t)} className={`tab-btn ${tab === t ? "active" : ""}`}>{t}</button>
+        ))}
       </div>
 
-      <Tabs tabs={["Overview","Quotes","Invoices","Payments","Updates","Feedback","Item Lists"]}
-        active={tab} onChange={setTab} />
+      {/* Two-column layout: main + right sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_272px] gap-5">
 
-      {tab === "Overview" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Project details */}
-          <div className="card p-5">
-            <h3 className="section-title mb-4">Project details</h3>
-            <div className="space-y-3 text-[13px]">
-              {project.project_type && (
-                <div className="flex items-center justify-between">
-                  <span className="text-[#8a8fa3]">Type</span>
-                  <span className="font-medium text-[#0c1226]">{project.project_type}</span>
+        {/* Main content */}
+        <div className="space-y-5 min-w-0">
+
+          {/* ── OVERVIEW TAB ── */}
+          {tab === "Overview" && (
+            <>
+              {/* Schedule card */}
+              {project.start_date && project.end_date && (
+                <div className="card p-5">
+                  <p className="text-[10px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-3">Schedule</p>
+                  <ProgressBar start={project.start_date} end={project.end_date} />
                 </div>
               )}
-              {project.address && (
-                <div className="flex items-start justify-between gap-4">
-                  <span className="text-[#8a8fa3] flex items-center gap-1"><MapPin size={11} /> Address</span>
-                  <span className="text-[#4a5168] text-right max-w-[200px]">{project.address}</span>
+
+              {/* Financial stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="mini-stat mini-stat-navy">
+                  <span className="mini-stat-label">Invoiced</span>
+                  <span className="mini-stat-value text-[17px]">{fmt(stats?.totalInvoiced ?? 0)}</span>
+                  <span className="text-[11px] text-[#8a8fa3] mt-0.5">of {fmt(project.budget ?? 0)}</span>
+                </div>
+                <div className="mini-stat mini-stat-blue">
+                  <span className="mini-stat-label">Approved</span>
+                  <span className="mini-stat-value text-[17px]">{fmt(stats?.totalQuoted ?? 0)}</span>
+                  <span className="text-[11px] text-[#8a8fa3] mt-0.5">{quotes.length} invoices</span>
+                </div>
+                <div className="mini-stat mini-stat-green">
+                  <span className="mini-stat-label">Paid</span>
+                  <span className="mini-stat-value text-[17px]">
+                    {fmt(payments.reduce((s: number, p: any) => s + (p.amount ?? 0), 0))}
+                  </span>
+                  <span className="text-[11px] text-brand-green mt-0.5">collected</span>
+                </div>
+                <div className="mini-stat mini-stat-amber">
+                  <span className="mini-stat-label">Outstanding</span>
+                  <span className="mini-stat-value text-[17px]">{fmt(stats?.totalDue ?? 0)}</span>
+                  <span className="text-[11px] text-[#8a8fa3] mt-0.5">balance due</span>
+                </div>
+              </div>
+
+              {/* Gantt timeline */}
+              {project.start_date && project.end_date && ganttTasks.length > 0 && (
+                <div className="card p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="section-title mb-0">Project timeline</p>
+                    <button className="text-[12px] text-brand-navy font-medium hover:underline">Full schedule</button>
+                  </div>
+                  <GanttBar tasks={ganttTasks} start={project.start_date} end={project.end_date} />
                 </div>
               )}
-              {project.start_date && (
-                <div className="flex items-center justify-between">
-                  <span className="text-[#8a8fa3] flex items-center gap-1"><Calendar size={11} /> Start</span>
-                  <span className="text-[#4a5168]">{fmtDate(project.start_date)}</span>
+
+              {/* Latest updates */}
+              <div className="card p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="section-title mb-0">Latest updates</p>
+                  <button onClick={() => setUpdateModal(true)}
+                    className="text-[12px] text-brand-navy font-medium hover:underline flex items-center gap-1">
+                    <Plus size={11} /> Add update
+                  </button>
                 </div>
-              )}
-              {project.end_date && (
-                <div className="flex items-center justify-between">
-                  <span className="text-[#8a8fa3] flex items-center gap-1"><Clock size={11} /> End</span>
-                  <span className="text-[#4a5168]">{fmtDate(project.end_date)}</span>
+                {updates.length === 0 ? (
+                  <p className="text-[13px] text-[#8a8fa3] text-center py-4">No updates yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {updates.slice(0, 3).map((u: any) => (
+                      <div key={u.id} className="flex gap-3">
+                        <div className="w-7 h-7 bg-brand-navy/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-brand-navy text-[10px] font-bold">✦</span>
+                        </div>
+                        <div>
+                          <p className="text-[13px] font-semibold text-[#0c1226]">{u.title}</p>
+                          <p className="text-[11px] text-[#8a8fa3]">{fmtDate(u.created_at)}</p>
+                          {u.message && <p className="text-[12px] text-[#4a5168] mt-1">{u.message}</p>}
+                        </div>
+                      </div>
+                    ))}
+                    {updates.length > 3 && (
+                      <button onClick={() => setTab("Updates")} className="text-[12px] text-brand-navy hover:underline">
+                        View all {updates.length} updates →
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* ── TASKS TAB ── */}
+          {tab === "Tasks" && (
+            <div className="card p-5">
+              <h3 className="section-title mb-4">Tasks</h3>
+              <div className="space-y-2 mb-4">
+                {tasks.length === 0 && (
+                  <p className="text-[13px] text-[#8a8fa3] text-center py-6">No tasks yet. Add one below.</p>
+                )}
+                {tasks.map(t => (
+                  <div key={t.id} className="flex items-center gap-3 py-2 border-b border-[#f6f6f3] group">
+                    <button onClick={() => toggleTask(t.id)} className="text-[#8a8fa3] hover:text-brand-green transition-colors flex-shrink-0">
+                      {t.done ? <CheckSquare size={16} className="text-brand-green" /> : <Square size={16} />}
+                    </button>
+                    <span className={`flex-1 text-[13px] ${t.done ? "line-through text-[#8a8fa3]" : "text-[#0c1226]"}`}>{t.label}</span>
+                    <button onClick={() => setTasks(tasks.filter(x => x.id !== t.id))}
+                      className="opacity-0 group-hover:opacity-100 text-[#d8d6cf] hover:text-red-500 transition-all">
+                      <X size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input value={newTask} onChange={e => setNewTask(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && addTask()}
+                  placeholder="Add a task…" className="field flex-1 text-[13px]" />
+                <button onClick={addTask} className="btn btn-primary btn-sm gap-1">
+                  <Plus size={13} /> Add
+                </button>
+              </div>
+              {tasks.length > 0 && (
+                <div className="mt-4 pt-3 border-t border-[#f0efea] flex justify-between text-[12px] text-[#8a8fa3]">
+                  <span>{tasks.filter(t => t.done).length} of {tasks.length} completed</span>
+                  <button onClick={() => setTasks(t => t.filter(x => !x.done))}
+                    className="text-red-500 hover:underline">Clear done</button>
                 </div>
-              )}
-              {project.budget && (
-                <div className="flex items-center justify-between">
-                  <span className="text-[#8a8fa3] flex items-center gap-1"><DollarSign size={11} /> Budget</span>
-                  <span className="font-semibold text-[#0c1226]">{fmt(project.budget)}</span>
-                </div>
-              )}
-              {project.description && (
-                <p className="text-[#4a5168] leading-relaxed pt-1 border-t border-[#f0efea]">{project.description}</p>
               )}
             </div>
+          )}
 
-            <ProgressBar start={project.start_date} end={project.end_date} />
+          {/* ── UPDATES TAB ── */}
+          {tab === "Updates" && (
+            <div>
+              <div className="flex justify-end mb-3">
+                <button onClick={() => setUpdateModal(true)} className="btn btn-primary btn-sm gap-1.5">
+                  <Plus size={13} /> Add update
+                </button>
+              </div>
+              <div className="space-y-3">
+                {updates.length === 0 ? (
+                  <p className="text-[13px] text-[#8a8fa3] text-center py-8">No updates yet.</p>
+                ) : updates.map((u: any) => (
+                  <div key={u.id} className="card p-4">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="font-semibold text-[13px] text-[#0c1226]">{u.title}</p>
+                      <span className="text-[11px] text-[#8a8fa3]">{fmtDate(u.created_at)}</span>
+                    </div>
+                    {u.status_milestone && (
+                      <span className="inline-block bg-blue-50 text-blue-700 text-[11px] font-medium px-2 py-0.5 rounded-full mb-2">
+                        {u.status_milestone}
+                      </span>
+                    )}
+                    <p className="text-[13px] text-[#4a5168] leading-relaxed">{u.message}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── FILES TAB ── */}
+          {tab === "Files" && (
+            <div className="card p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="section-title mb-0">Files</h3>
+                <button onClick={() => fileRef.current?.click()} className="btn btn-outline btn-sm gap-1.5">
+                  <Upload size={13} /> Upload
+                </button>
+                <input ref={fileRef} type="file" multiple className="hidden" onChange={handleFileAdd} />
+              </div>
+              {docs.length === 0 ? (
+                <div className="border-2 border-dashed border-[#e7e6e1] rounded-xl p-10 flex flex-col items-center text-center">
+                  <Upload size={28} className="text-[#8a8fa3] mb-3 opacity-50" />
+                  <p className="text-[13px] font-medium text-[#4a5168]">Drop files here or click Upload</p>
+                  <p className="text-[11px] text-[#8a8fa3] mt-1">PDFs, images, spreadsheets</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {docs.map((d, i) => (
+                    <div key={i} className="flex items-center gap-3 py-2.5 px-3 bg-[#f6f6f3] rounded-lg">
+                      <FileText size={16} className="text-[#4a5168] flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-medium text-[#0c1226] truncate">{d.name}</p>
+                        <p className="text-[11px] text-[#8a8fa3]">{d.size}</p>
+                      </div>
+                      <button onClick={() => setDocs(docs.filter((_, j) => j !== i))}
+                        className="text-[#8a8fa3] hover:text-red-500 transition-colors">
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── FINANCIALS TAB ── */}
+          {tab === "Financials" && (
+            <div className="space-y-5">
+              <div className="card p-5">
+                <h3 className="section-title mb-3">Quotes</h3>
+                {quotes.length === 0 ? (
+                  <p className="text-[13px] text-[#8a8fa3] text-center py-4">No quotes.</p>
+                ) : (
+                  <div className="table-wrapper -mx-5 -mb-5">
+                    <table className="table-base">
+                      <thead><tr><th>Number</th><th>Title</th><th>Total</th><th>Status</th></tr></thead>
+                      <tbody>
+                        {quotes.map((q: any) => (
+                          <tr key={q.id}>
+                            <td><Link href={`/quotes/${q.id}`} className="text-brand-navy hover:underline font-medium">{q.quote_number}</Link></td>
+                            <td className="text-[#4a5168]">{q.title || "—"}</td>
+                            <td className="font-semibold">{fmt(q.total)}</td>
+                            <td><StatusBadge status={q.status} /></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              <div className="card p-5">
+                <h3 className="section-title mb-3">Invoices</h3>
+                {invoices.length === 0 ? (
+                  <p className="text-[13px] text-[#8a8fa3] text-center py-4">No invoices.</p>
+                ) : (
+                  <div className="table-wrapper -mx-5 -mb-5">
+                    <table className="table-base">
+                      <thead><tr><th>Number</th><th>Total</th><th>Paid</th><th>Due</th><th>Status</th></tr></thead>
+                      <tbody>
+                        {invoices.map((inv: any) => (
+                          <tr key={inv.id}>
+                            <td><Link href={`/invoices/${inv.id}`} className="text-brand-navy hover:underline font-medium">{inv.invoice_number}</Link></td>
+                            <td className="font-semibold">{fmt(inv.total)}</td>
+                            <td className="text-brand-green font-semibold">{fmt(inv.amount_paid)}</td>
+                            <td className={inv.amount_due > 0 ? "text-red-600 font-semibold" : "text-brand-green"}>{fmt(inv.amount_due)}</td>
+                            <td><StatusBadge status={inv.status} /></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              <div className="card p-5">
+                <h3 className="section-title mb-3">Payments</h3>
+                {payments.length === 0 ? (
+                  <p className="text-[13px] text-[#8a8fa3] text-center py-4">No payments.</p>
+                ) : (
+                  <div className="table-wrapper -mx-5 -mb-5">
+                    <table className="table-base">
+                      <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Reference</th></tr></thead>
+                      <tbody>
+                        {payments.map((p: any) => (
+                          <tr key={p.id}>
+                            <td className="text-[#8a8fa3] text-xs">{fmtDate(p.payment_date)}</td>
+                            <td className="font-semibold text-brand-green">{fmt(p.amount)}</td>
+                            <td className="capitalize text-[#4a5168]">{p.payment_method?.replace("_", " ") || "—"}</td>
+                            <td className="text-[#8a8fa3] text-xs">{p.reference_number || "—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── RIGHT SIDEBAR (always visible) ── */}
+        <div className="space-y-4">
+
+          {/* Team panel */}
+          <div className="card p-4">
+            <p className="text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-3">Team</p>
+            <div className="space-y-2.5 mb-3">
+              {assignedTeam.length === 0 && (
+                <p className="text-[12px] text-[#8a8fa3]">No team assigned yet.</p>
+              )}
+              {assignedTeam.map((m, i) => {
+                const ini = m.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
+                const roleLabel = i === 0 ? "Project lead" : m.role;
+                const avatarColor = ["bg-brand-navy", "bg-brand-green", "bg-[#7C3AED]", "bg-[#D97706]"][i % 4];
+                return (
+                  <div key={m.id} className="flex items-center gap-2.5">
+                    <div className={`w-7 h-7 ${avatarColor} rounded-full flex items-center justify-center flex-shrink-0`}>
+                      <span className="text-white text-[9px] font-bold">{ini}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-medium text-[#0c1226] truncate">{m.name}</p>
+                      <p className="text-[10px] text-[#8a8fa3] capitalize">{roleLabel}</p>
+                    </div>
+                    <button onClick={() => setAssignedTeam(assignedTeam.filter(t => t.id !== m.id))}
+                      className="text-[#d8d6cf] hover:text-red-400 transition-colors">
+                      <X size={12} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="relative">
+              <button onClick={() => setAssignOpen(!assignOpen)}
+                className="flex items-center gap-1.5 text-[12px] text-brand-green font-medium hover:text-brand-green/70 transition-colors">
+                <UserPlus size={13} /> Assign team member
+              </button>
+              {assignOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setAssignOpen(false)} />
+                  <div className="absolute left-0 top-full mt-1 bg-white border border-[#e7e6e1] rounded-xl shadow-dropdown z-20 w-52 overflow-hidden">
+                    {teamMembers.length === 0 ? (
+                      <div className="px-3 py-2 text-[12px] text-[#8a8fa3]">No team members</div>
+                    ) : teamMembers.map(m => (
+                      <button key={m.id} onClick={() => assignMember(m)}
+                        className={`w-full text-left px-3 py-2.5 text-[13px] hover:bg-[#f6f6f3] transition-colors ${assignedTeam.find(t => t.id === m.id) ? "opacity-40 pointer-events-none" : ""}`}>
+                        {m.name}
+                        <span className="text-[10px] text-[#8a8fa3] ml-2 capitalize">{m.role}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Contact + financials */}
-          <div className="space-y-4">
-            {project.contacts && (
-              <div className="card p-5">
-                <h3 className="section-title mb-3">Customer</h3>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-brand-navy rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-sm">{initials}</span>
+          {/* Documents panel */}
+          <div className="card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wider">Documents</p>
+              <button onClick={() => fileRef.current?.click()}
+                className="text-[11px] text-brand-navy font-medium hover:underline">Upload</button>
+            </div>
+            {docs.length === 0 ? (
+              <div>
+                <p className="text-[12px] text-[#8a8fa3] mb-2">No files uploaded yet.</p>
+                <button onClick={() => fileRef.current?.click()}
+                  className="btn btn-outline btn-sm w-full gap-1.5 text-[12px]">
+                  <Upload size={12} /> Choose files
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {docs.map((d, i) => (
+                  <div key={i} className="flex items-center gap-2 group">
+                    <FileText size={13} className="text-[#4a5168] flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-medium text-[#0c1226] truncate">{d.name}</p>
+                      <p className="text-[10px] text-[#8a8fa3]">{d.size}</p>
+                    </div>
+                    <button onClick={() => setDocs(docs.filter((_, j) => j !== i))}
+                      className="opacity-0 group-hover:opacity-100 text-[#8a8fa3] hover:text-red-500 transition-all">
+                      <X size={12} />
+                    </button>
                   </div>
-                  <div>
-                    <p className="font-semibold text-[#0c1226]">{project.contacts.full_name}</p>
-                    {project.contacts.email && <p className="text-[12px] text-[#8a8fa3]">{project.contacts.email}</p>}
-                    {project.contacts.phone && <p className="text-[12px] text-[#8a8fa3]">{project.contacts.phone}</p>}
-                  </div>
-                </div>
-                <Link href={`/contacts/${project.contact_id}`} className="btn btn-outline btn-sm mt-3 inline-flex">
-                  View contact
-                </Link>
+                ))}
               </div>
             )}
+          </div>
 
-            <div className="card p-5">
-              <h3 className="section-title mb-3">Financial summary</h3>
-              <div className="space-y-2.5 text-[13px]">
-                <div className="flex justify-between">
-                  <span className="text-[#8a8fa3]">Quotes</span>
-                  <span className="font-medium">{quotes.length} · {fmt(stats?.totalQuoted ?? 0)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#8a8fa3]">Invoiced</span>
-                  <span className="font-medium">{invoices.length} · {fmt(stats?.totalInvoiced ?? 0)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#8a8fa3]">Collected</span>
-                  <span className="font-semibold text-brand-green">{fmt(payments.reduce((s: number, p: any) => s + (p.amount ?? 0), 0))}</span>
-                </div>
-                <div className="flex justify-between border-t border-[#f0efea] pt-2">
-                  <span className="text-[#8a8fa3]">Outstanding</span>
-                  <span className={`font-bold ${(stats?.totalDue ?? 0) > 0 ? "text-red-600" : "text-brand-green"}`}>
-                    {fmt(stats?.totalDue ?? 0)}
-                  </span>
-                </div>
-              </div>
+          {/* Quick links */}
+          <div className="card p-4">
+            <p className="text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-3">Quick actions</p>
+            <div className="space-y-1.5">
+              <Link href={`/quotes/new`}
+                className="flex items-center justify-between py-1.5 text-[12px] text-[#4a5168] hover:text-brand-navy transition-colors">
+                <span>New quote</span>
+                <span className="text-[#d8d6cf]">›</span>
+              </Link>
+              <Link href={`/invoices/new`}
+                className="flex items-center justify-between py-1.5 text-[12px] text-[#4a5168] hover:text-brand-navy transition-colors">
+                <span>New invoice</span>
+                <span className="text-[#d8d6cf]">›</span>
+              </Link>
+              {project.contacts?.phone && (
+                <a href={`tel:${project.contacts.phone}`}
+                  className="flex items-center justify-between py-1.5 text-[12px] text-[#4a5168] hover:text-brand-navy transition-colors">
+                  <span>Call customer</span>
+                  <span className="text-[#d8d6cf]">›</span>
+                </a>
+              )}
             </div>
           </div>
         </div>
-      )}
-
-      {tab === "Quotes" && (
-        <div className="table-wrapper">
-          <table className="table-base">
-            <thead><tr><th>Number</th><th>Title</th><th>Total</th><th>Status</th></tr></thead>
-            <tbody>
-              {quotes.length === 0
-                ? <tr><td colSpan={4} className="text-center py-8 text-[#8a8fa3]">No quotes yet</td></tr>
-                : quotes.map((q: any) => (
-                  <tr key={q.id}>
-                    <td><Link href={`/quotes/${q.id}`} className="text-brand-navy hover:underline font-medium">{q.quote_number}</Link></td>
-                    <td className="text-[#4a5168]">{q.title || "—"}</td>
-                    <td className="font-semibold">{fmt(q.total)}</td>
-                    <td><StatusBadge status={q.status} /></td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {tab === "Invoices" && (
-        <div className="table-wrapper">
-          <table className="table-base">
-            <thead><tr><th>Number</th><th>Total</th><th>Paid</th><th>Due</th><th>Status</th></tr></thead>
-            <tbody>
-              {invoices.length === 0
-                ? <tr><td colSpan={5} className="text-center py-8 text-[#8a8fa3]">No invoices yet</td></tr>
-                : invoices.map((i: any) => (
-                  <tr key={i.id}>
-                    <td><Link href={`/invoices/${i.id}`} className="text-brand-navy hover:underline font-medium">{i.invoice_number}</Link></td>
-                    <td className="font-semibold">{fmt(i.total)}</td>
-                    <td className="text-brand-green font-semibold">{fmt(i.amount_paid)}</td>
-                    <td className={i.amount_due > 0 ? "text-red-600 font-semibold" : "text-brand-green"}>{fmt(i.amount_due)}</td>
-                    <td><StatusBadge status={i.status} /></td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {tab === "Payments" && (
-        <div className="table-wrapper">
-          <table className="table-base">
-            <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Reference</th></tr></thead>
-            <tbody>
-              {payments.length === 0
-                ? <tr><td colSpan={4} className="text-center py-8 text-[#8a8fa3]">No payments yet</td></tr>
-                : payments.map((p: any) => (
-                  <tr key={p.id}>
-                    <td className="text-[#8a8fa3] text-xs">{fmtDate(p.payment_date)}</td>
-                    <td className="font-semibold text-brand-green">{fmt(p.amount)}</td>
-                    <td className="capitalize text-[#4a5168]">{p.payment_method?.replace("_"," ")}</td>
-                    <td className="text-[#8a8fa3] text-xs">{p.reference_number || "—"}</td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {tab === "Updates" && (
-        <div className="space-y-3">
-          {updates.length === 0
-            ? <p className="text-sm text-[#8a8fa3] text-center py-8">No updates yet.</p>
-            : updates.map((u: any) => (
-              <div key={u.id} className="card p-4">
-                <div className="flex justify-between mb-1">
-                  <p className="font-semibold text-[#0c1226]">{u.title}</p>
-                  <span className="text-xs text-[#8a8fa3]">{fmtDate(u.created_at)}</span>
-                </div>
-                {u.status_milestone && <span className="badge bg-blue-50 text-blue-700 mb-2">{u.status_milestone}</span>}
-                <p className="text-sm text-[#4a5168] leading-relaxed">{u.message}</p>
-              </div>
-            ))}
-        </div>
-      )}
-
-      {tab === "Feedback" && (
-        <div className="space-y-3">
-          {feedback.length === 0
-            ? <p className="text-sm text-[#8a8fa3] text-center py-8">No feedback yet.</p>
-            : feedback.map((f: any) => (
-              <div key={f.id} className="card p-4">
-                <div className="flex items-center gap-1 mb-2">
-                  <span className="text-amber-400">{"★".repeat(f.rating || 0)}</span>
-                  <span className="text-[#d8d6cf]">{"★".repeat(5 - (f.rating || 0))}</span>
-                </div>
-                <p className="text-sm text-[#4a5168]">{f.comments}</p>
-              </div>
-            ))}
-        </div>
-      )}
-
-      {tab === "Item Lists" && (
-        <div className="space-y-3">
-          {lists.length === 0
-            ? <p className="text-sm text-[#8a8fa3] text-center py-8">No requirement lists yet.</p>
-            : lists.map((l: any) => (
-              <div key={l.id} className="card p-4 flex justify-between items-center">
-                <div>
-                  <p className="font-medium text-[#0c1226]">{l.title}</p>
-                  <p className="text-xs text-[#8a8fa3]">{fmtDate(l.created_at)}</p>
-                </div>
-              </div>
-            ))}
-          <Link href="/item-requirements" className="btn btn-outline btn-sm">View All</Link>
-        </div>
-      )}
+      </div>
 
       {/* Edit Modal */}
       <Modal open={editModal} onClose={() => setEditModal(false)} title="Edit Project">
@@ -389,7 +674,7 @@ export default function ProjectDetailPage() {
           <div>
             <label className="label">Title <span className="text-red-500">*</span></label>
             <input value={updateForm.title} onChange={e => setUpdateForm({ ...updateForm, title: e.target.value })}
-              placeholder="Project update title" className="field" />
+              placeholder="e.g. Day 10 · Electrical rough-in passed inspection" className="field" />
           </div>
           <div>
             <label className="label">Status / Milestone</label>

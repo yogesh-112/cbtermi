@@ -1,116 +1,56 @@
-﻿"use client";
+"use client";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import {
-  LayoutDashboard, Users, Briefcase, Receipt, MoreHorizontal,
-  FileText, CreditCard, Bell, Star, MessageSquare, MessagesSquare,
-  ClipboardList, UserCog, Settings, X, ChevronRight,
-} from "lucide-react";
+import { usePathname } from "next/navigation";
+import { LayoutDashboard, Users, Briefcase, Receipt, MoreHorizontal } from "lucide-react";
 
 const PRIMARY = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Home" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/contacts",  icon: Users,           label: "Contacts" },
   { href: "/projects",  icon: Briefcase,       label: "Projects" },
   { href: "/invoices",  icon: Receipt,         label: "Invoices" },
 ];
 
-const MORE_ITEMS = [
-  { href: "/quotes",            icon: FileText,       label: "Quotes" },
-  { href: "/payments",          icon: CreditCard,     label: "Payments" },
-  { href: "/notifications",     icon: Bell,           label: "Notifications" },
-  { href: "/communications",    icon: MessagesSquare, label: "Communications" },
-  { href: "/item-requirements", icon: ClipboardList,  label: "Item Requirements" },
-  { href: "/project-updates",   icon: MessageSquare,  label: "Project Updates" },
-  { href: "/feedback",          icon: Star,           label: "Feedback" },
-  { href: "/team",              icon: UserCog,        label: "Team" },
-  { href: "/settings",          icon: Settings,       label: "Settings" },
+const MORE_PATHS = [
+  "/quotes", "/payments", "/notifications", "/communications",
+  "/item-requirements", "/project-updates", "/feedback",
+  "/team", "/settings", "/change-orders", "/more",
 ];
 
 export default function MobileNav() {
   const pathname = usePathname();
-  const router = useRouter();
-  const [moreOpen, setMoreOpen] = useState(false);
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/dashboard" && pathname.startsWith(href + "/"));
 
-  const isMoreActive = MORE_ITEMS.some((item) => isActive(item.href));
+  const isMoreActive = MORE_PATHS.some(p => pathname === p || pathname.startsWith(p + "/"));
 
   return (
-    <>
-      {/* Bottom Navigation Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e7e6e1]"
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
-        <div className="flex items-stretch h-16">
-          {PRIMARY.map(({ href, icon: Icon, label }) => {
-            const active = isActive(href);
-            return (
-              <Link key={href} href={href}
-                className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors
-                  ${active ? "text-brand-navy" : "text-[#8a8fa3]"}`}>
-                <div className={`p-1 rounded-lg transition-all ${active ? "bg-brand-blue-50" : ""}`}>
-                  <Icon size={20} strokeWidth={active ? 2.5 : 2} />
-                </div>
-                <span className={`text-[10px] font-medium ${active ? "text-brand-navy" : "text-[#8a8fa3]"}`}>
-                  {label}
-                </span>
-              </Link>
-            );
-          })}
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e7e6e1]"
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+      <div className="flex items-stretch h-16">
+        {PRIMARY.map(({ href, icon: Icon, label }) => {
+          const active = isActive(href);
+          return (
+            <Link key={href} href={href}
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors
+                ${active ? "text-brand-navy" : "text-[#8a8fa3]"}`}>
+              <div className={`p-1.5 rounded-lg transition-all ${active ? "bg-[#eef2ff]" : ""}`}>
+                <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+              </div>
+              <span className="text-[10px] font-medium leading-none">{label}</span>
+            </Link>
+          );
+        })}
 
-          {/* More */}
-          <button onClick={() => setMoreOpen(true)}
-            className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors
-              ${isMoreActive ? "text-brand-navy" : "text-[#8a8fa3]"}`}>
-            <div className={`p-1 rounded-lg transition-all ${isMoreActive ? "bg-brand-blue-50" : ""}`}>
-              <MoreHorizontal size={20} strokeWidth={isMoreActive ? 2.5 : 2} />
-            </div>
-            <span className={`text-[10px] font-medium ${isMoreActive ? "text-brand-navy" : "text-[#8a8fa3]"}`}>
-              More
-            </span>
-          </button>
-        </div>
-      </nav>
-
-      {/* More Drawer */}
-      {moreOpen && (
-        <div className="lg:hidden fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/40 animate-fade-in" onClick={() => setMoreOpen(false)} />
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[24px] shadow-modal animate-slide-in-bottom"
-            style={{ paddingBottom: "env(safe-area-inset-bottom, 16px)" }}>
-            <div className="flex items-center justify-between px-5 pt-5 pb-4">
-              <h2 className="text-base font-bold text-[#0c1226]" style={{ letterSpacing: "-0.02em" }}>
-                More
-              </h2>
-              <button onClick={() => setMoreOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#f0efea] text-[#4a5168]">
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="px-4 pb-4 grid grid-cols-1 gap-1">
-              {MORE_ITEMS.map(({ href, icon: Icon, label }) => {
-                const active = isActive(href);
-                return (
-                  <Link key={href} href={href} onClick={() => setMoreOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all
-                      ${active ? "bg-brand-blue-50 text-brand-navy" : "text-[#4a5168] hover:bg-[#f6f6f3]"}`}>
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0
-                      ${active ? "bg-brand-navy text-white" : "bg-[#f0efea] text-[#4a5168]"}`}>
-                      <Icon size={17} />
-                    </div>
-                    <span className={`text-sm font-medium flex-1 ${active ? "text-brand-navy font-semibold" : ""}`}>
-                      {label}
-                    </span>
-                    <ChevronRight size={14} className="text-[#d8d6cf]" />
-                  </Link>
-                );
-              })}
-            </div>
+        <Link href="/more"
+          className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors
+            ${isMoreActive ? "text-brand-navy" : "text-[#8a8fa3]"}`}>
+          <div className={`p-1.5 rounded-lg transition-all ${isMoreActive ? "bg-[#eef2ff]" : ""}`}>
+            <MoreHorizontal size={20} strokeWidth={isMoreActive ? 2.5 : 2} />
           </div>
-        </div>
-      )}
-    </>
+          <span className="text-[10px] font-medium leading-none">More</span>
+        </Link>
+      </div>
+    </nav>
   );
 }

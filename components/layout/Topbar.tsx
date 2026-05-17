@@ -23,6 +23,7 @@ const PAGE_META: Record<string, { label: string; ctaLabel?: string; ctaHref?: st
   "/settings":          { label: "Settings" },
   "/subscription":      { label: "Subscription" },
   "/profile":           { label: "Profile" },
+  "/more":              { label: "More" },
 };
 
 interface Props {

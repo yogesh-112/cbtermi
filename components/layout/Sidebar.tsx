@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Users, FileText, Receipt, Briefcase, CreditCard,
   ClipboardList, MessageSquare, Star, Bell, MessagesSquare, UserCog,
   Settings, ChevronDown, Plus, LogOut, X, GitPullRequestDraft,
+  UserCheck, UserCircle,
 } from "lucide-react";
 
 const PRIMARY_NAV = [
@@ -17,6 +18,11 @@ const PRIMARY_NAV = [
   { href: "/change-orders",     icon: GitPullRequestDraft,  label: "Change Orders" },
   { href: "/invoices",          icon: Receipt,              label: "Invoices" },
   { href: "/payments",          icon: CreditCard,           label: "Payments" },
+];
+
+const CONTACTS_SUB = [
+  { href: "/leads",     icon: UserCheck,   label: "Leads" },
+  { href: "/customers", icon: UserCircle,  label: "Customers" },
 ];
 
 const SECONDARY_NAV = [
@@ -58,6 +64,10 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/dashboard" && pathname.startsWith(href + "/"));
+
+  const contactsActive = ["/contacts", "/leads", "/customers"].some(p =>
+    pathname === p || pathname.startsWith(p + "/")
+  );
 
   const NavLink = ({ href, icon: Icon, label }: { href: string; icon: any; label: string }) => (
     <Link href={href} onClick={() => setMobileOpen(false)}
@@ -131,7 +141,27 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-1 space-y-0.5">
-        {PRIMARY_NAV.map((item) => <NavLink key={item.href} {...item} />)}
+        {PRIMARY_NAV.map((item) => (
+          <div key={item.href}>
+            <NavLink {...item} />
+            {/* Contacts sub-nav */}
+            {item.href === "/contacts" && contactsActive && (
+              <div className="ml-4 mt-0.5 space-y-0.5 border-l border-white/10 pl-2">
+                {CONTACTS_SUB.map(sub => (
+                  <Link key={sub.href} href={sub.href} onClick={() => setMobileOpen(false)}
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[12px] transition-colors ${
+                      isActive(sub.href)
+                        ? "text-white font-medium bg-white/10"
+                        : "text-white/50 hover:text-white/80 hover:bg-white/5"
+                    }`}>
+                    <sub.icon size={13} className="flex-shrink-0" />
+                    {sub.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
         <div className="sidebar-section">More</div>
         {SECONDARY_NAV.map((item) => <NavLink key={item.href} {...item} />)}
       </nav>

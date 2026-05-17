@@ -7,6 +7,8 @@ import Link from "next/link";
 const PAGE_META: Record<string, { label: string; ctaLabel?: string; ctaHref?: string }> = {
   "/dashboard":         { label: "Dashboard",        ctaLabel: "New quote",       ctaHref: "/quotes/new" },
   "/contacts":          { label: "Contacts",          ctaLabel: "New contact",     ctaHref: "/contacts/new" },
+  "/leads":             { label: "Leads",             ctaLabel: "Add lead",        ctaHref: "/contacts/new" },
+  "/customers":         { label: "Customers",         ctaLabel: "Add customer",    ctaHref: "/contacts/new" },
   "/projects":          { label: "Projects",          ctaLabel: "New project",     ctaHref: "/projects/new" },
   "/quotes":            { label: "Quotes",            ctaLabel: "New quote",       ctaHref: "/quotes/new" },
   "/invoices":          { label: "Invoices",          ctaLabel: "New invoice",     ctaHref: "/invoices/new" },

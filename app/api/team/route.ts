@@ -15,6 +15,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  if (!["owner", "admin"].includes(session.role ?? "")) {
+    return NextResponse.json({ message: "Only owners and admins can invite team members." }, { status: 403 });
+  }
   const { email, role = "staff" } = await request.json();
   if (!email) return NextResponse.json({ message: "Email required" }, { status: 400 });
 
@@ -34,6 +37,9 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  if (!["owner", "admin"].includes(session.role ?? "")) {
+    return NextResponse.json({ message: "Only owners and admins can remove team members." }, { status: 403 });
+  }
   const { userId, invitationId } = await request.json();
 
   if (userId) await supabase.from("business_members").delete().eq("business_id", session.businessId).eq("user_id", userId);

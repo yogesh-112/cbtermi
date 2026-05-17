@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search, Bell, Plus, ChevronDown, LogOut, Settings, UserCircle } from "lucide-react";
 import Link from "next/link";
 
@@ -38,6 +38,30 @@ export default function Topbar({ user, businesses, currentBusiness }: Props) {
   const [bizOpen, setBizOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    if (search.length < 2) { setSearchResults([]); setSearchOpen(false); return; }
+    searchTimer.current = setTimeout(async () => {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(search)}`);
+      const data = await res.json();
+      setSearchResults(data.results ?? []);
+      setSearchOpen(true);
+    }, 300);
+    return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
+  }, [search]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const currentPage = Object.keys(PAGE_META)
     .sort((a, b) => b.length - a.length)
@@ -105,15 +129,36 @@ export default function Topbar({ user, businesses, currentBusiness }: Props) {
       </div>
 
       {/* Search */}
-      <div className="flex-1 max-w-[420px] relative">
-        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a8fa3] pointer-events-none" />
+      <div className="flex-1 max-w-[420px] relative" ref={searchRef}>
+        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a8fa3] pointer-events-none z-10" />
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
+          onFocus={() => searchResults.length > 0 && setSearchOpen(true)}
           placeholder="Search contacts, projects, invoices…"
           className="w-full h-[34px] pl-8 pr-11 text-[13px] bg-[#f6f6f3] border border-[#e7e6e1] rounded-lg text-[#0c1226] placeholder:text-[#8a8fa3] focus:outline-none focus:ring-2 focus:ring-brand-navy/20 focus:bg-white transition-colors"
         />
         <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[#8a8fa3] font-medium bg-white border border-[#e7e6e1] rounded px-1 py-0.5 pointer-events-none">⌘K</span>
+        {searchOpen && searchResults.length > 0 && (
+          <div className="absolute left-0 top-full mt-1.5 w-full bg-white border border-[#e7e6e1] rounded-xl shadow-dropdown z-30 overflow-hidden animate-scale-in">
+            {searchResults.map((r) => (
+              <Link key={r.id + r.type} href={r.href}
+                onClick={() => { setSearch(""); setSearchOpen(false); }}
+                className="flex items-center gap-3 px-3.5 py-2.5 hover:bg-[#f6f6f3] transition-colors">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8a8fa3] w-14 flex-shrink-0">{r.type}</span>
+                <div className="min-w-0">
+                  <p className="text-[13px] font-medium text-[#0c1226] truncate">{r.label}</p>
+                  {r.sub && <p className="text-[11px] text-[#8a8fa3] truncate">{r.sub}</p>}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+        {searchOpen && search.length >= 2 && searchResults.length === 0 && (
+          <div className="absolute left-0 top-full mt-1.5 w-full bg-white border border-[#e7e6e1] rounded-xl shadow-dropdown z-30 px-4 py-3 text-[13px] text-[#8a8fa3]">
+            No results for &ldquo;{search}&rdquo;
+          </div>
+        )}
       </div>
 
       {/* Right side */}

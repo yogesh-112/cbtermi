@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     .select("role").eq("user_id", session.id).eq("business_id", businessId).single();
   if (!member) return NextResponse.json({ message: "Access denied" }, { status: 403 });
 
-  await supabase.from("users").update({ last_business_id: businessId }).eq("id", session.id);
+  await supabase.from("users").update({ last_business_id: businessId, last_used_business_id: businessId }).eq("id", session.id);
 
   const newToken = await signToken({ ...session, businessId, role: member.role });
   const res = NextResponse.json({ message: "Switched" });

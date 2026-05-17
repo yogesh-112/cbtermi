@@ -5,6 +5,57 @@ import {
   Building2, Sliders, Hash, Bell, Mail, Plug, Globe, Shield, Webhook,
 } from "lucide-react";
 
+function PasswordChangeForm() {
+  const [form, setForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [saving, setSaving] = useState(false);
+
+  const setF = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (form.newPassword !== form.confirmPassword) {
+      toast("New passwords do not match.", "error"); return;
+    }
+    if (form.newPassword.length < 8) {
+      toast("Password must be at least 8 characters.", "error"); return;
+    }
+    setSaving(true);
+    const res = await fetch("/api/auth/change-password", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword: form.currentPassword, newPassword: form.newPassword }),
+    });
+    const data = await res.json();
+    setSaving(false);
+    if (res.ok) {
+      toast("Password changed successfully.");
+      setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } else {
+      toast(data.message ?? "Failed to change password.", "error");
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="space-y-4 max-w-sm">
+      <div>
+        <label className="label">Current password</label>
+        <input type="password" value={form.currentPassword} onChange={setF("currentPassword")} className="field" required />
+      </div>
+      <div>
+        <label className="label">New password</label>
+        <input type="password" value={form.newPassword} onChange={setF("newPassword")} className="field" required minLength={8} />
+      </div>
+      <div>
+        <label className="label">Confirm new password</label>
+        <input type="password" value={form.confirmPassword} onChange={setF("confirmPassword")} className="field" required />
+      </div>
+      <button type="submit" disabled={saving} className="btn btn-primary btn-sm">
+        {saving ? "Saving…" : "Change password"}
+      </button>
+    </form>
+  );
+}
+
 const SECTIONS = [
   { key: "profile",       label: "Business profile",    icon: Building2 },
   { key: "preferences",   label: "Preferences",         icon: Sliders },
@@ -315,7 +366,15 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {["email","integrations","region","security","api"].includes(section) && (
+          {section === "security" && (
+            <div className="card p-5">
+              <h3 className="section-title mb-1">Change password</h3>
+              <p className="text-[12px] text-[#8a8fa3] mb-4">You will need to log in again after changing your password.</p>
+              <PasswordChangeForm />
+            </div>
+          )}
+
+          {["email","integrations","region","api"].includes(section) && (
             <div className="card p-8 text-center">
               <div className="w-12 h-12 bg-[#f0efea] rounded-2xl flex items-center justify-center mx-auto mb-3">
                 {(() => { const S = SECTIONS.find(s => s.key === section); return S ? <S.icon size={20} className="text-[#8a8fa3]" /> : null; })()}

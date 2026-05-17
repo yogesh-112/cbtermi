@@ -31,6 +31,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  if (!["owner", "admin"].includes(session.role ?? "")) {
+    return NextResponse.json({ message: "Only owners and admins can delete contacts." }, { status: 403 });
+  }
   const { id } = await params;
   await supabase.from("contacts").delete().eq("id", id).eq("business_id", session.businessId);
   return NextResponse.json({ message: "Deleted" });

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
+import { checkTrialAccess } from "@/lib/trial";
+import { logAudit } from "@/lib/audit";
 
 export async function GET() {
   const session = await requireSession().catch(() => null);
@@ -12,6 +14,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  const trialErr = await checkTrialAccess(session.businessId);
+  if (trialErr) return trialErr;
   const body = await request.json();
   if (!body.amount || body.amount <= 0) return NextResponse.json({ message: "Valid amount required" }, { status: 400 });
 
@@ -28,5 +32,6 @@ export async function POST(request: NextRequest) {
       await supabase.from("invoices").update({ amount_paid, amount_due, status }).eq("id", body.invoice_id);
     }
   }
+  await logAudit({ businessId: session.businessId, userId: session.id, entityType: "payment", entityId: payment.id, action: "recorded", payload: { amount: body.amount, invoice_id: body.invoice_id } });
   return NextResponse.json({ payment }, { status: 201 });
 }

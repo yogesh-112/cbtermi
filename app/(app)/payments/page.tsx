@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, CreditCard, TrendingUp } from "lucide-react";
-import { Modal, EmptyState, toast } from "@/components/ui";
+import { Plus, CreditCard, TrendingUp, RotateCcw } from "lucide-react";
+import { Modal, ConfirmDialog, EmptyState, toast } from "@/components/ui";
 import { fmt, fmtDate } from "@/lib/utils";
 
 const METHODS = [
@@ -30,6 +30,8 @@ export default function PaymentsPage() {
     payment_method: "cash", reference_number: "", notes: "",
   });
   const [saving, setSaving] = useState(false);
+  const [reversing, setReversing] = useState<string | null>(null);
+  const [confirmReverse, setConfirmReverse] = useState<any>(null);
 
   const load = () => {
     setLoading(true);
@@ -40,6 +42,16 @@ export default function PaymentsPage() {
     fetch("/api/invoices").then(r => r.json()).then(d => setInvoices(d.invoices ?? []));
     fetch("/api/contacts").then(r => r.json()).then(d => setContacts(d.contacts ?? []));
   }, []);
+
+  const reversePayment = async (payment: any) => {
+    setReversing(payment.id);
+    const res = await fetch(`/api/payments/${payment.id}/reverse`, { method: "POST" });
+    const data = await res.json();
+    setReversing(null);
+    setConfirmReverse(null);
+    if (res.ok) { toast("Payment reversed successfully"); load(); }
+    else toast(data.message ?? "Failed to reverse payment", "error");
+  };
 
   const save = async () => {
     if (!form.amount || parseFloat(form.amount) <= 0) { toast("Enter a valid amount", "error"); return; }
@@ -166,13 +178,14 @@ export default function PaymentsPage() {
               <th>Method</th>
               <th>Reference</th>
               <th>Status</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="text-center py-10 text-[#8a8fa3]">Loading…</td></tr>
+              <tr><td colSpan={8} className="text-center py-10 text-[#8a8fa3]">Loading…</td></tr>
             ) : payments.length === 0 ? (
-              <tr><td colSpan={7}>
+              <tr><td colSpan={8}>
                 <EmptyState icon={<CreditCard size={40} />} title="No payments yet" description="Record your first payment."
                   action={<button className="btn btn-green btn-sm" onClick={() => setModal(true)}><Plus size={14} /> Record Payment</button>} />
               </td></tr>
@@ -191,11 +204,26 @@ export default function PaymentsPage() {
                 <td className="text-[13px] text-[#4a5168]">{METHOD_LABEL[p.payment_method] || p.payment_method}</td>
                 <td className="text-[12px] text-[#8a8fa3]">{p.reference_number || "—"}</td>
                 <td><span className="badge bg-brand-green/10 text-brand-green">● Cleared</span></td>
+                <td>
+                  <button onClick={() => setConfirmReverse(p)}
+                    className="flex items-center gap-1 text-[11px] text-[#8a8fa3] hover:text-red-600 transition-colors px-2 py-1 rounded hover:bg-red-50">
+                    <RotateCcw size={11} /> Reverse
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      <ConfirmDialog
+        open={!!confirmReverse}
+        onClose={() => setConfirmReverse(null)}
+        onConfirm={() => confirmReverse && reversePayment(confirmReverse)}
+        title="Reverse payment?"
+        message={confirmReverse ? `This will reverse ${fmt(confirmReverse.amount)} recorded on ${fmtDate(confirmReverse.payment_date)}. The invoice balance will be restored. This cannot be undone.` : ""}
+        danger
+      />
 
       <Modal open={modal} onClose={() => setModal(false)} title="Record Payment" size="md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

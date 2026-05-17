@@ -6,10 +6,13 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  const { data: quote } = await supabase.from("quotes").select("*, contacts(*), projects(name)").eq("id", id).eq("business_id", session.businessId).single();
-  if (!quote) return NextResponse.json({ message: "Not found" }, { status: 404 });
-  const { data: items } = await supabase.from("quote_items").select("*").eq("quote_id", id).order("sort_order");
-  return NextResponse.json({ quote, items: items ?? [] });
+  const { data: co } = await supabase
+    .from("change_orders")
+    .select("*, contacts(*), projects(name)")
+    .eq("id", id).eq("business_id", session.businessId).single();
+  if (!co) return NextResponse.json({ message: "Not found" }, { status: 404 });
+  const { data: items } = await supabase.from("change_order_items").select("*").eq("change_order_id", id).order("sort_order");
+  return NextResponse.json({ changeOrder: co, items: items ?? [] });
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -18,42 +21,39 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const { id } = await params;
   const { items, ...body } = await request.json();
 
-  const { data: existing } = await supabase.from("quotes").select("status").eq("id", id).eq("business_id", session.businessId).single();
+  const { data: existing } = await supabase.from("change_orders").select("status").eq("id", id).eq("business_id", session.businessId).single();
   if (!existing) return NextResponse.json({ message: "Not found" }, { status: 404 });
 
-  // Block edits on approved/converted quotes (status change to void is still allowed)
   if (["approved", "converted"].includes(existing.status) && body.status !== "voided") {
-    return NextResponse.json({ message: `Cannot edit an ${existing.status} quote. Create a new version or a change order instead.` }, { status: 400 });
+    return NextResponse.json({ message: `Cannot edit an ${existing.status} change order.` }, { status: 400 });
   }
 
   if (items) {
-    await supabase.from("quote_items").delete().eq("quote_id", id);
+    await supabase.from("change_order_items").delete().eq("change_order_id", id);
     const subtotal = items.reduce((s: number, i: any) => s + (i.total ?? 0), 0);
     const tax_amount = items.reduce((s: number, i: any) => s + ((i.total ?? 0) * (i.tax_rate ?? 0) / 100), 0);
     body.subtotal = subtotal; body.tax_amount = tax_amount; body.total = subtotal + tax_amount;
-    await supabase.from("quote_items").insert(items.map((item: any, i: number) => ({ ...item, quote_id: id, sort_order: i })));
+    await supabase.from("change_order_items").insert(items.map((item: any, i: number) => ({ ...item, change_order_id: id, sort_order: i })));
   }
 
-  const { data, error } = await supabase.from("quotes").update({ ...body, updated_at: new Date().toISOString() }).eq("id", id).eq("business_id", session.businessId).select().single();
+  const { data, error } = await supabase.from("change_orders").update({ ...body, updated_at: new Date().toISOString() }).eq("id", id).eq("business_id", session.businessId).select().single();
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
-  return NextResponse.json({ quote: data });
+  return NextResponse.json({ changeOrder: data });
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   if (!["owner", "admin"].includes(session.role ?? "")) {
-    return NextResponse.json({ message: "Only owners and admins can delete quotes." }, { status: 403 });
+    return NextResponse.json({ message: "Only owners and admins can delete change orders." }, { status: 403 });
   }
   const { id } = await params;
-
-  const { data: existing } = await supabase.from("quotes").select("status").eq("id", id).eq("business_id", session.businessId).single();
+  const { data: existing } = await supabase.from("change_orders").select("status").eq("id", id).eq("business_id", session.businessId).single();
   if (!existing) return NextResponse.json({ message: "Not found" }, { status: 404 });
   if (["approved", "converted"].includes(existing.status)) {
-    return NextResponse.json({ message: `Cannot delete an ${existing.status} quote.` }, { status: 400 });
+    return NextResponse.json({ message: `Cannot delete an ${existing.status} change order.` }, { status: 400 });
   }
-
-  await supabase.from("quote_items").delete().eq("quote_id", id);
-  await supabase.from("quotes").delete().eq("id", id).eq("business_id", session.businessId);
+  await supabase.from("change_order_items").delete().eq("change_order_id", id);
+  await supabase.from("change_orders").delete().eq("id", id).eq("business_id", session.businessId);
   return NextResponse.json({ message: "Deleted" });
 }

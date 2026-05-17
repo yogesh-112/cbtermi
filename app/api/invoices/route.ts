@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
+import { checkTrialAccess } from "@/lib/trial";
+import { logAudit } from "@/lib/audit";
 
 export async function GET() {
   const session = await requireSession().catch(() => null);
@@ -12,6 +14,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  const trialErr = await checkTrialAccess(session.businessId);
+  if (trialErr) return trialErr;
   const { items, ...body } = await request.json();
 
   // Auto-create project if none selected
@@ -38,5 +42,6 @@ export async function POST(request: NextRequest) {
   if (items?.length) {
     await supabase.from("invoice_items").insert(items.map((item: any, i: number) => ({ ...item, invoice_id: invoice.id, sort_order: i })));
   }
+  await logAudit({ businessId: session.businessId, userId: session.id, entityType: "invoice", entityId: invoice.id, action: "created", payload: { invoice_number: invoice.invoice_number, total } });
   return NextResponse.json({ invoice }, { status: 201 });
 }

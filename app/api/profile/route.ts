@@ -7,8 +7,24 @@ import bcrypt from "bcryptjs";
 export async function GET() {
   const session = await requireSession().catch(() => null);
   if (!session?.id) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  const { data, error } = await supabase.from("users").select("id, full_name, email, phone, role, about, display_name, skills, created_at").eq("id", session.id).single();
-  if (error) return NextResponse.json({ message: error.message }, { status: 500 });
+
+  // Try full select first; fall back to core columns if extended ones don't exist yet
+  const { data, error } = await supabase
+    .from("users")
+    .select("id, full_name, email, phone, role, about, display_name, skills, created_at")
+    .eq("id", session.id)
+    .single();
+
+  if (error) {
+    const { data: basic, error: err2 } = await supabase
+      .from("users")
+      .select("id, full_name, email, created_at")
+      .eq("id", session.id)
+      .single();
+    if (err2) return NextResponse.json({ message: err2.message }, { status: 500 });
+    return NextResponse.json({ user: basic });
+  }
+
   return NextResponse.json({ user: data });
 }
 
@@ -35,12 +51,21 @@ export async function PATCH(request: NextRequest) {
 
   if (Object.keys(update).length === 0) return NextResponse.json({ message: "Nothing to update" });
 
-  const { data, error } = await supabase.from("users").update({ ...update, updated_at: new Date().toISOString() }).eq("id", session.id).select("id, full_name, email, phone, role, about, display_name, skills").single();
-  if (error) return NextResponse.json({ message: error.message }, { status: 500 });
+  const { data, error } = await supabase
+    .from("users")
+    .update({ ...update, updated_at: new Date().toISOString() })
+    .eq("id", session.id)
+    .select("id, full_name, email, phone, role, about, display_name, skills")
+    .single();
 
-  const newName = data.full_name ?? session.name;
+  // If extended columns don't exist, fall back to core select
+  const userData = error
+    ? (await supabase.from("users").select("id, full_name, email").eq("id", session.id).single()).data
+    : data;
+
+  const newName = (userData as any)?.full_name ?? session.name;
   const newToken = await signToken({ id: session.id, name: newName, email: session.email, businessId: session.businessId, role: session.role });
-  const res = NextResponse.json({ user: data });
+  const res = NextResponse.json({ user: userData });
   res.cookies.set(SESSION_COOKIE, newToken, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 60 * 60 * 24 * 7, path: "/" });
   return res;
 }

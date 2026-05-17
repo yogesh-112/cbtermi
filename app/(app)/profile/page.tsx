@@ -41,7 +41,12 @@ export default function ProfilePage() {
     );
   }
 
-  if (!user) return null;
+  if (!user) return (
+    <div className="max-w-[920px]">
+      <h1 className="page-title">Profile</h1>
+      <p className="text-sm text-[#8a8fa3] mt-2">Could not load profile. Please refresh the page.</p>
+    </div>
+  );
 
   const initials = user.full_name?.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase() || "?";
   const skills: string[] = user.skills ? (Array.isArray(user.skills) ? user.skills : user.skills.split(",").map((s: string) => s.trim()).filter(Boolean)) : [];

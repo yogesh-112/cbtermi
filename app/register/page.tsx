@@ -75,12 +75,8 @@ export default function RegisterPage() {
       {/* Left — form */}
       <div className="flex-1 flex items-center justify-center p-8 lg:p-10">
         <div className="w-full max-w-[400px]">
-          <div className="flex items-center gap-2.5 mb-8">
-            <Image src="/logo.png" alt="Clear Build USA" width={32} height={32} className="object-contain" priority />
-            <div className="flex items-baseline gap-1 text-[18px] font-semibold">
-              <span style={{ color: "#16265a" }}>Clear</span>
-              <span style={{ color: "#2453E4" }}>Build</span>
-            </div>
+          <div className="mb-8">
+            <Image src="/logo.png" alt="Clear Build USA" width={140} height={38} className="object-contain object-left" priority />
           </div>
 
           <h1 className="text-[28px] font-semibold tracking-tight text-[#0c1226]">Start your free trial.</h1>

@@ -16,19 +16,15 @@ export default function AppLoading() {
 
       <div className="relative z-10 flex flex-col items-center">
         {/* Logo */}
-        <div className="w-14 h-14 bg-[#2453E4] rounded-2xl flex items-center justify-center mb-5 shadow-lg">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <rect x="4" y="12" width="8" height="12" rx="1.5" fill="white" opacity="0.9"/>
-            <rect x="14" y="6" width="10" height="18" rx="1.5" fill="white"/>
-          </svg>
-        </div>
-
-        {/* Wordmark */}
-        <div className="flex items-baseline gap-1.5 mb-2">
-          <span className="text-white text-[22px] font-semibold tracking-tight">Clear</span>
-          <span className="text-[#2453E4] text-[22px] font-semibold tracking-tight">Build</span>
-        </div>
-        <p className="text-white/40 text-[13px] font-medium tracking-[0.12em] uppercase mb-8">USA</p>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo.png"
+          alt="Clear Build USA"
+          width={160}
+          height={44}
+          className="object-contain mb-8"
+          style={{ filter: "brightness(0) invert(1)" }}
+        />
 
         {/* Dot animation */}
         <div className="flex items-center gap-2 mb-4">

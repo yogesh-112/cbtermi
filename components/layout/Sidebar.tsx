@@ -1,39 +1,42 @@
-﻿"use client";
+"use client";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, FileText, Receipt, Briefcase, CreditCard,
   ClipboardList, MessageSquare, Star, Bell, MessagesSquare, UserCog,
-  Settings, ChevronDown, Plus, LogOut, X, GitPullRequestDraft,
-  UserCheck, UserCircle,
+  Settings, X, GitPullRequestDraft, UserCheck, UserCircle,
 } from "lucide-react";
 
 const PRIMARY_NAV = [
-  { href: "/dashboard",         icon: LayoutDashboard,      label: "Dashboard" },
-  { href: "/contacts",          icon: Users,                label: "Contacts" },
-  { href: "/projects",          icon: Briefcase,            label: "Projects" },
-  { href: "/quotes",            icon: FileText,             label: "Quotes" },
-  { href: "/change-orders",     icon: GitPullRequestDraft,  label: "Change Orders" },
-  { href: "/invoices",          icon: Receipt,              label: "Invoices" },
-  { href: "/payments",          icon: CreditCard,           label: "Payments" },
+  { href: "/dashboard",         icon: LayoutDashboard,      label: "Dashboard",       countKey: null },
+  { href: "/contacts",          icon: Users,                label: "Contacts",         countKey: "contacts" as const },
+  { href: "/projects",          icon: Briefcase,            label: "Projects",         countKey: null },
+  { href: "/quotes",            icon: FileText,             label: "Quotes",           countKey: null },
+  { href: "/change-orders",     icon: GitPullRequestDraft,  label: "Change Orders",    countKey: null },
+  { href: "/invoices",          icon: Receipt,              label: "Invoices",         countKey: null },
+  { href: "/payments",          icon: CreditCard,           label: "Payments",         countKey: null },
 ];
 
 const CONTACTS_SUB = [
-  { href: "/leads",     icon: UserCheck,   label: "Leads" },
-  { href: "/customers", icon: UserCircle,  label: "Customers" },
+  { href: "/leads",     icon: UserCheck,  label: "Leads",     countKey: "leads" as const },
+  { href: "/customers", icon: UserCircle, label: "Customers", countKey: "customers" as const },
 ];
 
 const SECONDARY_NAV = [
-  { href: "/notifications",     icon: Bell,            label: "Notifications" },
-  { href: "/communications",    icon: MessagesSquare,  label: "Communications" },
-  { href: "/item-requirements", icon: ClipboardList,   label: "Item Requirements" },
-  { href: "/project-updates",   icon: MessageSquare,   label: "Project Updates" },
-  { href: "/feedback",          icon: Star,            label: "Feedback" },
-  { href: "/team",              icon: UserCog,         label: "Team" },
-  { href: "/settings",          icon: Settings,        label: "Settings" },
+  { href: "/notifications",     icon: Bell,           label: "Notifications",     countKey: null },
+  { href: "/communications",    icon: MessagesSquare, label: "Communications",    countKey: null },
+  { href: "/item-requirements", icon: ClipboardList,  label: "Item Requirements", countKey: null },
+  { href: "/project-updates",   icon: MessageSquare,  label: "Project Updates",   countKey: null },
+  { href: "/feedback",          icon: Star,           label: "Feedback",          countKey: null },
+  { href: "/team",              icon: UserCog,        label: "Team",              countKey: null },
+  { href: "/settings",          icon: Settings,       label: "Settings",          countKey: null },
 ];
+
+type CountKey = "contacts" | "leads" | "customers";
+
+interface Counts { contacts: number; leads: number; customers: number }
 
 interface Props {
   user: { name: string; email: string };
@@ -43,24 +46,29 @@ interface Props {
 
 export default function Sidebar({ user, businesses, currentBusiness }: Props) {
   const pathname = usePathname();
-  const router = useRouter();
-  const [bizOpen, setBizOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [counts, setCounts] = useState<Counts>({ contacts: 0, leads: 0, customers: 0 });
+  const [trialDays, setTrialDays] = useState({ used: 0, total: 14 });
 
-  const switchBusiness = async (id: string) => {
-    await fetch("/api/businesses/switch", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ businessId: id }),
-    });
-    router.refresh();
-    setBizOpen(false);
-  };
-
-  const logout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
-  };
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/contacts").then(r => r.json()),
+      fetch("/api/contacts?type=lead").then(r => r.json()),
+      fetch("/api/contacts?type=customer").then(r => r.json()),
+      fetch("/api/subscription").then(r => r.json()),
+    ]).then(([all, leads, customers, sub]) => {
+      setCounts({
+        contacts: (all.contacts ?? []).length,
+        leads:    (leads.contacts ?? []).length,
+        customers:(customers.contacts ?? []).length,
+      });
+      if (sub.subscription?.created_at) {
+        const start = new Date(sub.subscription.created_at);
+        const used = Math.max(0, Math.min(14, Math.floor((Date.now() - start.getTime()) / 86400000)));
+        setTrialDays({ used, total: 14 });
+      }
+    }).catch(() => {});
+  }, []);
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/dashboard" && pathname.startsWith(href + "/"));
@@ -69,74 +77,41 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
     pathname === p || pathname.startsWith(p + "/")
   );
 
-  const NavLink = ({ href, icon: Icon, label }: { href: string; icon: any; label: string }) => (
+  const Badge = ({ n }: { n: number }) =>
+    n > 0 ? (
+      <span className="ml-auto min-w-[18px] h-[18px] bg-white/20 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 flex-shrink-0">
+        {n > 99 ? "99+" : n}
+      </span>
+    ) : null;
+
+  const NavLink = ({
+    href, icon: Icon, label, countKey,
+  }: { href: string; icon: any; label: string; countKey: CountKey | null }) => (
     <Link href={href} onClick={() => setMobileOpen(false)}
       className={`sidebar-link ${isActive(href) ? "active" : ""}`}>
       <Icon size={16} className="flex-shrink-0 opacity-75" />
-      <span className="truncate">{label}</span>
+      <span className="truncate flex-1">{label}</span>
+      {countKey && <Badge n={counts[countKey]} />}
     </Link>
   );
 
+  const trialPct = Math.min(100, (trialDays.used / trialDays.total) * 100);
+  const daysLeft = trialDays.total - trialDays.used;
+
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
-      {/* Logo area */}
-      <div className="px-4 pt-5 pb-4 flex-shrink-0">
-        <div className="flex items-center gap-2.5">
+      {/* Logo */}
+      <div className="px-5 pt-5 pb-4 flex-shrink-0">
+        <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
           <Image
             src="/logo.png"
             alt="Clear Build USA"
-            width={28}
-            height={28}
-            className="object-contain rounded"
+            width={130}
+            height={36}
+            className="object-contain object-left"
             priority
           />
-          <div className="flex flex-col leading-tight">
-            <span className="text-white text-[14px] font-semibold tracking-tight">Clear Build</span>
-            <span className="text-white/50 text-[11px]">USA</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Business Switcher */}
-      <div className="px-3 pb-3 flex-shrink-0">
-        <div className="relative">
-          <button onClick={() => setBizOpen(!bizOpen)}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-[8px] bg-white/[0.08] hover:bg-white/[0.12] transition-colors group">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-5 h-5 bg-white/20 rounded flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-[9px] font-bold">
-                  {currentBusiness?.name?.[0]?.toUpperCase() ?? "B"}
-                </span>
-              </div>
-              <span className="text-white text-[13px] font-medium truncate leading-tight">
-                {currentBusiness?.name ?? "Select Business"}
-              </span>
-            </div>
-            <ChevronDown size={12} className={`text-white/40 transition-transform flex-shrink-0 ${bizOpen ? "rotate-180" : ""}`} />
-          </button>
-          {bizOpen && (
-            <div className="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-xl shadow-dropdown z-20 overflow-hidden border border-[#e7e6e1] animate-scale-in">
-              <div className="py-1">
-                {businesses.map((b) => (
-                  <button key={b.id} onClick={() => switchBusiness(b.id)}
-                    className={`w-full text-left flex items-center gap-2.5 px-3.5 py-2.5 text-sm transition-colors
-                      ${b.id === currentBusiness?.id ? "text-brand-navy font-semibold bg-brand-blue-50" : "text-[#4a5168] hover:bg-surface"}`}>
-                    <div className="w-5 h-5 bg-brand-navy/10 rounded flex items-center justify-center flex-shrink-0">
-                      <span className="text-brand-navy text-[9px] font-bold">{b.name[0]?.toUpperCase()}</span>
-                    </div>
-                    {b.name}
-                  </button>
-                ))}
-              </div>
-              <div className="border-t border-[#e7e6e1] py-1">
-                <Link href="/business-setup" onClick={() => setBizOpen(false)}
-                  className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-brand-green hover:bg-brand-green-light transition-colors font-medium">
-                  <Plus size={14} /> New Business
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
+        </Link>
       </div>
 
       {/* Navigation */}
@@ -144,7 +119,6 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
         {PRIMARY_NAV.map((item) => (
           <div key={item.href}>
             <NavLink {...item} />
-            {/* Contacts sub-nav */}
             {item.href === "/contacts" && contactsActive && (
               <div className="ml-4 mt-0.5 space-y-0.5 border-l border-white/10 pl-2">
                 {CONTACTS_SUB.map(sub => (
@@ -155,7 +129,8 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
                         : "text-white/50 hover:text-white/80 hover:bg-white/5"
                     }`}>
                     <sub.icon size={13} className="flex-shrink-0" />
-                    {sub.label}
+                    <span className="flex-1">{sub.label}</span>
+                    <Badge n={counts[sub.countKey]} />
                   </Link>
                 ))}
               </div>
@@ -166,31 +141,29 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
         {SECONDARY_NAV.map((item) => <NavLink key={item.href} {...item} />)}
       </nav>
 
-      {/* Trial badge */}
-      <div className="mx-3 mb-3 p-3 rounded-[10px] bg-white/[0.06]">
-        <div className="text-white text-[12.5px] font-semibold">Trial · explore free</div>
-        <div className="text-white/55 text-[11.5px] mt-0.5">Pro plan from $39/mo</div>
+      {/* Trial / plan badge */}
+      <div className="mx-3 mb-4 p-3.5 rounded-[10px] bg-white/[0.06] flex-shrink-0">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-white text-[12.5px] font-semibold">Trial · explore free</span>
+          <span className="text-white/50 text-[11px]">{daysLeft}d left</span>
+        </div>
+        {/* Timeline progress bar */}
+        <div className="h-1.5 bg-white/10 rounded-full overflow-hidden mb-2.5">
+          <div
+            className="h-full rounded-full transition-all"
+            style={{
+              width: `${trialPct}%`,
+              background: trialPct > 80 ? "#ef4444" : trialPct > 50 ? "#f59e0b" : "#3FA66B",
+            }}
+          />
+        </div>
+        <div className="text-white/50 text-[11px] mb-2.5">
+          Day {trialDays.used} of {trialDays.total} · Pro from $39/mo
+        </div>
         <Link href="/subscription"
-          className="mt-2.5 block text-center text-[12px] font-medium py-1.5 rounded-[7px] bg-white/10 hover:bg-white/15 text-white/80 hover:text-white transition-colors">
+          className="block text-center text-[12px] font-medium py-1.5 rounded-[7px] bg-white/10 hover:bg-white/15 text-white/80 hover:text-white transition-colors">
           Upgrade plan
         </Link>
-      </div>
-
-      {/* User Footer */}
-      <div className="px-3 pb-4 border-t border-white/[0.08] pt-3 flex-shrink-0">
-        <div className="flex items-center gap-2.5 px-2 py-2 rounded-[8px] hover:bg-white/[0.06] transition-colors group cursor-pointer">
-          <div className="w-7 h-7 bg-brand-green rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-xs font-bold">{user.name?.[0]?.toUpperCase()}</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white text-[12.5px] font-semibold truncate leading-tight">{user.name}</p>
-            <p className="text-white/45 text-[11px] truncate">{user.email}</p>
-          </div>
-          <button onClick={logout} title="Sign out"
-            className="text-white/35 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
-            <LogOut size={14} />
-          </button>
-        </div>
       </div>
     </div>
   );

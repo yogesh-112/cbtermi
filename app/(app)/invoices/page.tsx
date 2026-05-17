@@ -1,22 +1,33 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Receipt, Eye, Search } from "lucide-react";
-import { StatusBadge, EmptyState, ActionMenu } from "@/components/ui";
+import { Plus, Receipt, Search, SlidersHorizontal, TrendingUp } from "lucide-react";
+import { EmptyState } from "@/components/ui";
 import { fmt, fmtDate } from "@/lib/utils";
+
+const AVATAR_COLORS = [
+  "bg-[#2453E4]","bg-brand-green","bg-brand-navy","bg-[#7C3AED]",
+  "bg-[#D97706]","bg-[#DC2626]","bg-[#0D9488]","bg-[#DB2777]",
+];
+
+function InvStatusBadge({ inv }: { inv: any }) {
+  const now = new Date();
+  const due = inv.due_date ? new Date(inv.due_date) : null;
+  const daysOverdue = due && due < now ? Math.ceil((now.getTime() - due.getTime()) / 86400000) : 0;
+  const daysTilDue  = due && due >= now ? Math.ceil((due.getTime() - now.getTime()) / 86400000) : 0;
+
+  if (inv.status === "paid") return <span className="badge bg-brand-green/10 text-brand-green">● Paid</span>;
+  if (daysOverdue > 0) return <span className="badge bg-red-50 text-red-600">● Overdue {daysOverdue}d</span>;
+  if (daysTilDue <= 7 && daysTilDue > 0) return <span className="badge bg-amber-50 text-amber-700">● Due soon</span>;
+  if (inv.status === "draft") return <span className="badge bg-[#f0efea] text-[#8a8fa3]">Draft</span>;
+  return <span className="badge bg-orange-50 text-orange-700">● Awaiting</span>;
+}
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-
-  const STATUS_TABS = [
-    { value: "", label: "All" },
-    { value: "sent", label: "Sent" },
-    { value: "paid", label: "Paid" },
-    { value: "overdue", label: "Overdue" },
-  ];
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const load = () => {
     setLoading(true);
@@ -24,60 +35,99 @@ export default function InvoicesPage() {
   };
   useEffect(() => { load(); }, []);
 
-  const filtered = invoices.filter(inv => {
-    if (statusFilter && inv.status !== statusFilter) return false;
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return inv.invoice_number?.toLowerCase().includes(q) ||
-      inv.contacts?.full_name?.toLowerCase().includes(q);
+  const now = new Date();
+  const outstanding = invoices.filter(i => i.status !== "paid" && i.status !== "voided" && i.status !== "draft");
+  const outstandingAmt = outstanding.reduce((s, i) => s + (i.amount_due ?? 0), 0);
+  const paidAmt = invoices.filter(i => i.status === "paid").reduce((s, i) => s + (i.total ?? 0), 0);
+  const dueThisWeek = outstanding.filter(i => {
+    const d = i.due_date ? new Date(i.due_date) : null;
+    if (!d) return false;
+    const diff = (d.getTime() - now.getTime()) / 86400000;
+    return diff >= 0 && diff <= 7;
+  });
+  const overdue = outstanding.filter(i => {
+    const d = i.due_date ? new Date(i.due_date) : null;
+    return d && d < now;
   });
 
-  const outstanding = invoices.reduce((s, inv) => s + (inv.amount_due ?? 0), 0);
-  const paid = invoices.filter(inv => inv.status === "paid").length;
-  const totalValue = invoices.reduce((s, inv) => s + (inv.total ?? 0), 0);
+  const STATUS_TABS = [
+    { key: "all",     label: "All",      count: invoices.length },
+    { key: "draft",   label: "Drafts",   count: invoices.filter(i => i.status === "draft").length },
+    { key: "sent",    label: "Sent",     count: invoices.filter(i => i.status === "sent").length },
+    { key: "overdue", label: "Overdue",  count: overdue.length },
+    { key: "paid",    label: "Paid",     count: invoices.filter(i => i.status === "paid").length },
+  ];
+
+  const filtered = invoices.filter(i => {
+    if (statusFilter === "overdue") {
+      const d = i.due_date ? new Date(i.due_date) : null;
+      if (!d || d >= now || i.status === "paid") return false;
+    } else if (statusFilter !== "all" && i.status !== statusFilter) {
+      return false;
+    }
+    if (!search) return true;
+    const s = search.toLowerCase();
+    return i.invoice_number?.toLowerCase().includes(s) ||
+      i.contacts?.full_name?.toLowerCase().includes(s) ||
+      i.projects?.name?.toLowerCase().includes(s);
+  });
+
+  const getInitials = (name: string) =>
+    name?.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase() || "?";
 
   return (
     <div>
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Invoices</h1>
-          <p className="page-desc">{invoices.length} invoices</p>
-        </div>
-        <Link href="/invoices/new" className="btn btn-green"><Plus size={15} /> Create Invoice</Link>
+      <div className="mb-1">
+        <h1 className="page-title">Invoices</h1>
+        <p className="page-desc">{fmt(outstandingAmt)} outstanding · {fmt(paidAmt)} paid this month</p>
       </div>
 
-      {/* Mini stat cards */}
-      <div className="grid grid-cols-3 gap-3 mb-5">
-        <div className="mini-stat mini-stat-navy">
-          <span className="mini-stat-label">Total Invoices</span>
-          <span className="mini-stat-value">{invoices.length}</span>
-          <span className="mini-stat-sub">{fmt(totalValue)} total</span>
+      {/* 4 large stat cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+        <div className="mini-stat mini-stat-rose">
+          <span className="mini-stat-label">Outstanding</span>
+          <span className="mini-stat-value text-[20px]">{fmt(outstandingAmt)}</span>
+          <span className="text-[11px] text-[#8a8fa3] mt-0.5">{outstanding.length} invoice{outstanding.length !== 1 ? "s" : ""}</span>
+        </div>
+        <div className="mini-stat mini-stat-blue">
+          <span className="mini-stat-label">Due this week</span>
+          <span className="mini-stat-value text-[20px]">{fmt(dueThisWeek.reduce((s, i) => s + (i.amount_due ?? 0), 0))}</span>
+          <span className="text-[11px] text-[#8a8fa3] mt-0.5">{dueThisWeek.length} invoice{dueThisWeek.length !== 1 ? "s" : ""}</span>
         </div>
         <div className="mini-stat mini-stat-amber">
-          <span className="mini-stat-label">Outstanding</span>
-          <span className="mini-stat-value">{fmt(outstanding)}</span>
+          <span className="mini-stat-label">Overdue</span>
+          <span className="mini-stat-value text-[20px]">{fmt(overdue.reduce((s, i) => s + (i.amount_due ?? 0), 0))}</span>
+          <span className="text-[11px] text-red-500 mt-0.5">{overdue.length} invoice{overdue.length !== 1 ? "s" : ""}</span>
         </div>
         <div className="mini-stat mini-stat-green">
-          <span className="mini-stat-label">Paid</span>
-          <span className="mini-stat-value">{paid}</span>
-          <span className="mini-stat-sub">invoices</span>
+          <span className="mini-stat-label">Paid this month</span>
+          <span className="mini-stat-value text-[20px]">{fmt(paidAmt)}</span>
+          <span className="text-[11px] text-brand-green flex items-center gap-1 mt-0.5">
+            <TrendingUp size={10} /> total received
+          </span>
         </div>
       </div>
 
-      {/* Filter tabs + Search */}
+      {/* Filter tabs + search */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
         <div className="tabs-bar mb-0 flex-1">
           {STATUS_TABS.map(t => (
-            <button key={t.value} onClick={() => setStatusFilter(t.value)}
-              className={`tab-btn ${statusFilter === t.value ? "active" : ""}`}>
+            <button key={t.key} onClick={() => setStatusFilter(t.key)}
+              className={`tab-btn ${statusFilter === t.key ? "active" : ""} flex items-center gap-1.5`}>
               {t.label}
+              {t.count > 0 && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#f0efea] text-[#8a8fa3]">{t.count}</span>
+              )}
             </button>
           ))}
         </div>
-        <div className="input-group w-full sm:w-64 flex-shrink-0">
-          <Search size={14} className="input-icon" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search invoices…" className="field" />
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="input-group w-52">
+            <Search size={13} className="input-icon" />
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Search invoices…" className="field" />
+          </div>
+          <button className="btn btn-outline btn-sm gap-1.5"><SlidersHorizontal size={13} /> Filters</button>
         </div>
       </div>
 
@@ -86,24 +136,24 @@ export default function InvoicesPage() {
         {loading ? (
           [...Array(3)].map((_, i) => <div key={i} className="mobile-card animate-pulse h-28 skeleton" />)
         ) : filtered.length === 0 ? (
-          <EmptyState icon={<Receipt size={36} />} title="No invoices yet" description="Create your first invoice."
-            action={<Link href="/invoices/new" className="btn btn-green btn-sm"><Plus size={14} /> Create Invoice</Link>} />
+          <EmptyState icon={<Receipt size={36} />} title="No invoices" description="No invoices match your filters."
+            action={<Link href="/invoices/new" className="btn btn-primary btn-sm"><Plus size={14} /> New Invoice</Link>} />
         ) : filtered.map(inv => (
           <Link key={inv.id} href={`/invoices/${inv.id}`} className="mobile-card block hover:shadow-card-md transition-shadow">
             <div className="mobile-card-row">
               <div>
                 <p className="font-semibold text-[#0c1226]">{inv.invoice_number}</p>
-                <p className="text-xs text-[#8a8fa3] mt-0.5">{inv.contacts?.full_name || "—"}</p>
+                <p className="text-xs text-[#4a5168] mt-0.5">{inv.contacts?.full_name || "—"}</p>
               </div>
               <div className="text-right">
-                <p className="font-bold text-brand-navy">{fmt(inv.total)}</p>
-                <StatusBadge status={inv.status} />
+                <p className="font-bold text-[#0c1226]">{fmt(inv.total)}</p>
+                <InvStatusBadge inv={inv} />
               </div>
             </div>
             <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#f0efea]">
               <span className="text-xs text-[#8a8fa3]">{fmtDate(inv.created_at)}</span>
-              <span className={`text-xs font-semibold ${inv.amount_due > 0 ? "text-red-600" : "text-brand-green"}`}>
-                {inv.amount_due > 0 ? `${fmt(inv.amount_due)} due` : "Paid"}
+              <span className={`text-xs font-semibold ${(inv.amount_due ?? 0) > 0 ? "text-red-600" : "text-brand-green"}`}>
+                {(inv.amount_due ?? 0) > 0 ? `${fmt(inv.amount_due)} due` : "Paid"}
               </span>
             </div>
           </Link>
@@ -115,44 +165,62 @@ export default function InvoicesPage() {
         <table className="table-base">
           <thead>
             <tr>
-              <th>Number</th>
-              <th>Contact</th>
-              <th>Total</th>
-              <th>Amount Due</th>
+              <th>Invoice</th>
+              <th>Project</th>
+              <th>Customer</th>
+              <th>Amount</th>
+              <th>Issued</th>
+              <th>Due</th>
               <th>Status</th>
-              <th>Date</th>
-              <th>Actions</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="text-center py-10 text-[#8a8fa3]">Loading…</td></tr>
+              <tr><td colSpan={8} className="text-center py-10 text-[#8a8fa3]">Loading…</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={7}>
+              <tr><td colSpan={8}>
                 <EmptyState icon={<Receipt size={40} />} title="No invoices yet" description="Create your first invoice."
-                  action={<Link href="/invoices/new" className="btn btn-green btn-sm"><Plus size={14} /> Create Invoice</Link>} />
+                  action={<Link href="/invoices/new" className="btn btn-primary btn-sm"><Plus size={14} /> New Invoice</Link>} />
               </td></tr>
-            ) : filtered.map(inv => (
-              <tr key={inv.id}>
-                <td>
-                  <Link href={`/invoices/${inv.id}`} className="font-medium text-brand-navy hover:underline">
-                    {inv.invoice_number}
-                  </Link>
-                </td>
-                <td className="text-[#4a5168]">{inv.contacts?.full_name || "—"}</td>
-                <td className="font-semibold">{fmt(inv.total)}</td>
-                <td className={inv.amount_due > 0 ? "text-red-600 font-semibold" : "text-brand-green font-semibold"}>
-                  {fmt(inv.amount_due)}
-                </td>
-                <td><StatusBadge status={inv.status} /></td>
-                <td className="text-[#8a8fa3] text-xs">{fmtDate(inv.created_at)}</td>
-                <td>
-                  <ActionMenu items={[
-                    { label: "View / Edit", icon: <Eye size={14} />, onClick: () => window.location.href = `/invoices/${inv.id}` },
-                  ]} />
-                </td>
-              </tr>
-            ))}
+            ) : filtered.map((inv, idx) => {
+              const name = inv.contacts?.full_name;
+              const initials = getInitials(name || "?");
+              const avatarColor = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+              return (
+                <tr key={inv.id}>
+                  <td>
+                    <Link href={`/invoices/${inv.id}`} className="font-semibold text-brand-navy hover:underline text-[13px]">
+                      {inv.invoice_number}
+                    </Link>
+                  </td>
+                  <td className="text-[#4a5168] text-[13px]">{inv.projects?.name || "—"}</td>
+                  <td>
+                    {name ? (
+                      <div className="flex items-center gap-2">
+                        <div className={`w-6 h-6 ${avatarColor} rounded-full flex items-center justify-center flex-shrink-0`}>
+                          <span className="text-white text-[9px] font-bold">{initials}</span>
+                        </div>
+                        <span className="text-[13px] text-[#0c1226]">{name}</span>
+                      </div>
+                    ) : <span className="text-[#8a8fa3]">—</span>}
+                  </td>
+                  <td className="font-semibold text-[13px]">{fmt(inv.total)}</td>
+                  <td className="text-[#8a8fa3] text-[12px]">{fmtDate(inv.created_at)}</td>
+                  <td className="text-[12px]">
+                    {inv.due_date ? (
+                      <span className={new Date(inv.due_date) < now && inv.status !== "paid" ? "text-red-500 font-medium" : "text-[#8a8fa3]"}>
+                        {fmtDate(inv.due_date)}
+                      </span>
+                    ) : "—"}
+                  </td>
+                  <td><InvStatusBadge inv={inv} /></td>
+                  <td>
+                    <span className="text-[#d8d6cf] cursor-pointer hover:text-[#8a8fa3]">···</span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

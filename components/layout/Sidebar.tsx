@@ -6,16 +6,17 @@ import { useState } from "react";
 import {
   LayoutDashboard, Users, FileText, Receipt, Briefcase, CreditCard,
   ClipboardList, MessageSquare, Star, Bell, MessagesSquare, UserCog,
-  Settings, ChevronDown, Plus, LogOut, X,
+  Settings, ChevronDown, Plus, LogOut, X, GitPullRequestDraft,
 } from "lucide-react";
 
 const PRIMARY_NAV = [
-  { href: "/dashboard",         icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/contacts",          icon: Users,           label: "Contacts" },
-  { href: "/projects",          icon: Briefcase,       label: "Projects" },
-  { href: "/quotes",            icon: FileText,        label: "Quotes" },
-  { href: "/invoices",          icon: Receipt,         label: "Invoices" },
-  { href: "/payments",          icon: CreditCard,      label: "Payments" },
+  { href: "/dashboard",         icon: LayoutDashboard,      label: "Dashboard" },
+  { href: "/contacts",          icon: Users,                label: "Contacts" },
+  { href: "/projects",          icon: Briefcase,            label: "Projects" },
+  { href: "/quotes",            icon: FileText,             label: "Quotes" },
+  { href: "/change-orders",     icon: GitPullRequestDraft,  label: "Change Orders" },
+  { href: "/invoices",          icon: Receipt,              label: "Invoices" },
+  { href: "/payments",          icon: CreditCard,           label: "Payments" },
 ];
 
 const SECONDARY_NAV = [

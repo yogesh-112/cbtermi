@@ -244,19 +244,20 @@ export default function ContactsPage() {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Status</th>
               <th>Type</th>
-              <th>Actions</th>
+              <th>Location</th>
+              <th>Projects</th>
+              <th>Lifetime value</th>
+              <th>Last contact</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} className="text-center py-10 text-[#8a8fa3]">Loading…</td></tr>
+              <tr><td colSpan={7} className="text-center py-10 text-[#8a8fa3]">Loading…</td></tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={6}>
+                <td colSpan={7}>
                   <EmptyState icon={<Users size={40} />} title="No contacts yet"
                     description="Add your first contact to get started."
                     action={<button className="btn btn-primary btn-sm" onClick={openAdd}><Plus size={14} /> Add Contact</button>} />
@@ -266,48 +267,45 @@ export default function ContactsPage() {
               <tr key={c.id}>
                 <td>
                   <div className="flex items-center gap-2.5">
-                    <div className={`w-7 h-7 ${avatarColor(c.full_name)} rounded-full flex items-center justify-center flex-shrink-0`}>
-                      <span className="text-white text-[10px] font-bold">{getInitials(c.full_name)}</span>
+                    <div className={`w-8 h-8 ${avatarColor(c.full_name)} rounded-full flex items-center justify-center flex-shrink-0`}>
+                      <span className="text-white text-[11px] font-bold">{getInitials(c.full_name)}</span>
                     </div>
                     <div>
-                      <Link href={`/contacts/${c.id}`} className="font-medium text-brand-navy hover:underline">
+                      <Link href={`/contacts/${c.id}`} className="font-semibold text-[13px] text-[#0c1226] hover:text-brand-navy">
                         {c.full_name}
                       </Link>
-                      {c.business_name && <p className="text-xs text-[#8a8fa3]">{c.business_name}</p>}
+                      <p className="text-[11px] text-[#8a8fa3]">{c.email || c.business_name || "—"}</p>
                     </div>
-                  </div>
-                </td>
-                <td className="text-[#4a5168]">{c.email || "—"}</td>
-                <td className="text-[#4a5168]">{c.phone || "—"}</td>
-                <td>
-                  <div className="relative" ref={statusPopup === c.id ? popupRef : undefined}>
-                    <button onClick={() => setStatusPopup(statusPopup === c.id ? null : c.id)}
-                      className="flex items-center gap-1 text-xs font-medium text-[#4a5168] hover:text-brand-navy border border-[#e7e6e1] rounded-lg px-2.5 py-1 bg-white hover:bg-[#f6f6f3] transition-colors">
-                      {c.lead_status || "New Lead"} <ChevronDown size={10} />
-                    </button>
-                    {statusPopup === c.id && (
-                      <div className="absolute top-full left-0 mt-1 bg-white border border-[#e7e6e1] rounded-xl shadow-dropdown z-20 min-w-[160px] overflow-hidden animate-scale-in">
-                        {LEAD_STATUSES.map((s) => (
-                          <button key={s} onClick={() => updateStatus(c.id, s)}
-                            className={`w-full text-left px-3.5 py-2 text-xs hover:bg-[#f6f6f3] transition-colors ${c.lead_status === s ? "text-brand-navy font-semibold bg-brand-blue-50" : "text-[#4a5168]"}`}>
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 </td>
                 <td><StatusBadge status={c.contact_type} /></td>
+                <td className="text-[13px] text-[#4a5168]">
+                  {[c.city, c.state].filter(Boolean).join(", ") || "—"}
+                </td>
+                <td className="text-[13px] text-[#4a5168]">—</td>
+                <td className="text-[13px] font-medium text-[#0c1226]">$0</td>
+                <td className="text-[12px] text-[#8a8fa3]">—</td>
                 <td>
-                  <ActionMenu items={[
-                    { label: "View", icon: <Eye size={14} />, onClick: () => window.location.href = `/contacts/${c.id}` },
-                    { label: "Edit", icon: <Pencil size={14} />, onClick: () => openEdit(c) },
-                    { label: "Call", icon: <Phone size={14} />, onClick: () => window.open(`tel:${c.phone}`) },
-                    { label: "Email", icon: <Mail size={14} />, onClick: () => window.open(`mailto:${c.email}`) },
-                    ...(c.whatsapp ? [{ label: "WhatsApp", icon: <MessageCircle size={14} />, onClick: () => window.open(`https://wa.me/${c.whatsapp.replace(/\D/g,"")}`, "_blank") }] : []),
-                    ...(c.contact_type !== "customer" ? [{ label: "Convert to Customer", icon: <UserCheck size={14} />, onClick: () => convertToCustomer(c.id) }] : []),
-                    { label: "Delete", icon: <Trash2 size={14} />, onClick: () => setDeleteId(c.id), danger: true },
-                  ]} />
+                  <div className="flex items-center gap-1">
+                    {c.phone && (
+                      <a href={`tel:${c.phone}`}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8a8fa3] hover:text-brand-navy hover:bg-[#f6f6f3] transition-colors">
+                        <Phone size={13} />
+                      </a>
+                    )}
+                    {c.whatsapp && (
+                      <a href={`https://wa.me/${c.whatsapp.replace(/\D/g,"")}`} target="_blank" rel="noreferrer"
+                        className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8a8fa3] hover:text-brand-green hover:bg-[#f6f6f3] transition-colors">
+                        <MessageCircle size={13} />
+                      </a>
+                    )}
+                    <ActionMenu items={[
+                      { label: "View", icon: <Eye size={14} />, onClick: () => window.location.href = `/contacts/${c.id}` },
+                      { label: "Edit", icon: <Pencil size={14} />, onClick: () => openEdit(c) },
+                      ...(c.contact_type !== "customer" ? [{ label: "Convert", icon: <UserCheck size={14} />, onClick: () => convertToCustomer(c.id) }] : []),
+                      { label: "Delete", icon: <Trash2 size={14} />, onClick: () => setDeleteId(c.id), danger: true },
+                    ]} />
+                  </div>
                 </td>
               </tr>
             ))}

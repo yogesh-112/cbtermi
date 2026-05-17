@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft, Download, CreditCard, Copy, Ban, Trash2, Send,
-  CheckCircle2, Mail, MessageCircle, Phone, Clock,
+  CheckCircle2, Mail, MessageCircle, Phone, Clock, Link2,
 } from "lucide-react";
 import { toast, ConfirmDialog } from "@/components/ui";
 import { fmt, fmtDate } from "@/lib/utils";
@@ -138,7 +138,11 @@ export default function InvoiceDetailPage() {
           )}
           <button onClick={() => window.print()} className="btn btn-outline btn-sm"><Download size={13} /> Download PDF</button>
           {!["paid","voided"].includes(invoice.status) && (
-            <button onClick={openPayModal} className="btn btn-green btn-sm"><CreditCard size={13} /> Record payment</button>
+            <>
+              <button onClick={openPayModal} className="btn btn-green btn-sm"><CreditCard size={13} /> Record payment</button>
+              <button onClick={() => { const url = `${window.location.origin}/invoices/${id}/pay`; navigator.clipboard.writeText(url).then(() => toast("Payment link copied!")); }}
+                className="btn btn-outline btn-sm"><Link2 size={13} /> Share pay link</button>
+            </>
           )}
           <button onClick={duplicate} className="btn btn-outline btn-sm"><Copy size={13} /></button>
           {invoice.status !== "voided" && (

@@ -17,7 +17,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  const { contact_id, channel, message, subject } = await request.json();
+  const { contact_id, channel, message, subject, inbound } = await request.json();
   if (!contact_id || !message?.trim()) return NextResponse.json({ message: "contact_id and message are required" }, { status: 400 });
 
   const { data, error } = await supabase.from("communication_logs").insert({
@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
     channel: channel ?? "email",
     subject: subject ?? null,
     message: message.trim(),
-    type: "outbound",
-    sent_by: session.id,
-    status: "sent",
+    type: inbound ? "inbound" : "outbound",
+    sent_by: inbound ? null : session.id,
+    status: "received",
   }).select("*, contacts(full_name)").single();
 
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });

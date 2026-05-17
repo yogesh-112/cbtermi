@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
 import { checkTrialAccess } from "@/lib/trial";
 import { logAudit } from "@/lib/audit";
+import { sendEmail, paymentConfirmEmail } from "@/lib/email";
 
 export async function GET() {
   const session = await requireSession().catch(() => null);
@@ -33,5 +34,23 @@ export async function POST(request: NextRequest) {
     }
   }
   await logAudit({ businessId: session.businessId, userId: session.id, entityType: "payment", entityId: payment.id, action: "recorded", payload: { amount: body.amount, invoice_id: body.invoice_id } });
+
+  // Send payment confirmation email
+  if (body.invoice_id && body.contact_id) {
+    const [{ data: contact }, { data: inv }, { data: bizInfo }] = await Promise.all([
+      supabase.from("contacts").select("full_name, email").eq("id", body.contact_id).single(),
+      supabase.from("invoices").select("invoice_number").eq("id", body.invoice_id).single(),
+      supabase.from("businesses").select("name").eq("id", session.businessId).single(),
+    ]);
+    if (contact?.email && inv) {
+      const fmtMoney = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2 });
+      await sendEmail({
+        to: contact.email,
+        subject: `Payment confirmed — Invoice ${inv.invoice_number}`,
+        html: paymentConfirmEmail(contact.full_name ?? "Customer", bizInfo?.name ?? "your contractor", inv.invoice_number, fmtMoney(body.amount)),
+      });
+    }
+  }
+
   return NextResponse.json({ payment }, { status: 201 });
 }

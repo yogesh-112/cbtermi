@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Users, FileText, Receipt, Briefcase, CreditCard,
   ClipboardList, MessageSquare, Star, Bell, MessagesSquare, UserCog,
   Settings, X, GitPullRequestDraft, UserCheck, UserCircle,
-  ChevronsLeft, ChevronsRight,
+  ChevronsLeft, ChevronsRight, ShieldCheck,
 } from "lucide-react";
 
 const PRIMARY_NAV = [
@@ -31,6 +31,7 @@ const SECONDARY_NAV = [
   { href: "/project-updates",   icon: MessageSquare,  label: "Project Updates",  countKey: null },
   { href: "/feedback",          icon: Star,           label: "Feedback",         countKey: null },
   { href: "/team",              icon: UserCog,        label: "Team",             countKey: null },
+  { href: "/audit-log",         icon: ShieldCheck,    label: "Audit Log",        countKey: null },
   { href: "/settings",          icon: Settings,       label: "Settings",         countKey: null },
 ];
 

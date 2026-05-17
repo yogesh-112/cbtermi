@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
 import { checkTrialAccess } from "@/lib/trial";
 import { logAudit } from "@/lib/audit";
+import { sendEmail, invoiceEmail } from "@/lib/email";
 
 export async function GET() {
   const session = await requireSession().catch(() => null);
@@ -43,5 +44,21 @@ export async function POST(request: NextRequest) {
     await supabase.from("invoice_items").insert(items.map((item: any, i: number) => ({ ...item, invoice_id: invoice.id, sort_order: i })));
   }
   await logAudit({ businessId: session.businessId, userId: session.id, entityType: "invoice", entityId: invoice.id, action: "created", payload: { invoice_number: invoice.invoice_number, total } });
+
+  // Send invoice email to contact
+  if (body.contact_id) {
+    const { data: contact } = await supabase.from("contacts").select("full_name, email").eq("id", body.contact_id).single();
+    const { data: bizInfo } = await supabase.from("businesses").select("name").eq("id", session.businessId).single();
+    if (contact?.email) {
+      const fmtMoney = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2 });
+      const dueLabel = body.due_date ? new Date(body.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
+      await sendEmail({
+        to: contact.email,
+        subject: `Invoice ${invoice.invoice_number} from ${bizInfo?.name ?? "your contractor"}`,
+        html: invoiceEmail(contact.full_name ?? "Customer", bizInfo?.name ?? "Your Contractor", invoice.invoice_number, fmtMoney(total), dueLabel),
+      });
+    }
+  }
+
   return NextResponse.json({ invoice }, { status: 201 });
 }

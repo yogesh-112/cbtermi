@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
+import { sendEmail, quoteSentEmail } from "@/lib/email";
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession().catch(() => null);
@@ -34,8 +35,24 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     await supabase.from("quote_items").insert(items.map((item: any, i: number) => ({ ...item, quote_id: id, sort_order: i })));
   }
 
-  const { data, error } = await supabase.from("quotes").update({ ...body, updated_at: new Date().toISOString() }).eq("id", id).eq("business_id", session.businessId).select().single();
+  const { data, error } = await supabase.from("quotes").update({ ...body, updated_at: new Date().toISOString() }).eq("id", id).eq("business_id", session.businessId).select("*, contacts(full_name, email), businesses(name)").single();
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
+
+  // Send email when quote is marked as sent
+  if (body.status === "sent" && existing.status !== "sent") {
+    const contact = data.contacts as any;
+    const biz = data.businesses as any;
+    if (contact?.email) {
+      const fmtMoney = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2 });
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+      await sendEmail({
+        to: contact.email,
+        subject: `Quote ${data.quote_number} from ${biz?.name ?? "your contractor"}`,
+        html: quoteSentEmail(contact.full_name ?? "Customer", biz?.name ?? "Your Contractor", data.quote_number, fmtMoney(data.total ?? 0), `${appUrl}/quotes/${id}/preview`),
+      });
+    }
+  }
+
   return NextResponse.json({ quote: data });
 }
 

@@ -13,6 +13,8 @@ export default function QuotePreviewPage() {
   const [approved, setApproved] = useState(false);
   const [rejected, setRejected] = useState(false);
   const [error, setError] = useState("");
+  const [signModal, setSignModal] = useState(false);
+  const [signerName, setSignerName] = useState("");
 
   useEffect(() => {
     fetch(`/api/quotes/${id}/preview`)
@@ -29,12 +31,19 @@ export default function QuotePreviewPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  const openSignModal = () => {
+    setSignerName(quote?.contacts?.full_name ?? "");
+    setSignModal(true);
+  };
+
   const approve = async () => {
+    if (!signerName.trim()) return;
+    setSignModal(false);
     setApproving(true);
     const res = await fetch(`/api/quotes/${id}/preview`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "approved" }),
+      body: JSON.stringify({ status: "approved", approved_by: signerName.trim() }),
     });
     setApproving(false);
     if (res.ok) setApproved(true);
@@ -235,7 +244,7 @@ export default function QuotePreviewPage() {
                   <p className="text-[12px] text-[#4a5168] mb-4 leading-relaxed">
                     One click to approve — we'll auto-send a confirmation and schedule your start date.
                   </p>
-                  <button onClick={approve} disabled={approving}
+                  <button onClick={openSignModal} disabled={approving}
                     className="w-full flex items-center justify-center gap-2 h-[42px] bg-brand-green text-white text-[14px] font-semibold rounded-xl hover:bg-brand-green/90 transition-colors mb-2">
                     {approving ? "Approving…" : (
                       <><CheckCircle size={16} /> Approve quote</>
@@ -282,6 +291,38 @@ export default function QuotePreviewPage() {
           </div>
         </div>
       </div>
+
+      {/* E-signature modal */}
+      {signModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <h2 className="text-[16px] font-bold text-[#0c1226] mb-1">Confirm your approval</h2>
+            <p className="text-[13px] text-[#8a8fa3] mb-4">Type your full name below — this acts as your electronic signature.</p>
+            <label className="block text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-1.5">Full name</label>
+            <input
+              value={signerName}
+              onChange={e => setSignerName(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && approve()}
+              placeholder="e.g. John Smith"
+              autoFocus
+              className="w-full h-10 px-3 text-[14px] border border-[#e7e6e1] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-green/30 mb-4"
+            />
+            <p className="text-[11px] text-[#8a8fa3] mb-4 italic">
+              By typing your name and clicking Approve, you agree this constitutes a legally binding e-signature.
+            </p>
+            <div className="flex gap-2">
+              <button onClick={() => setSignModal(false)}
+                className="flex-1 h-[40px] border border-[#e7e6e1] text-[13px] font-medium text-[#4a5168] rounded-xl hover:bg-[#f6f6f3] transition-colors">
+                Cancel
+              </button>
+              <button onClick={approve} disabled={!signerName.trim()}
+                className="flex-1 h-[40px] bg-brand-green text-white text-[13px] font-semibold rounded-xl hover:bg-brand-green/90 transition-colors disabled:opacity-50">
+                Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -10,7 +10,7 @@ const APP_PATHS = [
   "/dashboard", "/contacts", "/leads", "/customers", "/quotes", "/invoices", "/payments",
   "/projects", "/item-requirements", "/project-updates", "/feedback",
   "/notifications", "/communications", "/team", "/settings", "/subscription",
-  "/change-orders", "/profile", "/more"
+  "/change-orders", "/profile", "/more", "/audit-log"
 ];
 
 export async function middleware(request: NextRequest) {

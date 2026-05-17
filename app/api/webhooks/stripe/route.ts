@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { getStripe, planForPriceId } from "@/lib/stripe";
+import { sendEmail, paymentConfirmEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
@@ -19,8 +20,50 @@ export async function POST(request: NextRequest) {
   switch (event.type) {
     case "checkout.session.completed": {
       const cs = event.data.object;
-      const businessId = cs.metadata?.businessId;
+      const mode = cs.metadata?.mode;
       const customerId = cs.customer as string;
+
+      // Invoice payment mode
+      if (mode === "invoice_payment") {
+        const invoiceId = cs.metadata?.invoiceId;
+        if (!invoiceId) break;
+        const amountPaid = (cs.amount_total ?? 0) / 100;
+        const fmt = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2 });
+
+        const { data: inv } = await supabase
+          .from("invoices")
+          .select("id, invoice_number, total, amount_paid, amount_due, contacts(full_name, email), businesses(name)")
+          .eq("id", invoiceId)
+          .single();
+
+        if (inv) {
+          const newPaid = (inv.amount_paid ?? 0) + amountPaid;
+          const newDue = Math.max(0, (inv.total ?? 0) - newPaid);
+          const newStatus = newDue <= 0 ? "paid" : "partially_paid";
+          await supabase.from("invoices").update({
+            amount_paid: newPaid,
+            amount_due: newDue,
+            status: newStatus,
+            paid_at: newDue <= 0 ? new Date().toISOString() : undefined,
+            payment_intent_id: cs.payment_intent as string,
+            updated_at: new Date().toISOString(),
+          }).eq("id", invoiceId);
+
+          const contact = inv.contacts as any;
+          const biz = inv.businesses as any;
+          if (contact?.email) {
+            await sendEmail({
+              to: contact.email,
+              subject: `Payment confirmed — Invoice ${inv.invoice_number}`,
+              html: paymentConfirmEmail(contact.full_name ?? "Customer", biz?.name ?? "your contractor", inv.invoice_number, fmt(amountPaid)),
+            });
+          }
+        }
+        break;
+      }
+
+      // Subscription mode
+      const businessId = cs.metadata?.businessId;
       const subscriptionId = cs.subscription as string;
       if (!businessId) break;
       await supabase.from("businesses").update({ stripe_customer_id: customerId }).eq("id", businessId);

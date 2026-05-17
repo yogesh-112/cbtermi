@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import {
-  Search, Send, Mail, MessageSquare, Phone, ArrowLeft, ExternalLink,
+  Search, Send, Mail, MessageSquare, Phone, ArrowLeft, ExternalLink, Inbox, X,
 } from "lucide-react";
 import { fmtDate } from "@/lib/utils";
 
@@ -40,6 +40,9 @@ export default function CommunicationsPage() {
   const [message, setMessage] = useState("");
   const [channel, setChannel] = useState("email");
   const [sending, setSending] = useState(false);
+  const [logModal, setLogModal] = useState(false);
+  const [logForm, setLogForm] = useState({ channel: "email", message: "", subject: "" });
+  const [logging, setLogging] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -65,6 +68,21 @@ export default function CommunicationsPage() {
     if (data.link) window.open(data.link, "_blank");
     if (data.log) setLogs(prev => [...prev, data.log]);
     setMessage("");
+  };
+
+  const logInbound = async () => {
+    if (!selected || !logForm.message.trim() || logging) return;
+    setLogging(true);
+    const res = await fetch("/api/communications", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contact_id: selected, channel: logForm.channel, message: logForm.message, subject: logForm.subject, inbound: true }),
+    });
+    const data = await res.json();
+    setLogging(false);
+    if (!res.ok) return;
+    if (data.log) setLogs(prev => [...prev, data.log]);
+    setLogModal(false);
+    setLogForm({ channel: "email", message: "", subject: "" });
   };
 
   // Group logs by contact
@@ -202,10 +220,16 @@ export default function CommunicationsPage() {
                     Active on {selectedContact?.channel ?? "email"}
                   </p>
                 </div>
-                <Link href={`/contacts/${selected}`}
-                  className="flex items-center gap-1 text-[12px] text-brand-navy font-medium hover:underline">
-                  View contact <ExternalLink size={11} />
-                </Link>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setLogModal(true)}
+                    className="flex items-center gap-1 text-[12px] text-[#8a8fa3] hover:text-[#4a5168] font-medium">
+                    <Inbox size={13} /> Log received
+                  </button>
+                  <Link href={`/contacts/${selected}`}
+                    className="flex items-center gap-1 text-[12px] text-brand-navy font-medium hover:underline">
+                    View contact <ExternalLink size={11} />
+                  </Link>
+                </div>
               </div>
 
               {/* Messages */}
@@ -268,6 +292,58 @@ export default function CommunicationsPage() {
           )}
         </div>
       </div>
+
+      {/* Log inbound message modal */}
+      {logModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[15px] font-bold text-[#0c1226]">Log received message</h2>
+              <button onClick={() => setLogModal(false)} className="p-1 rounded-lg hover:bg-[#f6f6f3]">
+                <X size={16} className="text-[#8a8fa3]" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-1.5">Channel</label>
+                <div className="flex gap-1.5">
+                  {["email","whatsapp","sms","call","note"].map(ch => (
+                    <button key={ch} onClick={() => setLogForm(f => ({ ...f, channel: ch }))}
+                      className={`px-2.5 py-1 text-[12px] rounded-lg capitalize transition-colors ${logForm.channel === ch ? "bg-brand-navy text-white" : "text-[#8a8fa3] border border-[#e7e6e1] hover:bg-[#f6f6f3]"}`}>
+                      {ch}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {logForm.channel === "email" && (
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-1.5">Subject</label>
+                  <input value={logForm.subject} onChange={e => setLogForm(f => ({ ...f, subject: e.target.value }))}
+                    placeholder="Email subject"
+                    className="w-full h-9 px-3 text-[13px] border border-[#e7e6e1] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-navy/20" />
+                </div>
+              )}
+              <div>
+                <label className="block text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-1.5">Message</label>
+                <textarea value={logForm.message} onChange={e => setLogForm(f => ({ ...f, message: e.target.value }))}
+                  placeholder="What did they say?"
+                  rows={3}
+                  className="w-full px-3 py-2 text-[13px] border border-[#e7e6e1] rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-brand-navy/20" />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => setLogModal(false)}
+                className="flex-1 h-[38px] border border-[#e7e6e1] text-[13px] text-[#4a5168] rounded-xl hover:bg-[#f6f6f3]">
+                Cancel
+              </button>
+              <button onClick={logInbound} disabled={!logForm.message.trim() || logging}
+                className="flex-1 h-[38px] bg-brand-navy text-white text-[13px] font-semibold rounded-xl hover:bg-brand-navy/90 disabled:opacity-50">
+                {logging ? "Saving…" : "Save log"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

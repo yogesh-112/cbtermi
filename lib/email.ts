@@ -75,3 +75,56 @@ export function teamInviteEmail(inviterName: string, businessName: string, link:
       </div>
     </div>`;
 }
+
+function emailShell(content: string) {
+  return `<div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:32px">
+    <div style="background:#1B3A5C;padding:20px 24px;border-radius:8px 8px 0 0">
+      <h1 style="color:#fff;font-size:20px;margin:0">Clear Build USA</h1>
+    </div>
+    <div style="background:#fff;border:1px solid #e2e8f0;border-top:0;padding:32px;border-radius:0 0 8px 8px">
+      ${content}
+    </div>
+  </div>`;
+}
+
+export function quoteSentEmail(contactName: string, businessName: string, quoteNumber: string, total: string, previewLink: string) {
+  return emailShell(`
+    <p style="color:#0f172a;font-size:16px">Hi ${contactName},</p>
+    <p style="color:#475569">${businessName} has sent you a quote for review.</p>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;background:#f8fafc;border-radius:6px;overflow:hidden">
+      <tr><td style="padding:10px 14px;color:#64748b;font-size:13px">Quote</td><td style="padding:10px 14px;font-weight:600;font-size:13px;text-align:right">${quoteNumber}</td></tr>
+      <tr><td style="padding:10px 14px;color:#64748b;font-size:13px;border-top:1px solid #e2e8f0">Total</td><td style="padding:10px 14px;font-weight:700;font-size:15px;text-align:right;border-top:1px solid #e2e8f0">${total}</td></tr>
+    </table>
+    <a href="${previewLink}" style="display:inline-block;background:#1B3A5C;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;margin:16px 0">Review &amp; Approve Quote</a>
+    <p style="color:#94a3b8;font-size:13px">Click the button to review the full quote and approve online.</p>`);
+}
+
+export function quoteApprovedEmail(businessEmail: string, contactName: string, quoteNumber: string, total: string) {
+  return emailShell(`
+    <p style="color:#0f172a;font-size:16px">Quote approved!</p>
+    <p style="color:#475569"><strong>${contactName}</strong> has approved quote <strong>${quoteNumber}</strong> (${total}).</p>
+    <p style="color:#475569">Log in to your dashboard to view the approval and next steps.</p>
+    <p style="color:#94a3b8;font-size:13px">Sent to: ${businessEmail}</p>`);
+}
+
+export function invoiceEmail(contactName: string, businessName: string, invoiceNumber: string, total: string, dueDate: string) {
+  return emailShell(`
+    <p style="color:#0f172a;font-size:16px">Hi ${contactName},</p>
+    <p style="color:#475569">You have a new invoice from <strong>${businessName}</strong>.</p>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;background:#f8fafc;border-radius:6px;overflow:hidden">
+      <tr><td style="padding:10px 14px;color:#64748b;font-size:13px">Invoice</td><td style="padding:10px 14px;font-weight:600;font-size:13px;text-align:right">${invoiceNumber}</td></tr>
+      <tr><td style="padding:10px 14px;color:#64748b;font-size:13px;border-top:1px solid #e2e8f0">Amount due</td><td style="padding:10px 14px;font-weight:700;font-size:15px;text-align:right;border-top:1px solid #e2e8f0">${total}</td></tr>
+      ${dueDate ? `<tr><td style="padding:10px 14px;color:#64748b;font-size:13px;border-top:1px solid #e2e8f0">Due</td><td style="padding:10px 14px;font-weight:600;font-size:13px;text-align:right;border-top:1px solid #e2e8f0">${dueDate}</td></tr>` : ""}
+    </table>
+    <p style="color:#94a3b8;font-size:13px">Please contact ${businessName} with any questions about this invoice.</p>`);
+}
+
+export function paymentConfirmEmail(contactName: string, businessName: string, invoiceNumber: string, amountPaid: string) {
+  return emailShell(`
+    <p style="color:#0f172a;font-size:16px">Hi ${contactName},</p>
+    <p style="color:#475569">Your payment of <strong>${amountPaid}</strong> for invoice <strong>${invoiceNumber}</strong> has been received by <strong>${businessName}</strong>. Thank you!</p>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:16px;margin:16px 0">
+      <p style="color:#16a34a;font-weight:600;margin:0">Payment confirmed ✓</p>
+    </div>
+    <p style="color:#94a3b8;font-size:13px">Keep this email for your records.</p>`);
+}

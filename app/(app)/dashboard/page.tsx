@@ -30,6 +30,7 @@ function MiniBar({ value, max, color }: { value: number; max: number; color: str
 export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [activity, setActivity] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<any[]>([]);
   const [outstandingInvoices, setOutstandingInvoices] = useState<any[]>([]);
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
@@ -42,6 +43,7 @@ export default function DashboardPage() {
     ]).then(([dash, me, inv]: [any, any, any]) => {
       setStats(dash.stats);
       setActivity(dash.recentActivity ?? []);
+      setChartData(dash.chartData ?? []);
       setUserName(me?.user?.name ?? me?.user?.full_name ?? "");
       const invs: any[] = inv.invoices ?? [];
       setOutstandingInvoices(invs.filter(i => (i.amount_due ?? 0) > 0).slice(0, 4));
@@ -116,24 +118,34 @@ export default function DashboardPage() {
               <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-brand-green inline-block" /> Paid</span>
             </div>
           </div>
-          {/* Simple bar chart */}
-          <div className="flex items-end gap-1.5 h-32 w-full">
-            {Array.from({ length: 14 }, (_, i) => {
-              const invVal = Math.random() * 0.7 + 0.1;
-              const paidVal = invVal * (Math.random() * 0.5 + 0.4);
-              return (
-                <div key={i} className="flex-1 flex items-end gap-0.5 h-full">
-                  <div className="flex-1 rounded-t bg-brand-navy/20 hover:bg-brand-navy/30 transition-colors"
-                    style={{ height: `${invVal * 100}%` }} />
-                  <div className="flex-1 rounded-t bg-brand-green hover:bg-brand-green/80 transition-colors"
-                    style={{ height: `${paidVal * 100}%` }} />
+          {/* Real bar chart */}
+          {(() => {
+            const maxVal = Math.max(...chartData.map(d => Math.max(d.invoiced, d.paid)), 1);
+            const startLabel = chartData[0]?.date ? new Date(chartData[0].date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
+            const midLabel = chartData[6]?.date ? new Date(chartData[6].date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
+            const endLabel = chartData[13]?.date ? new Date(chartData[13].date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
+            return (
+              <>
+                <div className="flex items-end gap-1.5 h-32 w-full">
+                  {(chartData.length ? chartData : Array.from({ length: 14 }, () => ({ invoiced: 0, paid: 0 }))).map((d: any, i: number) => {
+                    const invH = Math.max((d.invoiced / maxVal) * 100, d.invoiced > 0 ? 4 : 0);
+                    const paidH = Math.max((d.paid / maxVal) * 100, d.paid > 0 ? 4 : 0);
+                    return (
+                      <div key={i} className="flex-1 flex items-end gap-0.5 h-full group relative">
+                        <div className="flex-1 rounded-t bg-brand-navy/20 hover:bg-brand-navy/30 transition-colors"
+                          style={{ height: invH > 0 ? `${invH}%` : "3px" }} />
+                        <div className="flex-1 rounded-t bg-brand-green hover:bg-brand-green/80 transition-colors"
+                          style={{ height: paidH > 0 ? `${paidH}%` : "3px" }} />
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
-          <div className="flex justify-between text-[10px] text-[#8a8fa3] mt-2">
-            <span>Apr 23</span><span>Apr 30</span><span>May 7</span>
-          </div>
+                <div className="flex justify-between text-[10px] text-[#8a8fa3] mt-2">
+                  <span>{startLabel}</span><span>{midLabel}</span><span>{endLabel}</span>
+                </div>
+              </>
+            );
+          })()}
         </div>
 
         {/* Pending actions */}

@@ -36,50 +36,54 @@ export default function AdminUsersPage() {
   useEffect(() => { setPage(1); }, [search, filter]);
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[22px] font-semibold text-[#0d1117]">Users</h1>
+          <h1 className="text-[22px] font-bold text-[#0d1117]">Users</h1>
           <p className="text-[13px] text-[#6b7280] mt-0.5">{total} registered users</p>
         </div>
-        <button onClick={load} className="p-2 rounded-[8px] text-[#6b7280] hover:bg-white hover:text-[#0d1117] transition-colors border border-[#e5e7eb]">
+        <button onClick={load} className="p-2 rounded-[8px] text-[#6b7280] hover:text-[#0d1117] hover:bg-white border border-[#e8e9ed] transition-colors shadow-sm">
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
         </button>
       </div>
 
-      <div className="bg-white border border-[#e5e7eb] rounded-[12px] px-4 py-3 flex items-center gap-4 flex-wrap">
+      <div className="bg-white border border-[#e8e9ed] rounded-[12px] px-4 py-3 flex items-center gap-4 flex-wrap shadow-sm">
         <FilterTabs options={FILTER_OPTS} value={filter} onChange={setFilter} />
         <div className="flex-1" />
         <SearchBar value={search} onChange={setSearch} placeholder="Search users…" />
       </div>
 
       <AdminTable headers={["User", "Email", "Businesses", "Status", "Joined", ""]}>
-        {loading && <tr><td colSpan={6} className="py-10 text-center text-white/30 text-[13px]">Loading…</td></tr>}
+        {loading && <tr><td colSpan={6} className="py-10 text-center text-[#9399a8] text-[13px]">Loading…</td></tr>}
         {!loading && users.length === 0 && <AdminEmpty message="No users found" />}
         {users.map((u: any) => {
-          const bizCount = Array.isArray(u.business_members) ? u.business_members.length
+          const bizCount = Array.isArray(u.business_members)
+            ? u.business_members.length
             : u.business_members?.count ?? 0;
           return (
             <AdminTr key={u.id} onClick={() => router.push(`/admin/users/${u.id}`)}>
               <AdminTd>
-                <div>
-                  <p className="text-white font-medium text-[13px]">{u.name}</p>
-                  <MonoId id={u.id} prefix="usr" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-full bg-[#f0f1f5] flex items-center justify-center text-[11px] font-bold text-[#6b7280] flex-shrink-0">
+                    {u.name?.charAt(0)?.toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-[#0d1117] font-medium text-[13px]">{u.name}</p>
+                    <MonoId id={u.id} prefix="usr" />
+                  </div>
                 </div>
               </AdminTd>
-              <AdminTd className="text-[12px]">{u.email}</AdminTd>
-              <AdminTd className="text-[12px] text-white/60">{bizCount} business{bizCount !== 1 ? "es" : ""}</AdminTd>
+              <AdminTd className="text-[12px] text-[#6b7280]">{u.email}</AdminTd>
+              <AdminTd className="text-[12px] text-[#6b7280]">{bizCount} biz</AdminTd>
               <AdminTd>
-                {u.is_banned
-                  ? <StatusPill status="banned" />
-                  : !u.email_verified
-                  ? <StatusPill status="inactive" />
+                {u.is_banned ? <StatusPill status="banned" />
+                  : !u.email_verified ? <StatusPill status="inactive" />
                   : <StatusPill status="active" />}
               </AdminTd>
-              <AdminTd className="text-[12px] text-white/40">
+              <AdminTd className="text-[12px] text-[#9399a8]">
                 {new Date(u.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
               </AdminTd>
-              <AdminTd><ChevronRight size={14} className="text-white/20" /></AdminTd>
+              <AdminTd><ChevronRight size={14} className="text-[#c0c3cc]" /></AdminTd>
             </AdminTr>
           );
         })}

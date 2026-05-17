@@ -1,10 +1,23 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import {
-  AdminTable, AdminTr, AdminTd, MonoId, StatusPill,
-  Pagination, AdminEmpty,
-} from "@/components/admin/ui";
+import { AdminTable, AdminTr, AdminTd, MonoId, Pagination, AdminEmpty } from "@/components/admin/ui";
 import { RefreshCw } from "lucide-react";
+
+const ACTION_COLORS: Record<string, string> = {
+  suspend:    "bg-red-50 text-red-700",
+  ban:        "bg-red-50 text-red-700",
+  reactivate: "bg-emerald-50 text-emerald-700",
+  unban:      "bg-emerald-50 text-emerald-700",
+  login:      "bg-blue-50 text-blue-700",
+  create:     "bg-emerald-50 text-emerald-700",
+  delete:     "bg-red-50 text-red-700",
+  update:     "bg-amber-50 text-amber-700",
+};
+
+function actionColor(action: string) {
+  const key = Object.keys(ACTION_COLORS).find(k => action.includes(k));
+  return key ? ACTION_COLORS[key] : "bg-gray-100 text-gray-600";
+}
 
 export default function AdminAuditLogsPage() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -22,60 +35,46 @@ export default function AdminAuditLogsPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const actionColor = (action: string) => {
-    if (action.includes("suspend") || action.includes("ban"))   return "text-red-400";
-    if (action.includes("reactivate") || action.includes("unban")) return "text-emerald-400";
-    if (action.includes("login"))    return "text-blue-400";
-    if (action.includes("create"))   return "text-emerald-400";
-    if (action.includes("delete"))   return "text-red-400";
-    return "text-white/60";
-  };
-
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[22px] font-semibold text-[#0d1117]">Audit Logs</h1>
-          <p className="text-[13px] text-[#6b7280] mt-0.5">All admin actions — {total} entries</p>
+          <h1 className="text-[22px] font-bold text-[#0d1117]">Audit Logs</h1>
+          <p className="text-[13px] text-[#6b7280] mt-0.5">All admin actions · {total} entries</p>
         </div>
-        <button onClick={load} className="p-2 rounded-[8px] text-[#6b7280] hover:bg-white hover:text-[#0d1117] transition-colors border border-[#e5e7eb]">
+        <button onClick={load} className="p-2 rounded-[8px] text-[#6b7280] hover:text-[#0d1117] hover:bg-white border border-[#e8e9ed] transition-colors shadow-sm">
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
         </button>
       </div>
 
-      <AdminTable headers={["When", "Admin", "Action", "Entity", "Payload", "IP"]}>
-        {loading && <tr><td colSpan={6} className="py-10 text-center text-white/30 text-[13px]">Loading…</td></tr>}
+      <AdminTable headers={["When", "Admin", "Action", "Entity", "IP"]}>
+        {loading && <tr><td colSpan={5} className="py-10 text-center text-[#9399a8] text-[13px]">Loading…</td></tr>}
         {!loading && logs.length === 0 && <AdminEmpty message="No audit logs yet" />}
         {logs.map((log: any) => (
           <AdminTr key={log.id}>
-            <AdminTd className="text-[11px] text-white/40 whitespace-nowrap">
+            <AdminTd className="text-[11px] text-[#9399a8] whitespace-nowrap">
               {new Date(log.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
             </AdminTd>
             <AdminTd>
               <div>
-                <p className="text-white text-[12px] font-medium">{log.super_admins?.name ?? "—"}</p>
-                <p className="text-[10px] text-white/25">{log.super_admins?.role?.replace(/_/g, " ")}</p>
+                <p className="text-[#0d1117] font-medium text-[13px]">{log.super_admins?.name ?? "System"}</p>
+                <p className="text-[10px] text-[#9399a8]">{log.super_admins?.role?.replace(/_/g, " ")}</p>
               </div>
             </AdminTd>
             <AdminTd>
-              <span className={`text-[12px] font-mono font-medium ${actionColor(log.action)}`}>{log.action}</span>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold font-mono ${actionColor(log.action)}`}>
+                {log.action}
+              </span>
             </AdminTd>
-            <AdminTd className="text-[12px]">
+            <AdminTd>
               {log.entity_type ? (
                 <div>
-                  <span className="text-white/50">{log.entity_type}</span>
-                  {log.entity_id && <><br/><MonoId id={log.entity_id} /></>}
+                  <span className="text-[12px] text-[#6b7280]">{log.entity_type}</span>
+                  {log.entity_id && <><br /><MonoId id={log.entity_id} /></>}
                 </div>
-              ) : "—"}
+              ) : <span className="text-[#c0c3cc]">—</span>}
             </AdminTd>
-            <AdminTd className="max-w-[160px]">
-              {log.payload ? (
-                <span className="text-[11px] text-white/30 font-mono line-clamp-2">
-                  {JSON.stringify(log.payload)}
-                </span>
-              ) : "—"}
-            </AdminTd>
-            <AdminTd className="text-[11px] text-white/30 font-mono">{log.ip_address ?? "—"}</AdminTd>
+            <AdminTd className="text-[11px] text-[#9399a8] font-mono">{log.ip_address ?? "—"}</AdminTd>
           </AdminTr>
         ))}
       </AdminTable>

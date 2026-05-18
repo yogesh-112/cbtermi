@@ -4,15 +4,7 @@ import Link from "next/link";
 import { Plus, Briefcase, MapPin } from "lucide-react";
 import { StatusBadge, EmptyState } from "@/components/ui";
 import { fmt, fmtDate } from "@/lib/utils";
-
-
-const STATUS_FILTERS = [
-  { key: "",           label: "All" },
-  { key: "active",     label: "Active" },
-  { key: "scheduled",  label: "Scheduled" },
-  { key: "on_hold",    label: "On hold" },
-  { key: "completed",  label: "Completed" },
-];
+import { useT } from "@/lib/i18n";
 
 const CARD_GRADIENTS = [
   "from-[#1a2f5a] to-[#2453E4]",
@@ -24,6 +16,7 @@ const CARD_GRADIENTS = [
 ];
 
 export default function ProjectsPage() {
+  const t = useT();
   const [projects, setProjects] = useState<any[]>([]);
   const [all, setAll] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,32 +51,40 @@ export default function ProjectsPage() {
     return { total, elapsed: Math.max(0, Math.min(elapsed, total)) };
   };
 
+  const STATUS_FILTERS = [
+    { key: "",           label: t.projects.tabAll },
+    { key: "active",     label: t.projects.tabActive },
+    { key: "scheduled",  label: t.projects.tabScheduled },
+    { key: "on_hold",    label: t.projects.tabOnHold },
+    { key: "completed",  label: t.projects.tabCompleted },
+  ];
+
   return (
     <div>
       <div className="mb-1">
-        <h1 className="page-title">Projects</h1>
-        <p className="page-desc">{counts.active} in progress · {counts.scheduled} scheduled this month</p>
+        <h1 className="page-title">{t.projects.title}</h1>
+        <p className="page-desc">{counts.active} {t.projects.active.toLowerCase()} · {counts.scheduled} {t.projects.tabScheduled.toLowerCase()}</p>
       </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
         <div className="mini-stat mini-stat-green">
-          <span className="mini-stat-label">Active</span>
+          <span className="mini-stat-label">{t.projects.active}</span>
           <span className="mini-stat-value">{counts.active}</span>
-          <span className="text-[11px] text-brand-green mt-0.5">{counts.active} on schedule today</span>
+          <span className="text-[11px] text-brand-green mt-0.5">{counts.active} {t.projects.onSchedule}</span>
         </div>
         <div className="mini-stat mini-stat-blue">
-          <span className="mini-stat-label">Scheduled</span>
+          <span className="mini-stat-label">{t.projects.scheduled}</span>
           <span className="mini-stat-value">{counts.scheduled}</span>
-          <span className="text-[11px] text-[#8a8fa3] mt-0.5">next 30 days</span>
+          <span className="text-[11px] text-[#8a8fa3] mt-0.5">{t.projects.next30Days}</span>
         </div>
         <div className="mini-stat mini-stat-navy">
-          <span className="mini-stat-label">Completed</span>
+          <span className="mini-stat-label">{t.projects.completed}</span>
           <span className="mini-stat-value">{counts.completed}</span>
           <span className="text-[11px] text-[#8a8fa3] mt-0.5">+6% vs 2025</span>
         </div>
         <div className="mini-stat mini-stat-amber">
-          <span className="mini-stat-label">Avg completion</span>
+          <span className="mini-stat-label">{t.projects.avgCompletion}</span>
           <span className="mini-stat-value">—</span>
           <span className="text-[11px] text-[#8a8fa3] mt-0.5">across last 10 jobs</span>
         </div>
@@ -110,8 +111,8 @@ export default function ProjectsPage() {
         {loading ? (
           [...Array(3)].map((_, i) => <div key={i} className="mobile-card animate-pulse h-24 skeleton" />)
         ) : projects.length === 0 ? (
-          <EmptyState icon={<Briefcase size={36} />} title="No projects yet" description="Create your first project."
-            action={<Link href="/projects/new" className="btn btn-green btn-sm"><Plus size={14} /> New Project</Link>} />
+          <EmptyState icon={<Briefcase size={36} />} title={t.projects.noProjects} description={t.projects.noProjectsDesc}
+            action={<Link href="/projects/new" className="btn btn-green btn-sm"><Plus size={14} /> {t.projects.newProject}</Link>} />
         ) : projects.map(p => (
           <Link key={p.id} href={`/projects/${p.id}`} className="mobile-card block hover:shadow-card-md transition-shadow">
             <div className="mobile-card-row">
@@ -137,8 +138,8 @@ export default function ProjectsPage() {
             {[...Array(6)].map((_, i) => <div key={i} className="card h-52 animate-pulse skeleton" />)}
           </div>
         ) : projects.length === 0 ? (
-          <EmptyState icon={<Briefcase size={40} />} title="No projects yet" description="Create your first project."
-            action={<Link href="/projects/new" className="btn btn-primary btn-sm"><Plus size={14} /> New Project</Link>} />
+          <EmptyState icon={<Briefcase size={40} />} title={t.projects.noProjects} description={t.projects.noProjectsDesc}
+            action={<Link href="/projects/new" className="btn btn-primary btn-sm"><Plus size={14} /> {t.projects.newProject}</Link>} />
         ) : (
           <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
             {projects.map((p, idx) => {
@@ -183,7 +184,7 @@ export default function ProjectsPage() {
                     {days && (
                       <div className="mb-3">
                         <div className="flex justify-between text-[11px] text-[#8a8fa3] mb-1">
-                          <span>Day {days.elapsed} of {days.total}</span>
+                          <span>{t.nav.dayOf} {days.elapsed} {t.nav.of} {days.total}</span>
                           <span>{pct}%</span>
                         </div>
                         <div className="h-1.5 bg-[#f0efea] rounded-full overflow-hidden">
@@ -195,7 +196,7 @@ export default function ProjectsPage() {
                     {/* Budget row */}
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[10px] text-[#8a8fa3] uppercase tracking-wide">Budget</p>
+                        <p className="text-[10px] text-[#8a8fa3] uppercase tracking-wide">{t.projects.budget}</p>
                         <p className="text-[13px] font-semibold text-[#0c1226]">{p.budget ? fmt(p.budget) : "—"}</p>
                       </div>
                       {p.address && (

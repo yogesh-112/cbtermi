@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Plus, UserCheck, Search } from "lucide-react";
 import { EmptyState, toast } from "@/components/ui";
 import { fmtDate } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 const AVATAR_COLORS = [
   "bg-[#2453E4]","bg-brand-green","bg-brand-navy","bg-[#7C3AED]",
@@ -39,6 +40,7 @@ function statusBucket(s: string) {
 }
 
 export default function LeadsPage() {
+  const t = useT();
   const [leads, setLeads]   = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -96,7 +98,7 @@ export default function LeadsPage() {
   return (
     <div>
       <div className="mb-1">
-        <h1 className="page-title">Leads</h1>
+        <h1 className="page-title">{t.leads.title}</h1>
         <p className="page-desc">{leads.length} active leads · {thisWeek} new this week</p>
       </div>
 

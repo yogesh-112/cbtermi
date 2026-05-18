@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 import { Plus, ChevronDown, ChevronRight, Trash2, ClipboardList } from "lucide-react";
 import { Modal, toast, EmptyState } from "@/components/ui";
 import { fmtDate } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 export default function ItemRequirementsPage() {
+  const t = useT();
   const [lists, setLists] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string[]>([]);

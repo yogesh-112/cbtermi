@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2, Mail, Users, Clock, CheckCircle, Search, MoreHorizontal } from "lucide-react";
 import { Modal, EmptyState, toast, ConfirmDialog } from "@/components/ui";
 import { fmtDate } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 const ROLE_COLORS: Record<string, string> = {
   owner:        "bg-brand-navy/10 text-brand-navy",
@@ -12,19 +13,20 @@ const ROLE_COLORS: Record<string, string> = {
   viewer:       "bg-[#f0efea] text-[#8a8fa3]",
   subcontractor:"bg-amber-50 text-amber-700",
 };
-const ROLE_LABEL: Record<string, string> = {
-  owner: "Owner", manager: "Manager", staff: "Staff", crew: "Crew",
-  viewer: "Viewer", subcontractor: "Subcontractor",
-};
-const ROLE_PERMS: { role: string; color: string; count?: number; desc: string }[] = [
-  { role: "owner",        color: "bg-brand-navy/10 text-brand-navy", desc: "Full access to everything, billing, and settings" },
-  { role: "manager",      color: "bg-blue-50 text-blue-700",         desc: "Manage projects, contacts, quotes, and invoices" },
-  { role: "crew",         color: "bg-[#f0efea] text-[#4a5168]",      desc: "View and update assigned projects only" },
-  { role: "subcontractor",color: "bg-amber-50 text-amber-700",        desc: "Limited access to assigned jobs" },
-  { role: "viewer",       color: "bg-[#f0efea] text-[#8a8fa3]",      desc: "Read-only access to shared data" },
-];
 
 export default function TeamPage() {
+  const t = useT();
+  const ROLE_LABEL: Record<string, string> = {
+    owner: t.team.roles.owner, manager: t.team.roles.manager, staff: t.team.roles.staff,
+    crew: t.team.roles.crew, viewer: t.team.roles.viewer, subcontractor: t.team.roles.subcontractor,
+  };
+  const ROLE_PERMS: { role: string; color: string; desc: string }[] = [
+    { role: "owner",        color: "bg-brand-navy/10 text-brand-navy", desc: t.team.roleDescs.owner },
+    { role: "manager",      color: "bg-blue-50 text-blue-700",         desc: t.team.roleDescs.manager },
+    { role: "crew",         color: "bg-[#f0efea] text-[#4a5168]",      desc: t.team.roleDescs.staff },
+    { role: "subcontractor",color: "bg-amber-50 text-amber-700",        desc: t.team.roleDescs.crew },
+    { role: "viewer",       color: "bg-[#f0efea] text-[#8a8fa3]",      desc: t.team.roleDescs.viewer },
+  ];
   const [members, setMembers] = useState<any[]>([]);
   const [invitations, setInvitations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +47,7 @@ export default function TeamPage() {
   useEffect(() => { load(); }, []);
 
   const invite = async () => {
-    if (!form.email) { toast("Email address is required", "error"); return; }
+    if (!form.email) { toast(t.team.emailRequired, "error"); return; }
     setSaving(true);
     const res = await fetch("/api/team", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -53,7 +55,7 @@ export default function TeamPage() {
     });
     setSaving(false);
     if (res.ok) {
-      toast("Invitation sent successfully");
+      toast(t.team.sendInvitation);
       setModal(false); setForm({ email: "", role: "staff" }); load();
     } else {
       const d = await res.json(); toast(d.message || "Failed to send invitation", "error");
@@ -63,13 +65,13 @@ export default function TeamPage() {
   const removeMember = async () => {
     if (!removeId) return;
     await fetch("/api/team", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: removeId }) });
-    toast("Team member removed"); setRemoveId(null); load();
+    toast(t.team.removeMemberTitle); setRemoveId(null); load();
   };
 
   const cancelInvite = async () => {
     if (!cancelId) return;
     await fetch("/api/team", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ invitationId: cancelId }) });
-    toast("Invitation cancelled"); setCancelId(null); load();
+    toast(t.team.cancelInviteTitle); setCancelId(null); load();
   };
 
   const getInitials = (name: string) => name?.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase() || "?";
@@ -85,54 +87,54 @@ export default function TeamPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="page-title">Team</h1>
-        <p className="page-desc">{members.length} member{members.length !== 1 ? "s" : ""}{invitations.length > 0 ? ` · ${invitations.length} pending invitation${invitations.length !== 1 ? "s" : ""}` : ""}</p>
+        <h1 className="page-title">{t.team.title}</h1>
+        <p className="page-desc">{members.length} {t.team.memberCount}{invitations.length > 0 ? ` · ${invitations.length} ${t.team.pendingCount}` : ""}</p>
       </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="mini-stat mini-stat-navy">
-          <span className="mini-stat-label">Active members</span>
+          <span className="mini-stat-label">{t.team.activeMembers}</span>
           <span className="mini-stat-value">{members.length}</span>
-          <span className="text-[11px] text-[#8a8fa3] mt-0.5">seat usage {members.length} / 10</span>
+          <span className="text-[11px] text-[#8a8fa3] mt-0.5">{t.team.seatUsage} {members.length} / 10</span>
         </div>
         <div className="mini-stat mini-stat-amber">
-          <span className="mini-stat-label">Pending invitations</span>
+          <span className="mini-stat-label">{t.team.pendingInvites}</span>
           <span className="mini-stat-value">{invitations.length}</span>
-          {invitations.length > 0 && <span className="text-[11px] text-amber-600 mt-0.5">resend if expired</span>}
+          {invitations.length > 0 && <span className="text-[11px] text-amber-600 mt-0.5">{t.team.resendIfExpired}</span>}
         </div>
         <div className="mini-stat mini-stat-green">
-          <span className="mini-stat-label">On site today</span>
+          <span className="mini-stat-label">{t.team.onSiteToday}</span>
           <span className="mini-stat-value">{Math.min(members.length, 4)}</span>
-          <span className="text-[11px] text-[#8a8fa3] mt-0.5">active today</span>
+          <span className="text-[11px] text-[#8a8fa3] mt-0.5">{t.team.activeToday}</span>
         </div>
         <div className="mini-stat mini-stat-blue">
-          <span className="mini-stat-label">Avg response time</span>
+          <span className="mini-stat-label">{t.team.avgResponseTime}</span>
           <span className="mini-stat-value">—</span>
-          <span className="text-[11px] text-[#8a8fa3] mt-0.5">customer messages</span>
+          <span className="text-[11px] text-[#8a8fa3] mt-0.5">{t.team.customerMessages}</span>
         </div>
       </div>
 
       {/* Members section */}
       <div className="card overflow-hidden">
         <div className="px-5 py-4 border-b border-[#e7e6e1] flex items-center gap-3 flex-wrap">
-          <h2 className="font-semibold text-[#0c1226] text-[15px]">Members</h2>
+          <h2 className="font-semibold text-[#0c1226] text-[15px]">{t.team.membersTab}</h2>
           <div className="flex-1 min-w-[180px] relative">
             <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a8fa3] pointer-events-none" />
             <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Search members…"
+              placeholder={t.team.searchPlaceholder}
               className="w-full h-8 pl-8 text-[13px] bg-[#f6f6f3] border border-[#e7e6e1] rounded-lg placeholder:text-[#8a8fa3] focus:outline-none focus:ring-2 focus:ring-brand-navy/20" />
           </div>
           <button className="btn btn-primary btn-sm ml-auto flex items-center gap-1.5" onClick={() => setModal(true)}>
-            <Plus size={13} /> Invite member
+            <Plus size={13} /> {t.team.inviteMember}
           </button>
         </div>
 
         {loading ? (
-          <div className="p-8 text-center text-[#8a8fa3] text-sm">Loading…</div>
+          <div className="p-8 text-center text-[#8a8fa3] text-sm">{t.team.loading}</div>
         ) : filtered.length === 0 ? (
-          <EmptyState icon={<Users size={32} />} title="No team members yet"
-            description="Invite a colleague to collaborate on this business." />
+          <EmptyState icon={<Users size={32} />} title={t.team.noMembers}
+            description={t.team.noMembersDesc} />
         ) : (
           <>
             {/* Desktop table */}
@@ -140,11 +142,11 @@ export default function TeamPage() {
               <table className="table-base">
                 <thead>
                   <tr>
-                    <th>Member</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Last active</th>
-                    <th>Assigned projects</th>
+                    <th>{t.team.memberCol}</th>
+                    <th>{t.team.roleCol}</th>
+                    <th>{t.team.statusCol}</th>
+                    <th>{t.team.lastActiveCol}</th>
+                    <th>{t.team.assignedCol}</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -169,7 +171,7 @@ export default function TeamPage() {
                       </td>
                       <td>
                         <span className="flex items-center gap-1.5 text-[13px] text-brand-green">
-                          <span className="w-1.5 h-1.5 rounded-full bg-brand-green" /> Active
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand-green" /> {t.team.active}
                         </span>
                       </td>
                       <td className="text-[#8a8fa3] text-[13px]">{fmtDate(m.joined_at) || "—"}</td>
@@ -218,7 +220,7 @@ export default function TeamPage() {
           <>
             <div className="px-5 py-3 border-t border-[#e7e6e1] bg-amber-50/50">
               <h3 className="text-[12px] font-semibold text-amber-700 uppercase tracking-wide flex items-center gap-1.5">
-                <Clock size={12} /> Pending invitations · {invitations.length}
+                <Clock size={12} /> {t.team.pendingInvitesSection} · {invitations.length}
               </h3>
             </div>
             <div className="divide-y divide-[#f0efea]">
@@ -232,7 +234,7 @@ export default function TeamPage() {
                     <p className="text-[11px] text-[#8a8fa3]">Expires {fmtDate(inv.expires_at)}</p>
                   </div>
                   <span className={`badge ${ROLE_COLORS[inv.role] ?? "bg-[#f0efea] text-[#4a5168]"}`}>{ROLE_LABEL[inv.role] ?? inv.role}</span>
-                  <span className="badge bg-amber-50 text-amber-700">Pending</span>
+                  <span className="badge bg-amber-50 text-amber-700">{t.team.pending}</span>
                   <button onClick={() => setCancelId(inv.id)} className="w-7 h-7 rounded-lg flex items-center justify-center text-[#8a8fa3] hover:text-red-500 hover:bg-red-50 transition-colors">
                     <Trash2 size={13} />
                   </button>
@@ -245,7 +247,7 @@ export default function TeamPage() {
 
       {/* Roles & permissions */}
       <div className="card p-5">
-        <h2 className="section-title mb-4">Roles &amp; permissions</h2>
+        <h2 className="section-title mb-4">{t.team.rolesSection}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
           {ROLE_PERMS.map(r => (
             <div key={r.role} className="p-4 rounded-xl border border-[#e7e6e1] bg-[#fafaf8]">
@@ -257,43 +259,42 @@ export default function TeamPage() {
       </div>
 
       {/* Invite Modal */}
-      <Modal open={modal} onClose={() => setModal(false)} title="Invite team member" size="sm">
+      <Modal open={modal} onClose={() => setModal(false)} title={t.team.inviteTitle} size="sm">
         <div className="space-y-4">
           <div className="bg-[#f6f6f3] border border-[#e7e6e1] rounded-xl p-4 text-sm text-[#4a5168]">
             <div className="flex items-start gap-2">
               <CheckCircle size={15} className="text-brand-green mt-0.5 flex-shrink-0" />
-              <p>If this person already uses Clear Build, they'll receive a notification. Otherwise, they'll be invited to create an account.</p>
+              <p>{t.team.inviteDesc}</p>
             </div>
           </div>
           <div>
-            <label className="label">Email address <span className="text-red-500">*</span></label>
+            <label className="label">{t.team.emailRequired}</label>
             <input type="email" value={form.email}
               onChange={e => setForm({ ...form, email: e.target.value })}
-              placeholder="colleague@example.com" className="field" />
+              placeholder={t.team.emailPlaceholder} className="field" />
           </div>
           <div>
-            <label className="label">Role</label>
+            <label className="label">{t.team.roleLabel}</label>
             <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} className="field">
-              <option value="manager">Manager — manage business operations</option>
-              <option value="staff">Staff — create and edit assigned data</option>
-              <option value="crew">Crew — view and update assigned projects</option>
-              <option value="viewer">Viewer — read-only access</option>
+              <option value="manager">{t.team.roleOptions.manager}</option>
+              <option value="staff">{t.team.roleOptions.staff}</option>
+              <option value="crew">{t.team.roleOptions.crew}</option>
+              <option value="viewer">{t.team.roleOptions.viewer}</option>
             </select>
           </div>
           <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
-            <button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button>
+            <button className="btn btn-outline" onClick={() => setModal(false)}>{t.common.cancel}</button>
             <button className="btn btn-primary" onClick={invite} disabled={saving}>
-              {saving ? "Sending…" : "Send invitation"}
+              {saving ? t.common.sending : t.team.sendInvitation}
             </button>
           </div>
         </div>
       </Modal>
 
       <ConfirmDialog open={!!removeId} onClose={() => setRemoveId(null)} onConfirm={removeMember}
-        title="Remove team member"
-        message="This person will lose access to this business. You can re-invite them later." danger />
+        title={t.team.removeMemberTitle} message={t.team.removeMemberDesc} danger />
       <ConfirmDialog open={!!cancelId} onClose={() => setCancelId(null)} onConfirm={cancelInvite}
-        title="Cancel invitation" message="The invitation link will become invalid immediately." danger />
+        title={t.team.cancelInviteTitle} message={t.team.cancelInviteDesc} danger />
     </div>
   );
 }

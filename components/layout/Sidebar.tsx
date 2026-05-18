@@ -6,34 +6,9 @@ import {
   LayoutDashboard, Users, FileText, Receipt, Briefcase, CreditCard,
   ClipboardList, MessageSquare, Star, Bell, MessagesSquare, UserCog,
   Settings, X, GitPullRequestDraft, UserCheck, UserCircle,
-  ChevronsLeft, ChevronsRight, ShieldCheck,
+  ChevronsLeft, ChevronsRight, ShieldCheck, HelpCircle, Calendar, LayoutTemplate,
 } from "lucide-react";
-
-const PRIMARY_NAV = [
-  { href: "/dashboard",         icon: LayoutDashboard,      label: "Dashboard",      countKey: null },
-  { href: "/contacts",          icon: Users,                label: "Contacts",       countKey: "contacts" as const },
-  { href: "/projects",          icon: Briefcase,            label: "Projects",       countKey: null },
-  { href: "/quotes",            icon: FileText,             label: "Quotes",         countKey: null },
-  { href: "/change-orders",     icon: GitPullRequestDraft,  label: "Change Orders",  countKey: null },
-  { href: "/invoices",          icon: Receipt,              label: "Invoices",       countKey: null },
-  { href: "/payments",          icon: CreditCard,           label: "Payments",       countKey: null },
-];
-
-const CONTACTS_SUB = [
-  { href: "/leads",     icon: UserCheck,  label: "Leads",     countKey: "leads" as const },
-  { href: "/customers", icon: UserCircle, label: "Customers", countKey: "customers" as const },
-];
-
-const SECONDARY_NAV = [
-  { href: "/notifications",     icon: Bell,           label: "Notifications",    countKey: null },
-  { href: "/communications",    icon: MessagesSquare, label: "Communications",   countKey: null },
-  { href: "/item-requirements", icon: ClipboardList,  label: "Item Requirements",countKey: null },
-  { href: "/project-updates",   icon: MessageSquare,  label: "Project Updates",  countKey: null },
-  { href: "/feedback",          icon: Star,           label: "Feedback",         countKey: null },
-  { href: "/team",              icon: UserCog,        label: "Team",             countKey: null },
-  { href: "/audit-log",         icon: ShieldCheck,    label: "Audit Log",        countKey: null },
-  { href: "/settings",          icon: Settings,       label: "Settings",         countKey: null },
-];
+import { useT } from "@/lib/i18n";
 
 type CountKey = "contacts" | "leads" | "customers";
 interface Counts { contacts: number; leads: number; customers: number }
@@ -46,10 +21,40 @@ interface Props {
 
 export default function Sidebar({ user, businesses, currentBusiness }: Props) {
   const pathname = usePathname();
+  const t = useT();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [counts, setCounts] = useState<Counts>({ contacts: 0, leads: 0, customers: 0 });
   const [trialDays, setTrialDays] = useState({ used: 0, total: 14 });
+
+  const PRIMARY_NAV = [
+    { href: "/dashboard",         icon: LayoutDashboard,      label: t.nav.dashboard,      countKey: null },
+    { href: "/contacts",          icon: Users,                label: t.nav.contacts,       countKey: "contacts" as const },
+    { href: "/projects",          icon: Briefcase,            label: t.nav.projects,       countKey: null },
+    { href: "/quotes",            icon: FileText,             label: t.nav.quotes,         countKey: null },
+    { href: "/change-orders",     icon: GitPullRequestDraft,  label: t.nav.changeOrders,   countKey: null },
+    { href: "/invoices",          icon: Receipt,              label: t.nav.invoices,       countKey: null },
+    { href: "/payments",          icon: CreditCard,           label: t.nav.payments,       countKey: null },
+  ];
+
+  const CONTACTS_SUB = [
+    { href: "/leads",     icon: UserCheck,  label: t.nav.leads,     countKey: "leads" as const },
+    { href: "/customers", icon: UserCircle, label: t.nav.customers, countKey: "customers" as const },
+  ];
+
+  const SECONDARY_NAV = [
+    { href: "/scheduling",        icon: Calendar,       label: "Scheduling",           countKey: null },
+    { href: "/templates",         icon: LayoutTemplate, label: "Templates",            countKey: null },
+    { href: "/notifications",     icon: Bell,           label: t.nav.notifications,    countKey: null },
+    { href: "/communications",    icon: MessagesSquare, label: t.nav.communications,   countKey: null },
+    { href: "/item-requirements", icon: ClipboardList,  label: t.nav.itemRequirements, countKey: null },
+    { href: "/project-updates",   icon: MessageSquare,  label: t.nav.projectUpdates,   countKey: null },
+    { href: "/feedback",          icon: Star,           label: t.nav.feedback,         countKey: null },
+    { href: "/team",              icon: UserCog,        label: t.nav.team,             countKey: null },
+    { href: "/audit-log",         icon: ShieldCheck,    label: t.nav.auditLog,         countKey: null },
+    { href: "/settings",          icon: Settings,       label: t.nav.settings,         countKey: null },
+    { href: "/help",              icon: HelpCircle,     label: "Help & Support",       countKey: null },
+  ];
 
   // Restore collapsed state from localStorage on mount
   useEffect(() => {
@@ -80,7 +85,7 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
         const used = Math.max(0, Math.min(14,
           Math.floor((Date.now() - new Date(sub.subscription.created_at).getTime()) / 86400000)
         ));
-        setTrialDays({ used, total: 14 });
+        setTrialDays({ used, total: 15 });
       }
     }).catch(() => {});
   }, []);
@@ -206,7 +211,7 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
 
         {/* "More" section */}
         {(!collapsed || inDrawer) && (
-          <div className="sidebar-section">More</div>
+          <div className="sidebar-section">{t.nav.more}</div>
         )}
         {collapsed && !inDrawer && <div className="my-2 mx-1 border-t border-white/10" />}
 
@@ -221,8 +226,8 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
       {(!collapsed || inDrawer) && (
         <div className="mx-3 mb-4 p-3.5 rounded-[10px] bg-white/[0.06] flex-shrink-0">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-white text-[12.5px] font-semibold">Trial · explore free</span>
-            <span className="text-white/50 text-[11px]">{daysLeft}d left</span>
+            <span className="text-white text-[12.5px] font-semibold">{t.nav.trialLabel}</span>
+            <span className="text-white/50 text-[11px]">{daysLeft}{t.nav.daysLeft}</span>
           </div>
           <div className="h-1.5 bg-white/10 rounded-full overflow-hidden mb-2.5">
             <div
@@ -234,11 +239,11 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
             />
           </div>
           <div className="text-white/50 text-[11px] mb-2.5">
-            Day {trialDays.used} of {trialDays.total} · Pro from $39/mo
+            {t.nav.dayOf} {trialDays.used} {t.nav.of} {trialDays.total} · {t.nav.proFrom}
           </div>
           <Link href="/subscription"
             className="block text-center text-[12px] font-medium py-1.5 rounded-[7px] bg-white/10 hover:bg-white/15 text-white/80 hover:text-white transition-colors">
-            Upgrade plan
+            {t.nav.upgradePlan}
           </Link>
         </div>
       )}
@@ -250,7 +255,7 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
             className="flex items-center justify-center h-9 rounded-[8px] text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors">
             <CreditCard size={16} />
           </Link>
-          <Tooltip label={`Upgrade · ${daysLeft}d trial left`} />
+          <Tooltip label={`${t.nav.upgradePlan} · ${daysLeft}${t.nav.daysLeft}`} />
         </div>
       )}
     </div>

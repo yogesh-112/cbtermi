@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Modal, ConfirmDialog, toast } from "@/components/ui";
 import { fmtDate } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 const CHANNEL_COLORS: Record<string, string> = {
   email:        "bg-blue-50 text-blue-700",
@@ -36,6 +37,7 @@ const TYPE_COLOR: Record<string, string> = {
 type TabKey = "all" | "unread" | "system";
 
 export default function NotificationsPage() {
+  const t = useT();
   const [logs, setLogs] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
@@ -67,21 +69,21 @@ export default function NotificationsPage() {
   useEffect(() => { load(); }, []);
 
   const saveTemplate = async () => {
-    if (!tForm.name || !tForm.message) { toast("Name and message required", "error"); return; }
+    if (!tForm.name || !tForm.message) { toast(t.common.required, "error"); return; }
     setTSaving(true);
     const res = await fetch("/api/notifications", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(tForm),
     });
     setTSaving(false);
-    if (res.ok) { toast("Template saved"); setTModal(false); setTForm({ name: "", channel: "email", subject: "", message: "" }); load(); }
-    else { const d = await res.json(); toast(d.message || "Failed", "error"); }
+    if (res.ok) { toast(t.communications.saveTemplate); setTModal(false); setTForm({ name: "", channel: "email", subject: "", message: "" }); load(); }
+    else { const d = await res.json(); toast(d.message || t.common.required, "error"); }
   };
 
   const deleteTemplate = async () => {
     if (!deleteId) return;
     await fetch("/api/notifications", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: deleteId }) });
-    toast("Template deleted"); setDeleteId(null); load();
+    toast(t.communications.deleteTemplateTitle); setDeleteId(null); load();
   };
 
   const loadTemplate = (id: string) => {
@@ -90,7 +92,7 @@ export default function NotificationsPage() {
   };
 
   const send = async () => {
-    if (!sForm.contact_id || !sForm.message) { toast("Contact and message required", "error"); return; }
+    if (!sForm.contact_id || !sForm.message) { toast(t.common.required, "error"); return; }
     setSSaving(true);
     const res = await fetch("/api/notifications", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -112,9 +114,9 @@ export default function NotificationsPage() {
   };
 
   const tabs: { key: TabKey; label: string; count?: number }[] = [
-    { key: "all",    label: "All",    count: logs.length },
-    { key: "unread", label: "Unread", count: logs.filter(l => !l.read_at).length },
-    { key: "system", label: "Templates", count: templates.length },
+    { key: "all",    label: t.communications.tabAll,       count: logs.length },
+    { key: "unread", label: t.communications.tabUnread,    count: logs.filter(l => !l.read_at).length },
+    { key: "system", label: t.communications.tabTemplates, count: templates.length },
   ];
 
   const displayItems = activeTab === "system" ? templates : logs;
@@ -123,12 +125,12 @@ export default function NotificationsPage() {
     <div>
       <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
         <div>
-          <h1 className="page-title">Notifications</h1>
-          <p className="page-desc">{logs.length > 0 ? `${logs.filter(l => !l.read_at).length} unread · everything that needs your attention` : "Sent and received messages appear here"}</p>
+          <h1 className="page-title">{t.notifications.title}</h1>
+          <p className="page-desc">{logs.length > 0 ? `${logs.filter(l => !l.read_at).length} ${t.communications.unread} · ${t.communications.attentionNeeded}` : t.communications.sentReceived}</p>
         </div>
         <div className="flex gap-2">
-          <button className="btn btn-outline btn-sm" onClick={() => setTModal(true)}><Plus size={13} /> New Template</button>
-          <button className="btn btn-primary btn-sm" onClick={() => setSModal(true)}><Send size={13} /> Send</button>
+          <button className="btn btn-outline btn-sm" onClick={() => setTModal(true)}><Plus size={13} /> {t.communications.newTemplate}</button>
+          <button className="btn btn-primary btn-sm" onClick={() => setSModal(true)}><Send size={13} /> {t.communications.send}</button>
         </div>
       </div>
 
@@ -149,7 +151,7 @@ export default function NotificationsPage() {
         ))}
         {logs.length > 0 && (
           <button className="ml-auto flex items-center gap-1.5 text-[12px] text-[#8a8fa3] hover:text-[#4a5168] px-3 py-2 transition-colors">
-            <CheckCircle size={12} /> Mark all read
+            <CheckCircle size={12} /> {t.communications.markAllRead}
           </button>
         )}
       </div>
@@ -161,33 +163,33 @@ export default function NotificationsPage() {
       ) : displayItems.length === 0 ? (
         <div className="card p-12 text-center">
           <Bell size={32} className="text-[#d8d6cf] mx-auto mb-3" />
-          <p className="font-medium text-[#4a5168]">{activeTab === "system" ? "No templates yet" : "No notifications yet"}</p>
+          <p className="font-medium text-[#4a5168]">{activeTab === "system" ? t.communications.noTemplates : t.communications.noNotifications}</p>
           <p className="text-[13px] text-[#8a8fa3] mt-1">
-            {activeTab === "system" ? "Create reusable message templates." : "Sent messages and activity will appear here."}
+            {activeTab === "system" ? t.communications.noTemplatesDesc : t.communications.noNotificationsDesc}
           </p>
         </div>
       ) : activeTab === "system" ? (
         /* Templates view */
         <div className="space-y-2">
-          {templates.map((t: any) => {
-            const ChanIcon = t.channel === "email" ? Mail : t.channel === "whatsapp" ? MessageCircle : Phone;
+          {templates.map((tmpl: any) => {
+            const ChanIcon = tmpl.channel === "email" ? Mail : tmpl.channel === "whatsapp" ? MessageCircle : Phone;
             return (
-              <div key={t.id} className="card p-4 hover:shadow-card-md transition-shadow">
+              <div key={tmpl.id} className="card p-4 hover:shadow-card-md transition-shadow">
                 <div className="flex items-start gap-3">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${CHANNEL_COLORS[t.channel] ?? "bg-[#f0efea] text-[#4a5168]"}`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${CHANNEL_COLORS[tmpl.channel] ?? "bg-[#f0efea] text-[#4a5168]"}`}>
                     <ChanIcon size={15} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-semibold text-[#0c1226] text-[13px]">{t.name}</p>
-                      <span className={`badge capitalize ${CHANNEL_COLORS[t.channel] ?? "bg-[#f0efea] text-[#4a5168]"}`}>{t.channel}</span>
+                      <p className="font-semibold text-[#0c1226] text-[13px]">{tmpl.name}</p>
+                      <span className={`badge capitalize ${CHANNEL_COLORS[tmpl.channel] ?? "bg-[#f0efea] text-[#4a5168]"}`}>{tmpl.channel}</span>
                     </div>
-                    <p className="text-[12px] text-[#8a8fa3] mt-0.5 line-clamp-1">{t.message}</p>
+                    <p className="text-[12px] text-[#8a8fa3] mt-0.5 line-clamp-1">{tmpl.message}</p>
                   </div>
                   <div className="flex gap-1">
-                    <button onClick={() => { loadTemplate(t.id); setSModal(true); }}
+                    <button onClick={() => { loadTemplate(tmpl.id); setSModal(true); }}
                       className="btn btn-outline btn-sm gap-1"><Send size={11} /> Use</button>
-                    <button onClick={() => setDeleteId(t.id)} className="btn btn-ghost btn-sm text-red-500 p-1.5"><Trash2 size={13} /></button>
+                    <button onClick={() => setDeleteId(tmpl.id)} className="btn btn-ghost btn-sm text-red-500 p-1.5"><Trash2 size={13} /></button>
                   </div>
                 </div>
               </div>
@@ -228,92 +230,92 @@ export default function NotificationsPage() {
       )}
 
       {/* New Template Modal */}
-      <Modal open={tModal} onClose={() => setTModal(false)} title="New notification template" size="md">
+      <Modal open={tModal} onClose={() => setTModal(false)} title={t.communications.newTemplateTitle} size="md">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">Template name <span className="text-red-500">*</span></label>
+              <label className="label">{t.communications.templateName}</label>
               <input value={tForm.name} onChange={e => setTForm({ ...tForm, name: e.target.value })}
-                className="field" placeholder="e.g. Appointment Reminder" />
+                className="field" placeholder={t.communications.templateNamePlaceholder} />
             </div>
             <div>
-              <label className="label">Channel</label>
+              <label className="label">{t.communications.channelLabel}</label>
               <select value={tForm.channel} onChange={e => setTForm({ ...tForm, channel: e.target.value })} className="field">
-                <option value="email">Email</option>
-                <option value="sms">SMS</option>
-                <option value="whatsapp">WhatsApp</option>
+                <option value="email">{t.communications.emailChannel}</option>
+                <option value="sms">{t.communications.smsChannel}</option>
+                <option value="whatsapp">{t.communications.whatsappChannel}</option>
               </select>
             </div>
           </div>
           {tForm.channel === "email" && (
             <div>
-              <label className="label">Subject</label>
+              <label className="label">{t.communications.subject}</label>
               <input value={tForm.subject} onChange={e => setTForm({ ...tForm, subject: e.target.value })}
                 className="field" placeholder="Email subject line" />
             </div>
           )}
           <div>
-            <label className="label">Message <span className="text-red-500">*</span></label>
+            <label className="label">{t.communications.message} <span className="text-red-500">*</span></label>
             <textarea value={tForm.message} onChange={e => setTForm({ ...tForm, message: e.target.value })}
               className="field min-h-[120px] resize-y"
-              placeholder={"Hi {{contact_name}}, this is a message from {{business_name}}…"} />
+              placeholder={t.communications.messagePlaceholder} />
           </div>
           <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
-            <button className="btn btn-outline" onClick={() => setTModal(false)}>Cancel</button>
-            <button className="btn btn-primary" onClick={saveTemplate} disabled={tSaving}>{tSaving ? "Saving…" : "Save template"}</button>
+            <button className="btn btn-outline" onClick={() => setTModal(false)}>{t.common.cancel}</button>
+            <button className="btn btn-primary" onClick={saveTemplate} disabled={tSaving}>{tSaving ? t.common.saving : t.communications.saveTemplate}</button>
           </div>
         </div>
       </Modal>
 
       {/* Send Modal */}
-      <Modal open={sModal} onClose={() => setSModal(false)} title="Send notification" size="md">
+      <Modal open={sModal} onClose={() => setSModal(false)} title={t.communications.sendNotification} size="md">
         <div className="space-y-4">
           <div>
-            <label className="label">Load template</label>
+            <label className="label">{t.payments.loadTemplate}</label>
             <select value={sForm.template_id}
               onChange={e => { setSForm(f => ({ ...f, template_id: e.target.value })); loadTemplate(e.target.value); }}
               className="field">
-              <option value="">— Start from scratch —</option>
-              {templates.map((t: any) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              <option value="">{t.payments.scratchOption}</option>
+              {templates.map((tmpl: any) => <option key={tmpl.id} value={tmpl.id}>{tmpl.name}</option>)}
             </select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">Contact <span className="text-red-500">*</span></label>
+              <label className="label">{t.payments.contactRequired}</label>
               <select value={sForm.contact_id} onChange={e => setSForm({ ...sForm, contact_id: e.target.value })} className="field">
-                <option value="">Select contact…</option>
+                <option value="">{t.payments.selectContact}</option>
                 {contacts.map((c: any) => <option key={c.id} value={c.id}>{c.full_name}</option>)}
               </select>
             </div>
             <div>
-              <label className="label">Channel</label>
+              <label className="label">{t.payments.channel}</label>
               <select value={sForm.channel} onChange={e => setSForm({ ...sForm, channel: e.target.value })} className="field">
-                <option value="email">Email</option>
-                <option value="sms">SMS</option>
-                <option value="whatsapp">WhatsApp</option>
+                <option value="email">{t.communications.emailChannel}</option>
+                <option value="sms">{t.communications.smsChannel}</option>
+                <option value="whatsapp">{t.communications.whatsappChannel}</option>
               </select>
             </div>
           </div>
           {sForm.channel === "email" && (
             <div>
-              <label className="label">Subject</label>
+              <label className="label">{t.communications.subject}</label>
               <input value={sForm.subject} onChange={e => setSForm({ ...sForm, subject: e.target.value })} className="field" />
             </div>
           )}
           <div>
-            <label className="label">Message <span className="text-red-500">*</span></label>
+            <label className="label">{t.communications.message} <span className="text-red-500">*</span></label>
             <textarea value={sForm.message} onChange={e => setSForm({ ...sForm, message: e.target.value })}
               className="field min-h-[100px] resize-y" />
           </div>
           <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
-            <button className="btn btn-outline" onClick={() => setSModal(false)}>Cancel</button>
-            <button className="btn btn-primary" onClick={send} disabled={sSaving}>{sSaving ? "Sending…" : "Send"}</button>
+            <button className="btn btn-outline" onClick={() => setSModal(false)}>{t.payments.cancelBtn}</button>
+            <button className="btn btn-primary" onClick={send} disabled={sSaving}>{sSaving ? t.common.sending : t.communications.send}</button>
           </div>
         </div>
       </Modal>
 
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={deleteTemplate}
-        title="Delete template" message="Delete this notification template? This cannot be undone." danger />
+        title={t.communications.deleteTemplateTitle} message={t.communications.deleteTemplateMessage} danger />
     </div>
   );
 }

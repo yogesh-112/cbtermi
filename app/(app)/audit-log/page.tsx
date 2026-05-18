@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Search, ShieldCheck } from "lucide-react";
 import { fmtDate } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 const ACTION_COLORS: Record<string, string> = {
   created:  "bg-blue-50 text-blue-700",
@@ -27,6 +28,7 @@ const ENTITY_LABELS: Record<string, string> = {
 const ENTITY_FILTERS = ["All", "invoice", "quote", "payment", "project", "contact"];
 
 export default function AuditLogPage() {
+  const t = useT();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

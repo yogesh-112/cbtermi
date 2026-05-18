@@ -4,6 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
+import { useT } from "@/lib/i18n";
+
+const BUSINESS_TYPES = ["General Contractor","Remodeler","Electrician","Plumber","HVAC","Painter","Landscaper","Roofer","Flooring","Other"];
 
 function AuthHero({ badge, title, body }: { badge: string; title: string; body: string }) {
   return (
@@ -26,6 +30,7 @@ function AuthHero({ badge, title, body }: { badge: string; title: string; body: 
 
 export default function RegisterPage() {
   const router = useRouter();
+  const t = useT();
   const [form, setForm] = useState({ first_name: "", last_name: "", business_name: "", email: "", password: "", agree: false });
   const [err, setErr] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -45,18 +50,19 @@ export default function RegisterPage() {
     return s;
   };
   const strength = pwdStrength(form.password);
-  const strengthLabel = ["", "Weak", "Fair", "Strong", "Very strong"][strength];
+  const strengthLabels = ["", t.auth.errors.weak, t.auth.errors.fair, t.auth.errors.strong, t.auth.errors.veryStrong];
+  const strengthLabel = strengthLabels[strength];
   const strengthColor = ["", "#b53a4b", "#b6750a", "#2f8a4a", "#2f8a4a"][strength];
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs: Record<string, string> = {};
-    if (!form.first_name.trim()) errs.first_name = "Required";
-    if (!form.email) errs.email = "Required";
-    else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = "Invalid email";
-    if (!form.password) errs.password = "Required";
-    else if (form.password.length < 8) errs.password = "Min 8 characters";
-    if (!form.agree) errs.agree = "You must agree to continue";
+    if (!form.first_name.trim()) errs.first_name = t.auth.errors.required;
+    if (!form.email) errs.email = t.auth.errors.required;
+    else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = t.auth.errors.invalidEmail;
+    if (!form.password) errs.password = t.auth.errors.required;
+    else if (form.password.length < 8) errs.password = t.auth.errors.minPassword;
+    if (!form.agree) errs.agree = t.auth.errors.mustAgree;
     if (Object.keys(errs).length) { setErr(errs); return; }
     setLoading(true); setErr({});
     const name = [form.first_name, form.last_name].filter(Boolean).join(" ");
@@ -66,7 +72,7 @@ export default function RegisterPage() {
     });
     const data = await res.json();
     setLoading(false);
-    if (!res.ok) setErr({ general: data.message || "Registration failed" });
+    if (!res.ok) setErr({ general: data.message || t.auth.errors.registrationFailed });
     else router.push("/login?registered=true");
   };
 
@@ -75,12 +81,13 @@ export default function RegisterPage() {
       {/* Left — form */}
       <div className="flex-1 flex items-center justify-center p-8 lg:p-10">
         <div className="w-full max-w-[400px]">
-          <div className="mb-8">
+          <div className="mb-8 flex items-center justify-between">
             <Image src="/logo.png" alt="Clear Build USA" width={140} height={38} className="object-contain object-left" priority />
+            <LanguageSwitcher variant="auth" />
           </div>
 
-          <h1 className="text-[28px] font-semibold tracking-tight text-[#0c1226]">Start your free trial.</h1>
-          <p className="text-[14px] text-[#4a5168] mt-2">14 days free. No card required.</p>
+          <h1 className="text-[28px] font-semibold tracking-tight text-[#0c1226]">{t.auth.register.title}</h1>
+          <p className="text-[14px] text-[#4a5168] mt-2">{t.auth.register.subtitle}</p>
 
           {err.general && (
             <div className="mt-5 p-3.5 bg-brand-rose-50 border border-brand-rose/20 rounded-xl text-brand-rose text-sm">
@@ -97,41 +104,41 @@ export default function RegisterPage() {
               <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
               <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
             </svg>
-            Sign up with Google
+            {t.auth.register.signUpWithGoogle}
           </button>
           <div className="flex items-center gap-3 mt-4 mb-2">
             <div className="flex-1 h-px bg-[#e7e6e1]" />
-            <span className="text-[12px] text-[#8a8fa3]">or sign up with email</span>
+            <span className="text-[12px] text-[#8a8fa3]">{t.auth.register.orSignUpWithEmail}</span>
             <div className="flex-1 h-px bg-[#e7e6e1]" />
           </div>
 
           <form onSubmit={submit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="label">First name</label>
+                <label className="label">{t.auth.firstName}</label>
                 <input type="text" value={form.first_name} onChange={set("first_name")}
                   placeholder="Marcus" className="field" />
                 {err.first_name && <p className="mt-1 text-xs text-brand-rose">{err.first_name}</p>}
               </div>
               <div>
-                <label className="label">Last name</label>
+                <label className="label">{t.auth.lastName}</label>
                 <input type="text" value={form.last_name} onChange={set("last_name")}
                   placeholder="Kane" className="field" />
               </div>
             </div>
             <div>
-              <label className="label">Business name</label>
+              <label className="label">{t.auth.businessName}</label>
               <input type="text" value={form.business_name} onChange={set("business_name")}
                 placeholder="Riverbend Remodel" className="field" />
             </div>
             <div>
-              <label className="label">Work email</label>
+              <label className="label">{t.auth.workEmail}</label>
               <input type="email" value={form.email} onChange={set("email")}
                 placeholder="marcus@riverbendremodel.com" className="field" />
               {err.email && <p className="mt-1 text-xs text-brand-rose">{err.email}</p>}
             </div>
             <div>
-              <label className="label">Password</label>
+              <label className="label">{t.auth.password}</label>
               <div className="relative">
                 <input type={showPwd ? "text" : "password"} value={form.password} onChange={set("password")}
                   placeholder="••••••••" className="field pr-10" />
@@ -149,7 +156,7 @@ export default function RegisterPage() {
                     ))}
                   </div>
                   {strengthLabel && <p className="text-[11.5px] mt-1 font-medium" style={{ color: strengthColor }}>
-                    Strong · 12+ characters, mixed case, number
+                    {strengthLabel} · {t.auth.errors.strengthHint}
                   </p>}
                 </div>
               )}
@@ -160,30 +167,30 @@ export default function RegisterPage() {
                 onChange={e => setForm(f => ({ ...f, agree: e.target.checked }))}
                 className="w-4 h-4 mt-0.5 rounded border-[#e7e6e1] text-brand-navy focus:ring-brand-navy/20 flex-shrink-0" />
               <label htmlFor="agree" className="text-[13px] text-[#4a5168] cursor-pointer leading-snug">
-                I agree to the{" "}
-                <button type="button" className="text-brand-blue font-medium hover:underline">Terms</button>
-                {" "}and{" "}
-                <button type="button" className="text-brand-blue font-medium hover:underline">Privacy Policy</button>
+                {t.auth.register.agreeToTerms}{" "}
+                <button type="button" className="text-brand-blue font-medium hover:underline">{t.auth.register.terms}</button>
+                {" "}{t.auth.register.and}{" "}
+                <button type="button" className="text-brand-blue font-medium hover:underline">{t.auth.register.privacyPolicy}</button>
               </label>
             </div>
             {err.agree && <p className="text-xs text-brand-rose">{err.agree}</p>}
             <button type="submit" disabled={loading} className="btn btn-primary btn-lg w-full">
-              {loading ? "Creating account…" : "Create account"}
+              {loading ? t.auth.register.creatingAccount : t.auth.register.createAccount}
             </button>
           </form>
 
           <p className="text-center text-sm text-[#4a5168] mt-6">
-            Already have an account?{" "}
-            <Link href="/login" className="text-brand-blue font-medium hover:underline">Sign in</Link>
+            {t.auth.register.alreadyHaveAccount}{" "}
+            <Link href="/login" className="text-brand-blue font-medium hover:underline">{t.auth.register.signIn}</Link>
           </p>
         </div>
       </div>
 
       {/* Right — hero */}
       <AuthHero
-        badge="14-day free trial"
-        title="The clean way to run a remodel business."
-        body="Quotes, projects, invoices and customer chat — one calm workspace from the truck to the books."
+        badge={t.auth.register.badge}
+        title={t.auth.register.heroTitle}
+        body={t.auth.register.heroBody}
       />
     </div>
   );

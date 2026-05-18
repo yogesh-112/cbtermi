@@ -4,23 +4,12 @@ import Link from "next/link";
 import {
   GitPullRequestDraft, ClipboardList, MessagesSquare, Star, Bell,
   UserCog, CreditCard, Settings, ChevronRight, ArrowRight,
+  Calendar, LayoutTemplate, HelpCircle,
 } from "lucide-react";
-
-const WORKSPACE = [
-  { href: "/change-orders",     icon: GitPullRequestDraft, label: "Change orders",      badge: null },
-  { href: "/item-requirements", icon: ClipboardList,       label: "Item requirements",  badge: null },
-  { href: "/communications",    icon: MessagesSquare,      label: "Communications",     badge: null },
-  { href: "/feedback",          icon: Star,                label: "Feedback",           badge: null },
-  { href: "/notifications",     icon: Bell,                label: "Notifications",      badge: null },
-];
-
-const BUSINESS = [
-  { href: "/team",         icon: UserCog,    label: "Team",             badge: null },
-  { href: "/subscription", icon: CreditCard, label: "Subscription",     badge: "Pro" },
-  { href: "/settings",     icon: Settings,   label: "Business profile", badge: null },
-];
+import { useT } from "@/lib/i18n";
 
 export default function MorePage() {
+  const t = useT();
   const [user, setUser] = useState<any>(null);
   const [counts, setCounts] = useState({ quotes: 0, invoices: 0, team: 0 });
 
@@ -30,14 +19,31 @@ export default function MorePage() {
       fetch("/api/quotes").then(r => r.json()),
       fetch("/api/invoices").then(r => r.json()),
       fetch("/api/team").then(r => r.json()),
-    ]).then(([q, inv, t]) => {
+    ]).then(([q, inv, tm]) => {
       setCounts({
         quotes: (q.quotes ?? []).length,
         invoices: (inv.invoices ?? []).length,
-        team: (t.members ?? []).length,
+        team: (tm.members ?? []).length,
       });
     });
   }, []);
+
+  const WORKSPACE = [
+    { href: "/scheduling",        icon: Calendar,            label: "Scheduling",             badge: null },
+    { href: "/templates",         icon: LayoutTemplate,      label: "Templates",              badge: null },
+    { href: "/change-orders",     icon: GitPullRequestDraft, label: t.more.changeOrders,      badge: null },
+    { href: "/item-requirements", icon: ClipboardList,       label: t.more.itemRequirements,  badge: null },
+    { href: "/communications",    icon: MessagesSquare,      label: t.more.communications,    badge: null },
+    { href: "/feedback",          icon: Star,                label: t.more.feedback,          badge: null },
+    { href: "/notifications",     icon: Bell,                label: t.more.notifications,     badge: null },
+    { href: "/help",              icon: HelpCircle,          label: "Help & Support",         badge: null },
+  ];
+
+  const BUSINESS = [
+    { href: "/team",         icon: UserCog,    label: t.more.team,             badge: null },
+    { href: "/subscription", icon: CreditCard, label: t.nav.subscription,      badge: "Pro" },
+    { href: "/settings",     icon: Settings,   label: t.more.businessProfile,  badge: null },
+  ];
 
   const initials = user?.name?.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase() || "?";
 
@@ -57,7 +63,7 @@ export default function MorePage() {
           </div>
           <Link href="/profile"
             className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 text-white text-[12px] font-medium rounded-lg">
-            View <ArrowRight size={12} />
+            {t.more.view} <ArrowRight size={12} />
           </Link>
         </div>
       </div>
@@ -65,9 +71,9 @@ export default function MorePage() {
       {/* Stats row */}
       <div className="grid grid-cols-3 bg-white border-b border-[#e7e6e1]">
         {[
-          { label: "Quotes",   value: counts.quotes },
-          { label: "Invoices", value: counts.invoices },
-          { label: "Team",     value: counts.team },
+          { label: t.more.quotes,   value: counts.quotes },
+          { label: t.more.invoices, value: counts.invoices },
+          { label: t.more.team,     value: counts.team },
         ].map(s => (
           <div key={s.label} className="flex flex-col items-center py-4 border-r border-[#f0efea] last:border-r-0">
             <span className="text-[22px] font-bold text-[#0c1226]">{s.value}</span>
@@ -79,7 +85,7 @@ export default function MorePage() {
       <div className="px-4 pt-5 space-y-5">
         {/* Workspace section */}
         <div>
-          <p className="text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-2 px-1">Workspace</p>
+          <p className="text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-2 px-1">{t.more.workspace}</p>
           <div className="bg-white rounded-2xl overflow-hidden divide-y divide-[#f0efea]">
             {WORKSPACE.map(({ href, icon: Icon, label, badge }) => (
               <Link key={href} href={href}
@@ -99,7 +105,7 @@ export default function MorePage() {
 
         {/* Business section */}
         <div>
-          <p className="text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-2 px-1">Business</p>
+          <p className="text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-2 px-1">{t.more.business}</p>
           <div className="bg-white rounded-2xl overflow-hidden divide-y divide-[#f0efea]">
             {BUSINESS.map(({ href, icon: Icon, label, badge }) => (
               <Link key={href} href={href}

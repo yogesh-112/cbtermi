@@ -7,6 +7,7 @@ import MobileHeader from "@/components/layout/MobileHeader";
 import MobileNav from "@/components/layout/MobileNav";
 import Topbar from "@/components/layout/Topbar";
 import ImpersonationBanner from "@/components/layout/ImpersonationBanner";
+import ProductTour from "@/components/ProductTour";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
@@ -40,6 +41,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           {children}
         </div>
       </main>
+      <ProductTour />
     </div>
   );
 }

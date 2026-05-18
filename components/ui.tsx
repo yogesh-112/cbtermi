@@ -1,5 +1,5 @@
 ﻿"use client";
-import { ReactNode, useState, useEffect, useRef } from "react";
+import { ReactNode, useState, useEffect, useRef, ComponentType } from "react";
 import { X, CheckCircle, AlertCircle, Info, ChevronDown, MoreHorizontal } from "lucide-react";
 
 // ─── MODAL ────────────────────────────────────────────────────────────────────
@@ -53,14 +53,23 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, message, danger
 
 // ─── EMPTY STATE ──────────────────────────────────────────────────────────────
 export function EmptyState({ icon, title, description, action }: {
-  icon: ReactNode; title: string; description?: string; action?: ReactNode;
+  icon: ComponentType<{ size?: number }> | ReactNode;
+  title: string;
+  description?: string;
+  action?: ReactNode | { label: string; onClick: () => void };
 }) {
+  const IconEl = typeof icon === "function"
+    ? (() => { const C = icon as ComponentType<{ size?: number }>; return <C size={40} />; })()
+    : icon;
+  const ActionEl = action && typeof action === "object" && "label" in (action as object)
+    ? (() => { const a = action as { label: string; onClick: () => void }; return <button className="btn btn-primary btn-sm" onClick={a.onClick}>{a.label}</button>; })()
+    : action as ReactNode;
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-      <div className="text-[#d8d6cf] mb-4 p-4 bg-[#f6f6f3] rounded-2xl">{icon}</div>
+      <div className="text-[#d8d6cf] mb-4 p-4 bg-[#f6f6f3] rounded-2xl">{IconEl}</div>
       <h3 className="text-base font-semibold text-[#4a5168] mb-1">{title}</h3>
       {description && <p className="text-sm text-[#8a8fa3] mb-5 max-w-xs leading-relaxed">{description}</p>}
-      {action}
+      {ActionEl}
     </div>
   );
 }
@@ -190,16 +199,22 @@ export function StatCard({ label, value, sub, icon, color = "navy" }: {
 
 // ─── TABS ─────────────────────────────────────────────────────────────────────
 export function Tabs({ tabs, active, onChange }: {
-  tabs: string[]; active: string; onChange: (t: string) => void;
+  tabs: Array<string | { id: string; label: string }>;
+  active: string;
+  onChange: (t: string) => void;
 }) {
   return (
     <div className="tabs-bar">
-      {tabs.map((tab) => (
-        <button key={tab} onClick={() => onChange(tab)}
-          className={`tab-btn ${active === tab ? "active" : ""}`}>
-          {tab}
-        </button>
-      ))}
+      {tabs.map((tab) => {
+        const id = typeof tab === "string" ? tab : tab.id;
+        const label = typeof tab === "string" ? tab : tab.label;
+        return (
+          <button key={id} onClick={() => onChange(id)}
+            className={`tab-btn ${active === id ? "active" : ""}`}>
+            {label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -280,6 +295,35 @@ export function Select({ value, onChange, options, placeholder, className = "" }
       {placeholder && <option value="">{placeholder}</option>}
       {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
+  );
+}
+
+// ─── INFO TOOLTIP ─────────────────────────────────────────────────────────────
+export function InfoTooltip({ text, side = "top" }: { text: string; side?: "top" | "bottom" | "left" | "right" }) {
+  const [visible, setVisible] = useState(false);
+  const positions: Record<string, string> = {
+    top:    "bottom-full left-1/2 -translate-x-1/2 mb-2",
+    bottom: "top-full left-1/2 -translate-x-1/2 mt-2",
+    left:   "right-full top-1/2 -translate-y-1/2 mr-2",
+    right:  "left-full top-1/2 -translate-y-1/2 ml-2",
+  };
+  return (
+    <span className="relative inline-flex items-center"
+      onMouseEnter={() => setVisible(true)}
+      onMouseLeave={() => setVisible(false)}
+      onFocus={() => setVisible(true)}
+      onBlur={() => setVisible(false)}
+      onClick={() => setVisible(v => !v)}>
+      <button type="button" aria-label="More info" tabIndex={0}
+        className="w-4 h-4 rounded-full bg-[#e5e7eb] text-[#6b7280] hover:bg-[#d1d5db] flex items-center justify-center text-[10px] font-bold leading-none transition-colors flex-shrink-0">
+        i
+      </button>
+      {visible && (
+        <span className={`absolute z-[60] w-56 text-[12px] leading-relaxed bg-[#0c1226] text-white px-3 py-2 rounded-xl shadow-lg pointer-events-none ${positions[side]}`}>
+          {text}
+        </span>
+      )}
+    </span>
   );
 }
 

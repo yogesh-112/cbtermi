@@ -5,6 +5,7 @@ import {
   Search, Send, Mail, MessageSquare, Phone, ArrowLeft, ExternalLink, Inbox, X,
 } from "lucide-react";
 import { fmtDate } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 const CHANNEL_COLOR: Record<string, string> = {
   email:        "bg-blue-50 text-blue-700",
@@ -31,6 +32,7 @@ interface Contact {
 }
 
 export default function CommunicationsPage() {
+  const t = useT();
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -135,7 +137,7 @@ export default function CommunicationsPage() {
           ${mobileView === "chat" ? "hidden lg:flex" : "flex"}`}>
           {/* Header */}
           <div className="px-4 py-3.5 border-b border-[#e7e6e1]">
-            <h1 className="font-bold text-[15px] text-[#0c1226] mb-3" style={{ letterSpacing: "-0.02em" }}>Communications</h1>
+            <h1 className="font-bold text-[15px] text-[#0c1226] mb-3" style={{ letterSpacing: "-0.02em" }}>{t.communications.title}</h1>
             <div className="relative mb-3">
               <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a8fa3] pointer-events-none" />
               <input value={search} onChange={e => setSearch(e.target.value)}
@@ -162,7 +164,7 @@ export default function CommunicationsPage() {
             ) : displayed.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-40 text-center px-4">
                 <MessageSquare size={24} className="text-[#d8d6cf] mb-2" />
-                <p className="text-sm text-[#8a8fa3]">No conversations yet</p>
+                <p className="text-sm text-[#8a8fa3]">{t.communications.noNotifications}</p>
               </div>
             ) : (
               displayed.map((c, idx) => (

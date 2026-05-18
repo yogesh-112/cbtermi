@@ -5,8 +5,10 @@ import {
   Building2, Sliders, Hash, Bell, Mail, Plug, Globe, Shield, Webhook, Upload,
   Trash2, Plus, Check, ExternalLink, AlertCircle,
 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 function PasswordChangeForm() {
+  const t = useT();
   const [form, setForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [saving, setSaving] = useState(false);
   const setF = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, [k]: e.target.value }));
@@ -23,25 +25,13 @@ function PasswordChangeForm() {
   };
   return (
     <form onSubmit={submit} className="space-y-4 max-w-sm">
-      <div><label className="label">Current password</label><input type="password" value={form.currentPassword} onChange={setF("currentPassword")} className="field" required /></div>
-      <div><label className="label">New password</label><input type="password" value={form.newPassword} onChange={setF("newPassword")} className="field" required minLength={8} /></div>
-      <div><label className="label">Confirm new password</label><input type="password" value={form.confirmPassword} onChange={setF("confirmPassword")} className="field" required /></div>
-      <button type="submit" disabled={saving} className="btn btn-primary btn-sm">{saving ? "Saving…" : "Change password"}</button>
+      <div><label className="label">{t.settings.security.currentPassword}</label><input type="password" value={form.currentPassword} onChange={setF("currentPassword")} className="field" required /></div>
+      <div><label className="label">{t.settings.security.newPassword}</label><input type="password" value={form.newPassword} onChange={setF("newPassword")} className="field" required minLength={8} /></div>
+      <div><label className="label">{t.settings.security.confirmPassword}</label><input type="password" value={form.confirmPassword} onChange={setF("confirmPassword")} className="field" required /></div>
+      <button type="submit" disabled={saving} className="btn btn-primary btn-sm">{saving ? t.common.saving : t.settings.security.changePassword}</button>
     </form>
   );
 }
-
-const SECTIONS = [
-  { key: "profile",       label: "Business profile",  icon: Building2 },
-  { key: "preferences",   label: "Preferences",       icon: Sliders },
-  { key: "numbering",     label: "Tax & numbering",   icon: Hash },
-  { key: "notifications", label: "Notifications",     icon: Bell },
-  { key: "email",         label: "Email templates",   icon: Mail },
-  { key: "integrations",  label: "Integrations",      icon: Plug },
-  { key: "region",        label: "Language & region", icon: Globe },
-  { key: "security",      label: "Security",          icon: Shield },
-  { key: "api",           label: "API & webhooks",    icon: Webhook },
-];
 
 const BUSINESS_TYPES = ["General Contractor","Remodeler","Electrician","Plumber","HVAC","Painter","Landscaper","Roofer","Flooring","Other"];
 
@@ -63,6 +53,20 @@ const DEFAULT_TEMPLATES = [
 ];
 
 export default function SettingsPage() {
+  const t = useT();
+
+  const SECTIONS = [
+    { key: "profile",       label: t.settings.tabs.profile,        icon: Building2 },
+    { key: "preferences",   label: t.settings.tabs.preferences,    icon: Sliders },
+    { key: "numbering",     label: t.settings.tabs.tax,            icon: Hash },
+    { key: "notifications", label: t.settings.tabs.notifications,  icon: Bell },
+    { key: "email",         label: t.settings.tabs.emailTemplates, icon: Mail },
+    { key: "integrations",  label: t.settings.tabs.integrations,   icon: Plug },
+    { key: "region",        label: t.settings.tabs.language,       icon: Globe },
+    { key: "security",      label: t.settings.tabs.security,       icon: Shield },
+    { key: "api",           label: t.settings.tabs.api,            icon: Webhook },
+  ];
+
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -212,11 +216,11 @@ export default function SettingsPage() {
               <h1 className="text-[22px] font-bold text-[#0c1226]" style={{ letterSpacing: "-0.02em" }}>
                 {activeSection?.label ?? "Settings"}
               </h1>
-              <p className="text-[13px] text-[#8a8fa3] mt-0.5">Configure how Clear Build runs for your business</p>
+              <p className="text-[13px] text-[#8a8fa3] mt-0.5">{t.settings.tagline}</p>
             </div>
             {["profile","preferences","numbering"].includes(section) && (
               <button onClick={save} disabled={saving} className="btn btn-primary btn-sm">
-                {saving ? "Saving…" : "Save changes"}
+                {saving ? t.common.saving : t.settings.saveChanges}
               </button>
             )}
           </div>
@@ -224,8 +228,8 @@ export default function SettingsPage() {
           {section === "profile" && (
             <div className="space-y-5">
               <div className="card p-5">
-                <h3 className="section-title mb-1">Business profile</h3>
-                <p className="text-[12px] text-[#8a8fa3] mb-4">What customers see on quotes and invoices.</p>
+                <h3 className="section-title mb-1">{t.settings.profile.sectionTitle}</h3>
+                <p className="text-[12px] text-[#8a8fa3] mb-4">{t.settings.profile.subtitle}</p>
                 {/* Logo upload */}
                 <div className="flex items-center gap-4 mb-5">
                   {settings.logo_url ? (
@@ -238,37 +242,37 @@ export default function SettingsPage() {
                   <div>
                     <input ref={logoInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={uploadLogo} />
                     <button className="btn btn-outline btn-sm" onClick={() => logoInputRef.current?.click()} disabled={uploadingLogo}>
-                      {uploadingLogo ? "Uploading…" : "Change logo"}
+                      {uploadingLogo ? t.settings.profile.uploading : t.settings.profile.changeLogo}
                     </button>
-                    <p className="text-[11px] text-[#8a8fa3] mt-1">PNG or JPG, max 2 MB</p>
+                    <p className="text-[11px] text-[#8a8fa3] mt-1">{t.settings.profile.logoHint}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div><label className="label">Business name</label><input value={settings.name ?? ""} onChange={set("name")} className="field" /></div>
-                  <div><label className="label">Legal entity</label><input value={settings.legal_name ?? ""} onChange={set("legal_name")} className="field" placeholder="LLC, Inc, etc." /></div>
-                  <div><label className="label">Public email</label><input type="email" value={settings.email ?? ""} onChange={set("email")} className="field" /></div>
-                  <div><label className="label">Phone</label><input value={settings.phone ?? ""} onChange={set("phone")} className="field" /></div>
-                  <div><label className="label">Website</label><input value={settings.website ?? ""} onChange={set("website")} className="field" placeholder="https://yourbusiness.com" /></div>
-                  <div><label className="label">Trade license</label><input value={settings.trade_license ?? ""} onChange={set("trade_license")} className="field" placeholder="e.g. NC-GC-12345" /></div>
+                  <div><label className="label">{t.settings.profile.businessName}</label><input value={settings.name ?? ""} onChange={set("name")} className="field" /></div>
+                  <div><label className="label">{t.settings.profile.legalEntity}</label><input value={settings.legal_name ?? ""} onChange={set("legal_name")} className="field" placeholder={t.settings.profile.legalEntityPlaceholder} /></div>
+                  <div><label className="label">{t.settings.profile.publicEmail}</label><input type="email" value={settings.email ?? ""} onChange={set("email")} className="field" /></div>
+                  <div><label className="label">{t.settings.profile.phone}</label><input value={settings.phone ?? ""} onChange={set("phone")} className="field" /></div>
+                  <div><label className="label">{t.settings.profile.website}</label><input value={settings.website ?? ""} onChange={set("website")} className="field" placeholder={t.settings.profile.websitePlaceholder} /></div>
+                  <div><label className="label">{t.settings.profile.tradeLicense}</label><input value={settings.trade_license ?? ""} onChange={set("trade_license")} className="field" placeholder={t.settings.profile.tradeLicensePlaceholder} /></div>
                   <div>
-                    <label className="label">Business type</label>
+                    <label className="label">{t.settings.profile.businessType}</label>
                     <select value={settings.business_type ?? ""} onChange={set("business_type")} className="field">
-                      <option value="">Select type</option>
-                      {BUSINESS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                      <option value="">{t.settings.profile.selectType}</option>
+                      {BUSINESS_TYPES.map(bt => <option key={bt} value={bt}>{bt}</option>)}
                     </select>
                   </div>
-                  <div><label className="label">Service area</label><input value={settings.service_area ?? ""} onChange={set("service_area")} className="field" placeholder="e.g. Dallas–Fort Worth" /></div>
-                  <div className="md:col-span-2"><label className="label">Street address</label><input value={settings.address ?? ""} onChange={set("address")} className="field" /></div>
-                  <div><label className="label">City</label><input value={settings.city ?? ""} onChange={set("city")} className="field" /></div>
-                  <div><label className="label">State</label><input value={settings.state ?? ""} onChange={set("state")} className="field" /></div>
-                  <div><label className="label">ZIP</label><input value={settings.zip ?? ""} onChange={set("zip")} className="field" /></div>
+                  <div><label className="label">{t.settings.profile.serviceArea}</label><input value={settings.service_area ?? ""} onChange={set("service_area")} className="field" placeholder={t.settings.profile.serviceAreaPlaceholder} /></div>
+                  <div className="md:col-span-2"><label className="label">{t.settings.profile.streetAddress}</label><input value={settings.address ?? ""} onChange={set("address")} className="field" /></div>
+                  <div><label className="label">{t.settings.profile.city}</label><input value={settings.city ?? ""} onChange={set("city")} className="field" /></div>
+                  <div><label className="label">{t.settings.profile.state}</label><input value={settings.state ?? ""} onChange={set("state")} className="field" /></div>
+                  <div><label className="label">{t.settings.profile.zip}</label><input value={settings.zip ?? ""} onChange={set("zip")} className="field" /></div>
                   <div>
                     <label className="label">Country</label>
                     <select value={settings.country ?? "US"} onChange={set("country")} className="field">
-                      <option value="US">United States</option>
-                      <option value="CA">Canada</option>
-                      <option value="MX">Mexico</option>
-                      <option value="BR">Brazil</option>
+                      <option value="US">{t.businessSetup.countries.us}</option>
+                      <option value="CA">{t.businessSetup.countries.ca}</option>
+                      <option value="MX">{t.businessSetup.countries.mx}</option>
+                      <option value="BR">{t.businessSetup.countries.br}</option>
                     </select>
                   </div>
                 </div>
@@ -278,35 +282,35 @@ export default function SettingsPage() {
 
           {section === "preferences" && (
             <div className="card p-5">
-              <h3 className="section-title mb-4">Preferences</h3>
+              <h3 className="section-title mb-4">{t.settings.preferences.sectionTitle}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Currency</label>
+                  <label className="label">{t.settings.preferences.currency}</label>
                   <select value={settings.currency ?? "USD"} onChange={set("currency")} className="field">
-                    <option value="USD">USD ($) — US Dollar</option>
-                    <option value="CAD">CAD ($) — Canadian Dollar</option>
-                    <option value="EUR">EUR (€) — Euro</option>
-                    <option value="BRL">BRL (R$) — Brazilian Real</option>
+                    <option value="USD">{t.settings.preferences.currencies.usd}</option>
+                    <option value="CAD">{t.settings.preferences.currencies.cad}</option>
+                    <option value="EUR">{t.settings.preferences.currencies.eur}</option>
+                    <option value="BRL">{t.settings.preferences.currencies.brl}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="label">Default payment terms</label>
+                  <label className="label">{t.settings.preferences.paymentTerms}</label>
                   <select value={settings.payment_terms ?? "Net 30"} onChange={set("payment_terms")} className="field">
-                    {["Due on receipt","Net 7","Net 14","Net 15","Net 30","Net 45","Net 60"].map(t => <option key={t}>{t}</option>)}
+                    {["Due on receipt","Net 7","Net 14","Net 15","Net 30","Net 45","Net 60"].map(pt => <option key={pt}>{pt}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="label">Timezone</label>
+                  <label className="label">{t.settings.preferences.timezone}</label>
                   <select value={settings.timezone ?? "America/New_York"} onChange={set("timezone")} className="field">
                     {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz.replace("_", " ")}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="label">Date format</label>
+                  <label className="label">{t.settings.preferences.dateFormat}</label>
                   <select value={settings.date_format ?? "MM/DD/YYYY"} onChange={set("date_format")} className="field">
-                    <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-                    <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                    <option value="MM/DD/YYYY">{t.settings.preferences.dateFormats.us}</option>
+                    <option value="DD/MM/YYYY">{t.settings.preferences.dateFormats.eu}</option>
+                    <option value="YYYY-MM-DD">{t.settings.preferences.dateFormats.iso}</option>
                   </select>
                 </div>
               </div>
@@ -316,51 +320,51 @@ export default function SettingsPage() {
           {section === "numbering" && (
             <div className="space-y-5">
               <div className="card p-5">
-                <h3 className="section-title mb-1">Tax &amp; numbering</h3>
-                <p className="text-[12px] text-[#8a8fa3] mb-4">Prefixes and tax settings for quotes, invoices, and projects.</p>
+                <h3 className="section-title mb-1">{t.settings.tax.sectionTitle}</h3>
+                <p className="text-[12px] text-[#8a8fa3] mb-4">{t.settings.tax.subtitle}</p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="label">Tax rate</label>
+                    <label className="label">{t.settings.tax.taxRate}</label>
                     <div className="relative">
                       <input type="number" step="0.01" min="0" max="100" value={settings.default_tax_rate ?? "0"} onChange={set("default_tax_rate")} className="field pr-8" />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a8fa3] text-sm">%</span>
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a8fa3] text-sm">{t.settings.tax.taxRateSuffix}</span>
                     </div>
                   </div>
-                  <div><label className="label">Tax label</label><input value={settings.tax_label ?? "Sales tax"} onChange={set("tax_label")} className="field" placeholder="Sales tax" /></div>
+                  <div><label className="label">{t.settings.tax.taxLabel}</label><input value={settings.tax_label ?? "Sales tax"} onChange={set("tax_label")} className="field" placeholder={t.settings.tax.taxLabelPlaceholder} /></div>
                   <div>
-                    <label className="label">Currency</label>
+                    <label className="label">{t.settings.preferences.currency}</label>
                     <select value={settings.currency ?? "USD"} onChange={set("currency")} className="field">
                       <option value="USD">USD ($)</option><option value="CAD">CAD ($)</option><option value="EUR">EUR (€)</option>
                     </select>
                   </div>
                   <div>
-                    <label className="label">Quote prefix</label>
+                    <label className="label">{t.settings.tax.quotePrefix}</label>
                     <div className="flex gap-2">
                       <input value={settings.quote_prefix ?? "Q-"} onChange={set("quote_prefix")} className="field w-20" placeholder="Q-" />
                       <input value={settings.quote_next_number ?? ""} onChange={set("quote_next_number")} className="field" placeholder="1058" type="number" min="1" />
                     </div>
                   </div>
                   <div>
-                    <label className="label">Invoice prefix</label>
+                    <label className="label">{t.settings.tax.invoicePrefix}</label>
                     <div className="flex gap-2">
                       <input value={settings.invoice_prefix ?? "INV-"} onChange={set("invoice_prefix")} className="field w-20" placeholder="INV-" />
                       <input value={settings.invoice_next_number ?? ""} onChange={set("invoice_next_number")} className="field" placeholder="019" type="number" min="1" />
                     </div>
                   </div>
                   <div>
-                    <label className="label">Default payment terms</label>
+                    <label className="label">{t.settings.tax.paymentTerms}</label>
                     <select value={settings.payment_terms ?? "Net 30"} onChange={set("payment_terms")} className="field">
-                      {["Due on receipt","Net 7","Net 14","Net 15","Net 30","Net 45","Net 60"].map(t => <option key={t}>{t}</option>)}
+                      {["Due on receipt","Net 7","Net 14","Net 15","Net 30","Net 45","Net 60"].map(pt => <option key={pt}>{pt}</option>)}
                     </select>
                   </div>
                 </div>
               </div>
               <div className="card p-5">
-                <h3 className="section-title mb-3">Notification defaults</h3>
+                <h3 className="section-title mb-3">{t.settings.notifDefaults.sectionTitle}</h3>
                 {[
-                  { key: "notify_new_quote",   label: "New quote",         desc: "Email + WhatsApp" },
-                  { key: "notify_invoice_due", label: "Invoice due",       desc: "Email + SMS" },
-                  { key: "notify_payment",     label: "Payment received",  desc: "Email" },
+                  { key: "notify_new_quote",   label: t.settings.notifDefaults.newQuote,         desc: "Email + WhatsApp" },
+                  { key: "notify_invoice_due", label: t.settings.notifDefaults.invoiceDue,        desc: "Email + SMS" },
+                  { key: "notify_payment",     label: t.settings.notifDefaults.paymentReceived,   desc: "Email" },
                 ].map(({ key, label, desc }) => (
                   <div key={key} className="flex items-center justify-between py-3 border-b border-[#f0efea] last:border-0">
                     <div><p className="text-[13px] font-medium text-[#0c1226]">{label}</p><p className="text-[11px] text-[#8a8fa3]">{desc}</p></div>
@@ -376,14 +380,14 @@ export default function SettingsPage() {
 
           {section === "notifications" && (
             <div className="card p-5">
-              <h3 className="section-title mb-4">Notification preferences</h3>
+              <h3 className="section-title mb-4">{t.settings.notifPrefs.sectionTitle}</h3>
               <div className="space-y-1">
                 {[
-                  { key: "n_payment", label: "Payment received",          desc: "When a customer pays an invoice" },
-                  { key: "n_quote",   label: "Quote approved or rejected", desc: "When a customer acts on a quote" },
-                  { key: "n_invoice", label: "Invoice overdue",            desc: "When an invoice passes its due date" },
-                  { key: "n_message", label: "New message",               desc: "When a customer replies to a message" },
-                  { key: "n_review",  label: "New review submitted",       desc: "When a customer submits feedback" },
+                  { key: "n_payment", label: t.settings.notifPrefs.paymentReceived, desc: t.settings.notifPrefs.paymentReceivedDesc },
+                  { key: "n_quote",   label: t.settings.notifPrefs.quoteAction,      desc: t.settings.notifPrefs.quoteActionDesc },
+                  { key: "n_invoice", label: t.settings.notifPrefs.invoiceOverdue,   desc: t.settings.notifPrefs.invoiceOverdueDesc },
+                  { key: "n_message", label: t.settings.notifPrefs.newMessage,       desc: t.settings.notifPrefs.newMessageDesc },
+                  { key: "n_review",  label: t.settings.notifPrefs.newReview,        desc: t.settings.notifPrefs.newReviewDesc },
                 ].map(({ key, label, desc }) => (
                   <div key={key} className="flex items-center justify-between py-3.5 border-b border-[#f0efea] last:border-0">
                     <div><p className="text-[13px] font-medium text-[#0c1226]">{label}</p><p className="text-[11px] text-[#8a8fa3] mt-0.5">{desc}</p></div>
@@ -394,7 +398,7 @@ export default function SettingsPage() {
                   </div>
                 ))}
               </div>
-              <button onClick={save} disabled={saving} className="btn btn-primary btn-sm mt-4">{saving ? "Saving…" : "Save preferences"}</button>
+              <button onClick={save} disabled={saving} className="btn btn-primary btn-sm mt-4">{saving ? t.common.saving : t.settings.notifPrefs.savePrefs}</button>
             </div>
           )}
 
@@ -421,7 +425,7 @@ export default function SettingsPage() {
                         onChange={e => setTemplates(ts => ts.map(t => t.name === tpl.name ? { ...t, message: e.target.value } : t))} />
                     </div>
                     <button onClick={() => saveTemplate(tpl)} disabled={savingTemplate === tpl.name} className="btn btn-primary btn-sm">
-                      {savingTemplate === tpl.name ? "Saving…" : "Save template"}
+                      {savingTemplate === tpl.name ? t.common.saving : t.communications.saveTemplate}
                     </button>
                   </div>
                 </div>
@@ -432,40 +436,41 @@ export default function SettingsPage() {
           {section === "region" && (
             <div className="space-y-5">
               <div className="card p-5">
-                <h3 className="section-title mb-4">Language &amp; region</h3>
+                <h3 className="section-title mb-4">{t.settings.languageSection.sectionTitle}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="label">Language</label>
+                    <label className="label">{t.settings.languageSection.language}</label>
                     <select value={settings.language ?? "en"} onChange={set("language")} className="field">
-                      <option value="en">English</option>
-                      <option value="es">Español</option>
+                      <option value="en">{t.language.en}</option>
+                      <option value="es">{t.language.es}</option>
+                      <option value="pt">{t.language.pt}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="label">Timezone</label>
+                    <label className="label">{t.settings.preferences.timezone}</label>
                     <select value={settings.timezone ?? "America/New_York"} onChange={set("timezone")} className="field">
                       {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz.replace(/_/g, " ")}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="label">Date format</label>
+                    <label className="label">{t.settings.languageSection.dateFormat}</label>
                     <select value={settings.date_format ?? "MM/DD/YYYY"} onChange={set("date_format")} className="field">
-                      <option value="MM/DD/YYYY">MM/DD/YYYY (US)</option>
-                      <option value="DD/MM/YYYY">DD/MM/YYYY (EU)</option>
-                      <option value="YYYY-MM-DD">YYYY-MM-DD (ISO)</option>
+                      <option value="MM/DD/YYYY">{t.settings.preferences.dateFormats.us} (US)</option>
+                      <option value="DD/MM/YYYY">{t.settings.preferences.dateFormats.eu} (EU)</option>
+                      <option value="YYYY-MM-DD">{t.settings.preferences.dateFormats.iso} (ISO)</option>
                     </select>
                   </div>
                   <div>
-                    <label className="label">Currency</label>
+                    <label className="label">{t.settings.preferences.currency}</label>
                     <select value={settings.currency ?? "USD"} onChange={set("currency")} className="field">
-                      <option value="USD">USD ($) — US Dollar</option>
-                      <option value="CAD">CAD ($) — Canadian Dollar</option>
-                      <option value="EUR">EUR (€) — Euro</option>
-                      <option value="BRL">BRL (R$) — Brazilian Real</option>
+                      <option value="USD">{t.settings.preferences.currencies.usd}</option>
+                      <option value="CAD">{t.settings.preferences.currencies.cad}</option>
+                      <option value="EUR">{t.settings.preferences.currencies.eur}</option>
+                      <option value="BRL">{t.settings.preferences.currencies.brl}</option>
                     </select>
                   </div>
                 </div>
-                <button onClick={save} disabled={saving} className="btn btn-primary btn-sm mt-5">{saving ? "Saving…" : "Save"}</button>
+                <button onClick={save} disabled={saving} className="btn btn-primary btn-sm mt-5">{saving ? t.common.saving : t.common.save}</button>
               </div>
             </div>
           )}
@@ -474,42 +479,42 @@ export default function SettingsPage() {
             <div className="space-y-4">
               {[
                 {
-                  name: "Stripe Payments",
-                  desc: "Process subscriptions and billing through Stripe.",
+                  name: t.settings.integrations.stripe,
+                  desc: t.settings.integrations.stripeDesc,
                   status: "active",
-                  statusLabel: "Configured",
-                  action: { label: "Manage billing", href: "/subscription" },
+                  statusLabel: t.settings.integrations.configured,
+                  action: { label: t.settings.integrations.manageBilling, href: "/subscription" },
                   icon: "💳",
                 },
                 {
-                  name: "Resend Email",
-                  desc: "Transactional emails for quotes, invoices, and notifications.",
+                  name: t.settings.integrations.resend,
+                  desc: t.settings.integrations.resendDesc,
                   status: "active",
-                  statusLabel: "Configured",
+                  statusLabel: t.settings.integrations.configured,
                   action: null,
                   icon: "✉️",
                 },
                 {
-                  name: "QuickBooks",
-                  desc: "Sync invoices and payments with QuickBooks Online.",
+                  name: t.settings.integrations.quickbooks,
+                  desc: t.settings.integrations.quickbooksDesc,
                   status: "soon",
-                  statusLabel: "Coming soon",
+                  statusLabel: t.settings.integrations.comingSoon,
                   action: null,
                   icon: "📊",
                 },
                 {
-                  name: "Zapier",
-                  desc: "Connect Clear Build to 5,000+ apps via Zapier.",
+                  name: t.settings.integrations.zapier,
+                  desc: t.settings.integrations.zapierDesc,
                   status: "soon",
-                  statusLabel: "Coming soon",
+                  statusLabel: t.settings.integrations.comingSoon,
                   action: null,
                   icon: "⚡",
                 },
                 {
-                  name: "Google Calendar",
-                  desc: "Sync project schedules and deadlines to Google Calendar.",
+                  name: t.settings.integrations.googleCal,
+                  desc: t.settings.integrations.googleCalDesc,
                   status: "soon",
-                  statusLabel: "Coming soon",
+                  statusLabel: t.settings.integrations.comingSoon,
                   action: null,
                   icon: "📅",
                 },
@@ -537,8 +542,8 @@ export default function SettingsPage() {
 
           {section === "security" && (
             <div className="card p-5">
-              <h3 className="section-title mb-1">Change password</h3>
-              <p className="text-[12px] text-[#8a8fa3] mb-4">You will need to log in again after changing your password.</p>
+              <h3 className="section-title mb-1">{t.settings.security.sectionTitle}</h3>
+              <p className="text-[12px] text-[#8a8fa3] mb-4">{t.settings.security.subtitle}</p>
               <PasswordChangeForm />
             </div>
           )}
@@ -547,12 +552,12 @@ export default function SettingsPage() {
             <div className="space-y-5">
               {/* Webhook list */}
               <div className="card p-5">
-                <h3 className="section-title mb-1">Webhook endpoints</h3>
-                <p className="text-[12px] text-[#8a8fa3] mb-4">Clear Build will POST a JSON payload to these URLs when events occur.</p>
+                <h3 className="section-title mb-1">{t.settings.webhooks.sectionTitle}</h3>
+                <p className="text-[12px] text-[#8a8fa3] mb-4">{t.settings.webhooks.subtitle}</p>
                 {webhooksLoading ? (
                   <div className="space-y-2">{[...Array(2)].map((_, i) => <div key={i} className="h-12 skeleton rounded-xl animate-pulse" />)}</div>
                 ) : webhooks.length === 0 ? (
-                  <p className="text-[13px] text-[#8a8fa3] py-3">No webhooks yet.</p>
+                  <p className="text-[13px] text-[#8a8fa3] py-3">{t.settings.webhooks.noWebhooks}</p>
                 ) : (
                   <div className="space-y-3 mb-4">
                     {webhooks.map(wh => (
@@ -583,14 +588,14 @@ export default function SettingsPage() {
 
                 {/* Add webhook form */}
                 <div className="border border-dashed border-[#e7e6e1] rounded-xl p-4 space-y-3">
-                  <p className="text-[13px] font-medium text-[#0c1226]">Add endpoint</p>
+                  <p className="text-[13px] font-medium text-[#0c1226]">{t.settings.webhooks.addEndpoint}</p>
                   <div>
-                    <label className="label">URL</label>
+                    <label className="label">{t.settings.webhooks.urlLabel}</label>
                     <input value={newWebhook.url} onChange={e => setNewWebhook(w => ({ ...w, url: e.target.value }))}
-                      className="field" placeholder="https://your-server.com/webhooks/clearbuilt" />
+                      className="field" placeholder={t.settings.webhooks.urlPlaceholder} />
                   </div>
                   <div>
-                    <label className="label">Events to send</label>
+                    <label className="label">{t.settings.webhooks.events}</label>
                     <div className="flex flex-wrap gap-2 mt-1.5">
                       {WEBHOOK_EVENTS.map(ev => (
                         <button key={ev} type="button" onClick={() => toggleEvent(ev)}
@@ -602,17 +607,15 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <button onClick={addWebhook} disabled={addingWebhook || !newWebhook.url} className="btn btn-primary btn-sm gap-1.5">
-                    <Plus size={13} /> {addingWebhook ? "Adding…" : "Add endpoint"}
+                    <Plus size={13} /> {addingWebhook ? t.settings.webhooks.adding : t.settings.webhooks.addEndpoint}
                   </button>
                 </div>
               </div>
 
               {/* API access note */}
               <div className="card p-5">
-                <h3 className="section-title mb-1">API access</h3>
-                <p className="text-[13px] text-[#8a8fa3]">
-                  Programmatic API access for custom integrations is coming soon. In the meantime, use the webhook endpoints above to push data to your own systems.
-                </p>
+                <h3 className="section-title mb-1">{t.settings.api.sectionTitle}</h3>
+                <p className="text-[13px] text-[#8a8fa3]">{t.settings.api.desc}</p>
               </div>
             </div>
           )}

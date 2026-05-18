@@ -3,9 +3,10 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import {
   Plus, Search, Phone, Mail, MessageCircle, Eye, Pencil,
-  UserCheck, Bell, Trash2, ChevronDown, Users, MoreHorizontal,
+  UserCheck, Trash2, Users,
 } from "lucide-react";
 import { Modal, StatusBadge, EmptyState, toast, ConfirmDialog, ActionMenu, Tabs } from "@/components/ui";
+import { useT } from "@/lib/i18n";
 
 const LEAD_STATUSES = [
   "New Lead", "In Conversation", "Meeting Scheduled", "Site Visit",
@@ -26,6 +27,7 @@ const EMPTY_FORM = {
 type Tab = "all" | "lead" | "customer";
 
 export default function ContactsPage() {
+  const t = useT();
   const [contacts, setContacts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -85,9 +87,9 @@ export default function ContactsPage() {
   };
 
   const save = async () => {
-    if (!form.full_name.trim()) { toast("Full name is required", "error"); return; }
-    if (!form.email.trim()) { toast("Email is required", "error"); return; }
-    if (!form.phone.trim()) { toast("Phone number is required", "error"); return; }
+    if (!form.full_name.trim()) { toast(t.contacts.required, "error"); return; }
+    if (!form.email.trim()) { toast(t.contacts.required, "error"); return; }
+    if (!form.phone.trim()) { toast(t.contacts.required, "error"); return; }
     setSaving(true);
     const payload = {
       full_name: form.full_name, business_name: form.business_name,
@@ -104,8 +106,8 @@ export default function ContactsPage() {
       body: JSON.stringify(payload),
     });
     setSaving(false);
-    if (res.ok) { toast(editContact ? "Contact updated" : "Contact added"); setModal(false); load(); }
-    else toast("Failed to save contact", "error");
+    if (res.ok) { toast(editContact ? t.contacts.contactUpdated : t.contacts.contactAdded); setModal(false); load(); }
+    else toast(t.contacts.failedToSave, "error");
   };
 
   const updateStatus = async (id: string, status: string) => {
@@ -122,15 +124,15 @@ export default function ContactsPage() {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ contact_type: "customer" }),
     });
-    if (res.ok) { toast("Converted to customer"); load(); }
-    else toast("Failed to convert", "error");
+    if (res.ok) { toast(t.contacts.converted); load(); }
+    else toast(t.contacts.failedConvert, "error");
   };
 
   const deleteContact = async () => {
     if (!deleteId) return;
     const res = await fetch(`/api/contacts/${deleteId}`, { method: "DELETE" });
-    if (res.ok) { toast("Contact deleted"); load(); }
-    else toast("Failed to delete", "error");
+    if (res.ok) { toast(t.contacts.deleted); load(); }
+    else toast(t.contacts.failedDelete, "error");
     setDeleteId(null);
   };
 
@@ -152,39 +154,39 @@ export default function ContactsPage() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Contacts</h1>
-          <p className="page-desc">{contacts.length} total contacts</p>
+          <h1 className="page-title">{t.contacts.title}</h1>
+          <p className="page-desc">{contacts.length} {t.contacts.totalContacts}</p>
         </div>
         <button className="btn btn-primary" onClick={openAdd}>
-          <Plus size={15} /> Add Contact
+          <Plus size={15} /> {t.contacts.addContact}
         </button>
       </div>
 
       {/* Mini stat cards */}
       <div className="grid grid-cols-3 gap-3 mb-5">
         <div className="mini-stat mini-stat-navy">
-          <span className="mini-stat-label">Total</span>
+          <span className="mini-stat-label">{t.contacts.totalLabel}</span>
           <span className="mini-stat-value">{contacts.length}</span>
         </div>
         <div className="mini-stat mini-stat-blue">
-          <span className="mini-stat-label">Leads</span>
+          <span className="mini-stat-label">{t.contacts.leadsLabel}</span>
           <span className="mini-stat-value">{leads}</span>
         </div>
         <div className="mini-stat mini-stat-green">
-          <span className="mini-stat-label">Customers</span>
+          <span className="mini-stat-label">{t.contacts.customersLabel}</span>
           <span className="mini-stat-value">{customers}</span>
         </div>
       </div>
 
       {/* Tabs + Search */}
-      <Tabs tabs={["All", "Leads", "Customers"]}
-        active={tab === "all" ? "All" : tab === "lead" ? "Leads" : "Customers"}
-        onChange={(t) => setTab(t === "All" ? "all" : t === "Leads" ? "lead" : "customer")} />
+      <Tabs tabs={[t.contacts.tabAll, t.contacts.tabLeads, t.contacts.tabCustomers]}
+        active={tab === "all" ? t.contacts.tabAll : tab === "lead" ? t.contacts.tabLeads : t.contacts.tabCustomers}
+        onChange={(v) => setTab(v === t.contacts.tabAll ? "all" : v === t.contacts.tabLeads ? "lead" : "customer")} />
 
       <div className="input-group mb-5 max-w-sm">
         <Search size={14} className="input-icon" />
         <input value={search} onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name, email or phone…" className="field" />
+          placeholder={t.contacts.searchPlaceholder} className="field" />
       </div>
 
       {/* Mobile card list */}
@@ -204,9 +206,9 @@ export default function ContactsPage() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <EmptyState icon={<Users size={36} />} title="No contacts yet"
-            description="Add your first contact to get started."
-            action={<button className="btn btn-primary btn-sm" onClick={openAdd}><Plus size={14} /> Add Contact</button>} />
+          <EmptyState icon={<Users size={36} />} title={t.contacts.noContacts}
+            description={t.contacts.noContactsDesc}
+            action={<button className="btn btn-primary btn-sm" onClick={openAdd}><Plus size={14} /> {t.contacts.addContact}</button>} />
         ) : filtered.map((c) => (
           <div key={c.id} className="mobile-card">
             <div className="flex items-center gap-3">
@@ -220,10 +222,10 @@ export default function ContactsPage() {
                 {c.business_name && <p className="text-xs text-[#8a8fa3] truncate">{c.business_name}</p>}
               </div>
               <ActionMenu items={[
-                { label: "View", icon: <Eye size={14} />, onClick: () => window.location.href = `/contacts/${c.id}` },
-                { label: "Edit", icon: <Pencil size={14} />, onClick: () => openEdit(c) },
-                ...(c.contact_type !== "customer" ? [{ label: "Convert", icon: <UserCheck size={14} />, onClick: () => convertToCustomer(c.id) }] : []),
-                { label: "Delete", icon: <Trash2 size={14} />, onClick: () => setDeleteId(c.id), danger: true },
+                { label: t.contacts.view, icon: <Eye size={14} />, onClick: () => window.location.href = `/contacts/${c.id}` },
+                { label: t.contacts.editAction, icon: <Pencil size={14} />, onClick: () => openEdit(c) },
+                ...(c.contact_type !== "customer" ? [{ label: t.contacts.convertAction, icon: <UserCheck size={14} />, onClick: () => convertToCustomer(c.id) }] : []),
+                { label: t.common.delete, icon: <Trash2 size={14} />, onClick: () => setDeleteId(c.id), danger: true },
               ]} />
             </div>
             <div className="flex items-center gap-2 mt-3 flex-wrap">
@@ -243,12 +245,12 @@ export default function ContactsPage() {
         <table className="table-base">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Location</th>
-              <th>Projects</th>
-              <th>Lifetime value</th>
-              <th>Last contact</th>
+              <th>{t.contacts.nameCol}</th>
+              <th>{t.contacts.typeCol}</th>
+              <th>{t.contacts.locationCol}</th>
+              <th>{t.contacts.projectsCol}</th>
+              <th>{t.contacts.lifetimeValueCol}</th>
+              <th>{t.contacts.lastContactCol}</th>
               <th></th>
             </tr>
           </thead>
@@ -258,9 +260,9 @@ export default function ContactsPage() {
             ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={7}>
-                  <EmptyState icon={<Users size={40} />} title="No contacts yet"
-                    description="Add your first contact to get started."
-                    action={<button className="btn btn-primary btn-sm" onClick={openAdd}><Plus size={14} /> Add Contact</button>} />
+                  <EmptyState icon={<Users size={40} />} title={t.contacts.noContacts}
+                    description={t.contacts.noContactsDesc}
+                    action={<button className="btn btn-primary btn-sm" onClick={openAdd}><Plus size={14} /> {t.contacts.addContact}</button>} />
                 </td>
               </tr>
             ) : filtered.map((c) => (
@@ -300,10 +302,10 @@ export default function ContactsPage() {
                       </a>
                     )}
                     <ActionMenu items={[
-                      { label: "View", icon: <Eye size={14} />, onClick: () => window.location.href = `/contacts/${c.id}` },
-                      { label: "Edit", icon: <Pencil size={14} />, onClick: () => openEdit(c) },
-                      ...(c.contact_type !== "customer" ? [{ label: "Convert", icon: <UserCheck size={14} />, onClick: () => convertToCustomer(c.id) }] : []),
-                      { label: "Delete", icon: <Trash2 size={14} />, onClick: () => setDeleteId(c.id), danger: true },
+                      { label: t.contacts.view, icon: <Eye size={14} />, onClick: () => window.location.href = `/contacts/${c.id}` },
+                      { label: t.contacts.editAction, icon: <Pencil size={14} />, onClick: () => openEdit(c) },
+                      ...(c.contact_type !== "customer" ? [{ label: t.contacts.convertAction, icon: <UserCheck size={14} />, onClick: () => convertToCustomer(c.id) }] : []),
+                      { label: t.common.delete, icon: <Trash2 size={14} />, onClick: () => setDeleteId(c.id), danger: true },
                     ]} />
                   </div>
                 </td>
@@ -314,37 +316,37 @@ export default function ContactsPage() {
       </div>
 
       {/* Add / Edit Modal */}
-      <Modal open={modal} onClose={() => setModal(false)} title={editContact ? "Edit Contact" : "Add Contact"} size="lg">
+      <Modal open={modal} onClose={() => setModal(false)} title={editContact ? t.contacts.editContact : t.contacts.addContactModal} size="lg">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="label">Full Name <span className="text-red-500">*</span></label>
+            <label className="label">{t.contacts.fullName} <span className="text-red-500">*</span></label>
             <input value={form.full_name} onChange={set("full_name")} placeholder="John Doe" className="field" />
           </div>
           <div>
-            <label className="label">Business Name</label>
+            <label className="label">{t.contacts.businessName}</label>
             <input value={form.business_name} onChange={set("business_name")} placeholder="Company Inc." className="field" />
           </div>
           <div>
-            <label className="label">Email <span className="text-red-500">*</span></label>
+            <label className="label">{t.auth.email} <span className="text-red-500">*</span></label>
             <input type="email" value={form.email} onChange={set("email")} placeholder="john@example.com" className="field" />
           </div>
           <div>
-            <label className="label">Lead Source</label>
+            <label className="label">{t.contacts.leadSource}</label>
             <select value={form.lead_source} onChange={set("lead_source")} className="field">
-              <option value="">Select source</option>
+              <option value="">{t.contacts.selectSource}</option>
               {LEAD_SOURCES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div>
-            <label className="label">Phone Number <span className="text-red-500">*</span></label>
+            <label className="label">{t.contacts.phoneNumber} <span className="text-red-500">*</span></label>
             <input value={form.phone} onChange={set("phone")} placeholder="+1 (555) 000-0000" className="field" />
           </div>
           <div>
             <label className="label">
-              WhatsApp Number
+              {t.contacts.whatsappNumber}
               <label className="inline-flex items-center gap-1.5 ml-3 cursor-pointer">
                 <input type="checkbox" checked={form.whatsapp_same} onChange={toggleWhatsappSame} className="rounded" />
-                <span className="text-xs text-[#4a5168] font-normal">Same as phone</span>
+                <span className="text-xs text-[#4a5168] font-normal">{t.contacts.sameAsPhone}</span>
               </label>
             </label>
             <input
@@ -354,36 +356,36 @@ export default function ContactsPage() {
               className={`field ${form.whatsapp_same ? "bg-surface opacity-70" : ""}`} />
           </div>
           <div className="md:col-span-2">
-            <label className="label">Address</label>
+            <label className="label">{t.contacts.addressLabel}</label>
             <input value={form.address} onChange={set("address")} placeholder="123 Main St" className="field" />
           </div>
           <div>
-            <label className="label">City</label>
+            <label className="label">{t.contacts.cityLabel}</label>
             <input value={form.city} onChange={set("city")} placeholder="Dallas" className="field" />
           </div>
           <div>
-            <label className="label">State</label>
+            <label className="label">{t.contacts.stateLabel}</label>
             <input value={form.state} onChange={set("state")} placeholder="TX" className="field" />
           </div>
           <div>
-            <label className="label">Zipcode</label>
+            <label className="label">{t.contacts.zipcodeLabel}</label>
             <input value={form.zip} onChange={set("zip")} placeholder="75001" className="field" />
           </div>
           <div className="md:col-span-2">
-            <label className="label">Notes</label>
+            <label className="label">{t.common.notes}</label>
             <textarea value={form.notes} onChange={set("notes")} rows={3} className="field resize-none" placeholder="Additional notes…" />
           </div>
         </div>
         <div className="flex gap-3 justify-end mt-5 pt-4 border-t border-[#e7e6e1]">
-          <button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button>
+          <button className="btn btn-outline" onClick={() => setModal(false)}>{t.common.cancel}</button>
           <button className="btn btn-primary" onClick={save} disabled={saving}>
-            {saving ? "Saving…" : editContact ? "Update Contact" : "Add Contact"}
+            {saving ? t.contacts.saving : editContact ? t.contacts.updating : t.contacts.adding}
           </button>
         </div>
       </Modal>
 
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={deleteContact}
-        title="Delete Contact" message="Are you sure you want to delete this contact? This cannot be undone." danger />
+        title={t.contacts.deleteTitle} message={t.contacts.deleteMessage} danger />
     </div>
   );
 }

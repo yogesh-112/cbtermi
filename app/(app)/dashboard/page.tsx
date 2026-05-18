@@ -3,31 +3,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fmt, fmtDate } from "@/lib/utils";
 import { PageSkeleton } from "@/components/ui";
+import { useT } from "@/lib/i18n";
 import {
-  TrendingUp, TrendingDown, ArrowRight, FileText, Receipt,
-  CreditCard, Users, DollarSign, Clock, CheckCircle,
+  TrendingUp, ArrowRight, FileText, Receipt,
+  CreditCard, Users, CheckCircle,
 } from "lucide-react";
 
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
-}
-
-function MiniBar({ value, max, color }: { value: number; max: number; color: string }) {
-  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
-  return (
-    <div className="flex items-end gap-[3px] h-8">
-      {[0.4, 0.6, 0.75, 0.85, 0.9, 1.0, pct / 100].map((h, i) => (
-        <div key={i} className={`w-2 rounded-sm ${i === 6 ? color : "bg-[#e7e6e1]"}`}
-          style={{ height: `${Math.max(h * 100, 15)}%` }} />
-      ))}
-    </div>
-  );
-}
-
 export default function DashboardPage() {
+  const t = useT();
   const [stats, setStats] = useState<any>(null);
   const [activity, setActivity] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
@@ -50,13 +33,6 @@ export default function DashboardPage() {
     }).finally(() => setLoading(false));
   }, []);
 
-  const quickActions = [
-    { href: "/contacts/new",   icon: Users,      label: "New Contact",   bg: "bg-brand-navy" },
-    { href: "/quotes/new",     icon: FileText,   label: "New Quote",     bg: "bg-[#2453E4]" },
-    { href: "/invoices/new",   icon: Receipt,    label: "New Invoice",   bg: "bg-brand-green" },
-    { href: "/payments",       icon: CreditCard, label: "Payments",      bg: "bg-[#7C3AED]" },
-  ];
-
   if (loading) return <PageSkeleton />;
 
   const firstName = userName.split(" ")[0] || "there";
@@ -65,42 +41,54 @@ export default function DashboardPage() {
   const activeProjects = stats?.activeProjects ?? 0;
   const pendingQuotes = stats?.pendingQuotes ?? 0;
 
+  const h = new Date().getHours();
+  const greeting = h < 12 ? t.dashboard.greetingMorning : h < 17 ? t.dashboard.greetingAfternoon : t.dashboard.greetingEvening;
+
+  const quickActions = [
+    { href: "/contacts/new",   icon: Users,      label: t.dashboard.newContact,   bg: "bg-brand-navy" },
+    { href: "/quotes/new",     icon: FileText,   label: t.dashboard.newQuote,     bg: "bg-[#2453E4]" },
+    { href: "/invoices/new",   icon: Receipt,    label: t.dashboard.newInvoice,   bg: "bg-brand-green" },
+    { href: "/payments",       icon: CreditCard, label: t.dashboard.payments,     bg: "bg-[#7C3AED]" },
+  ];
+
   return (
     <div className="space-y-5">
       {/* Greeting */}
       <div>
         <h1 className="text-[26px] font-bold text-[#0c1226] leading-tight" style={{ letterSpacing: "-0.025em" }}>
-          {getGreeting()}, {firstName}.
+          {greeting}, {firstName}.
         </h1>
         <p className="text-[14px] text-[#8a8fa3] mt-0.5">
-          {pendingQuotes > 0 ? `${pendingQuotes} quote${pendingQuotes !== 1 ? "s" : ""} awaiting approval` : "Here's your business overview for today."}
+          {pendingQuotes > 0
+            ? `${pendingQuotes} ${pendingQuotes !== 1 ? t.dashboard.quotesAwaitingPlural : t.dashboard.quotesAwaiting}`
+            : t.dashboard.overviewToday}
         </p>
       </div>
 
       {/* 4 stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="mini-stat mini-stat-rose">
-          <span className="mini-stat-label">Outstanding invoices</span>
+          <span className="mini-stat-label">{t.dashboard.outstandingInvoices}</span>
           <span className="mini-stat-value text-[20px]">{fmt(outstanding)}</span>
           <span className="text-[11px] text-[#8a8fa3] flex items-center gap-1 mt-0.5">
-            <TrendingUp size={11} className="text-brand-green" /> {stats?.pendingInvoices ?? 0} open invoices
+            <TrendingUp size={11} className="text-brand-green" /> {stats?.pendingInvoices ?? 0} {t.dashboard.openInvoices}
           </span>
         </div>
         <div className="mini-stat mini-stat-blue">
-          <span className="mini-stat-label">Quotes pending</span>
+          <span className="mini-stat-label">{t.dashboard.quotesPending}</span>
           <span className="mini-stat-value">{pendingQuotes}</span>
-          <span className="text-[11px] text-[#8a8fa3] mt-0.5">awaiting approval</span>
+          <span className="text-[11px] text-[#8a8fa3] mt-0.5">{t.dashboard.awaitingApproval}</span>
         </div>
         <div className="mini-stat mini-stat-navy">
-          <span className="mini-stat-label">Active projects</span>
+          <span className="mini-stat-label">{t.dashboard.activeProjects}</span>
           <span className="mini-stat-value">{activeProjects}</span>
-          <span className="text-[11px] text-[#8a8fa3] mt-0.5">in progress</span>
+          <span className="text-[11px] text-[#8a8fa3] mt-0.5">{t.dashboard.inProgress}</span>
         </div>
         <div className="mini-stat mini-stat-green">
-          <span className="mini-stat-label">Paid this period</span>
+          <span className="mini-stat-label">{t.dashboard.paidThisPeriod}</span>
           <span className="mini-stat-value text-[20px]">{fmt(received)}</span>
           <span className="text-[11px] text-brand-green flex items-center gap-1 mt-0.5">
-            <TrendingUp size={11} /> total received
+            <TrendingUp size={11} /> {t.dashboard.totalReceived}
           </span>
         </div>
       </div>
@@ -110,15 +98,14 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 card p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="section-title mb-0">Cash in &amp; out</h2>
-              <p className="text-[12px] text-[#8a8fa3] mt-0.5">Daily collected vs invoiced — last 14 days</p>
+              <h2 className="section-title mb-0">{t.dashboard.cashInOut}</h2>
+              <p className="text-[12px] text-[#8a8fa3] mt-0.5">{t.dashboard.cashInOutSub}</p>
             </div>
             <div className="flex items-center gap-3 text-[11px] text-[#8a8fa3]">
-              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-brand-navy inline-block" /> Invoiced</span>
-              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-brand-green inline-block" /> Paid</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-brand-navy inline-block" /> {t.dashboard.invoiced}</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-brand-green inline-block" /> {t.common.paid}</span>
             </div>
           </div>
-          {/* Real bar chart */}
           {(() => {
             const maxVal = Math.max(...chartData.map(d => Math.max(d.invoiced, d.paid)), 1);
             const startLabel = chartData[0]?.date ? new Date(chartData[0].date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
@@ -151,16 +138,16 @@ export default function DashboardPage() {
         {/* Pending actions */}
         <div className="card p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="section-title mb-0">Pending actions</h2>
+            <h2 className="section-title mb-0">{t.dashboard.pendingActions}</h2>
             {activity.length > 0 && (
-              <span className="text-[11px] text-[#8a8fa3]">{activity.slice(0, 5).length} items</span>
+              <span className="text-[11px] text-[#8a8fa3]">{activity.slice(0, 5).length} {t.dashboard.items}</span>
             )}
           </div>
           {activity.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <CheckCircle size={24} className="text-brand-green mb-2" />
-              <p className="text-sm font-medium text-[#0c1226]">All caught up!</p>
-              <p className="text-xs text-[#8a8fa3] mt-0.5">No pending actions right now.</p>
+              <p className="text-sm font-medium text-[#0c1226]">{t.dashboard.allCaughtUp}</p>
+              <p className="text-xs text-[#8a8fa3] mt-0.5">{t.dashboard.noPendingActions}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -183,9 +170,9 @@ export default function DashboardPage() {
         {/* Recent activity */}
         <div className="lg:col-span-2 card p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="section-title mb-0">Recent activity</h2>
+            <h2 className="section-title mb-0">{t.dashboard.recentActivity}</h2>
             <Link href="/communications" className="text-xs text-brand-navy font-medium flex items-center gap-1 hover:underline">
-              View all <ArrowRight size={11} />
+              {t.common.viewAll} <ArrowRight size={11} />
             </Link>
           </div>
           {activity.length === 0 ? (
@@ -193,8 +180,8 @@ export default function DashboardPage() {
               <div className="w-10 h-10 bg-[#f0efea] rounded-2xl flex items-center justify-center mb-3">
                 <TrendingUp size={18} className="text-[#d8d6cf]" />
               </div>
-              <p className="text-sm font-medium text-[#4a5168]">No recent activity</p>
-              <p className="text-xs text-[#8a8fa3] mt-0.5">Activity will appear here as you use the app.</p>
+              <p className="text-sm font-medium text-[#4a5168]">{t.dashboard.noRecentActivity}</p>
+              <p className="text-xs text-[#8a8fa3] mt-0.5">{t.dashboard.noActivityDesc}</p>
             </div>
           ) : (
             <div className="space-y-1">
@@ -224,14 +211,14 @@ export default function DashboardPage() {
         {/* Outstanding invoices */}
         <div className="card p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="section-title mb-0">Outstanding</h2>
-            <Link href="/invoices" className="text-xs text-brand-navy font-medium hover:underline">All invoices</Link>
+            <h2 className="section-title mb-0">{t.dashboard.outstanding}</h2>
+            <Link href="/invoices" className="text-xs text-brand-navy font-medium hover:underline">{t.dashboard.allInvoices}</Link>
           </div>
           {outstandingInvoices.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <CheckCircle size={24} className="text-brand-green mb-2" />
-              <p className="text-sm font-medium text-[#0c1226]">No outstanding invoices</p>
-              <p className="text-xs text-[#8a8fa3] mt-0.5">All invoices are paid up.</p>
+              <p className="text-sm font-medium text-[#0c1226]">{t.dashboard.noOutstandingInvoices}</p>
+              <p className="text-xs text-[#8a8fa3] mt-0.5">{t.dashboard.allInvoicesPaid}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -249,7 +236,7 @@ export default function DashboardPage() {
                   </div>
                   {inv.due_date && (
                     <p className={`text-[11px] mt-0.5 ${new Date(inv.due_date) < new Date() ? "text-red-500" : "text-[#8a8fa3]"}`}>
-                      Due {fmtDate(inv.due_date)}
+                      {t.dashboard.due} {fmtDate(inv.due_date)}
                     </p>
                   )}
                 </Link>
@@ -258,7 +245,7 @@ export default function DashboardPage() {
           )}
           {outstanding > 0 && (
             <div className="mt-3 pt-3 border-t border-[#e7e6e1] flex justify-between items-center">
-              <span className="text-[12px] text-[#8a8fa3]">Total outstanding</span>
+              <span className="text-[12px] text-[#8a8fa3]">{t.dashboard.totalOutstanding}</span>
               <span className="text-[14px] font-bold text-[#0c1226]">{fmt(outstanding)}</span>
             </div>
           )}
@@ -267,7 +254,7 @@ export default function DashboardPage() {
 
       {/* Quick actions */}
       <div className="card p-5">
-        <h2 className="section-title mb-4">Quick actions</h2>
+        <h2 className="section-title mb-4">{t.dashboard.quickActions}</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {quickActions.map(({ href, icon: Icon, label, bg }) => (
             <Link key={href} href={href}

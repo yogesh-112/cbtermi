@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 import { Plus, Star, ThumbsUp, ThumbsDown, Minus } from "lucide-react";
 import { Modal, toast, EmptyState } from "@/components/ui";
 import { fmtDate } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 export default function FeedbackPage() {
+  const t = useT();
   const [feedback, setFeedback] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);

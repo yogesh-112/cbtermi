@@ -3,28 +3,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { Search, Bell, Plus, ChevronDown, LogOut, Settings, UserCircle } from "lucide-react";
 import Link from "next/link";
-
-const PAGE_META: Record<string, { label: string; ctaLabel?: string; ctaHref?: string }> = {
-  "/dashboard":         { label: "Dashboard",        ctaLabel: "New quote",       ctaHref: "/quotes/new" },
-  "/contacts":          { label: "Contacts",          ctaLabel: "New contact",     ctaHref: "/contacts/new" },
-  "/leads":             { label: "Leads",             ctaLabel: "Add lead",        ctaHref: "/contacts/new" },
-  "/customers":         { label: "Customers",         ctaLabel: "Add customer",    ctaHref: "/contacts/new" },
-  "/projects":          { label: "Projects",          ctaLabel: "New project",     ctaHref: "/projects/new" },
-  "/quotes":            { label: "Quotes",            ctaLabel: "New quote",       ctaHref: "/quotes/new" },
-  "/invoices":          { label: "Invoices",          ctaLabel: "New invoice",     ctaHref: "/invoices/new" },
-  "/payments":          { label: "Payments" },
-  "/change-orders":     { label: "Change Orders",     ctaLabel: "New order",       ctaHref: "/change-orders/new" },
-  "/notifications":     { label: "Notifications" },
-  "/communications":    { label: "Communications" },
-  "/item-requirements": { label: "Item Requirements" },
-  "/project-updates":   { label: "Project Updates" },
-  "/feedback":          { label: "Feedback" },
-  "/team":              { label: "Team" },
-  "/settings":          { label: "Settings" },
-  "/subscription":      { label: "Subscription" },
-  "/profile":           { label: "Profile" },
-  "/more":              { label: "More" },
-};
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useT } from "@/lib/i18n";
 
 interface Props {
   user: { name: string; email: string };
@@ -35,6 +15,7 @@ interface Props {
 export default function Topbar({ user, businesses, currentBusiness }: Props) {
   const pathname = usePathname();
   const router = useRouter();
+  const t = useT();
   const [bizOpen, setBizOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -42,6 +23,28 @@ export default function Topbar({ user, businesses, currentBusiness }: Props) {
   const [searchOpen, setSearchOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const PAGE_META: Record<string, { label: string; ctaLabel?: string; ctaHref?: string }> = {
+    "/dashboard":         { label: t.nav.dashboard,        ctaLabel: t.topbar.newQuote,       ctaHref: "/quotes/new" },
+    "/contacts":          { label: t.nav.contacts,          ctaLabel: t.topbar.newContact,     ctaHref: "/contacts/new" },
+    "/leads":             { label: t.nav.leads,             ctaLabel: t.topbar.addLead,        ctaHref: "/contacts/new" },
+    "/customers":         { label: t.nav.customers,         ctaLabel: t.topbar.addCustomer,    ctaHref: "/contacts/new" },
+    "/projects":          { label: t.nav.projects,          ctaLabel: t.projects.newProject,   ctaHref: "/projects/new" },
+    "/quotes":            { label: t.nav.quotes,            ctaLabel: t.topbar.newQuote,       ctaHref: "/quotes/new" },
+    "/invoices":          { label: t.nav.invoices,          ctaLabel: t.topbar.newInvoice,     ctaHref: "/invoices/new" },
+    "/payments":          { label: t.nav.payments },
+    "/change-orders":     { label: t.nav.changeOrders,      ctaLabel: t.topbar.newOrder,       ctaHref: "/change-orders/new" },
+    "/notifications":     { label: t.nav.notifications },
+    "/communications":    { label: t.nav.communications },
+    "/item-requirements": { label: t.nav.itemRequirements },
+    "/project-updates":   { label: t.nav.projectUpdates },
+    "/feedback":          { label: t.nav.feedback },
+    "/team":              { label: t.nav.team },
+    "/settings":          { label: t.nav.settings },
+    "/subscription":      { label: t.nav.subscription },
+    "/profile":           { label: t.nav.profile },
+    "/more":              { label: t.nav.more },
+  };
 
   useEffect(() => {
     if (searchTimer.current) clearTimeout(searchTimer.current);
@@ -114,7 +117,7 @@ export default function Topbar({ user, businesses, currentBusiness }: Props) {
               <div className="border-t border-[#e7e6e1] py-1">
                 <Link href="/business-setup" onClick={() => setBizOpen(false)}
                   className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-brand-green hover:bg-[#f0faf4] font-medium">
-                  <Plus size={13} /> New Business
+                  <Plus size={13} /> {t.nav.newBusiness}
                 </Link>
               </div>
             </div>
@@ -135,7 +138,7 @@ export default function Topbar({ user, businesses, currentBusiness }: Props) {
           value={search}
           onChange={e => setSearch(e.target.value)}
           onFocus={() => searchResults.length > 0 && setSearchOpen(true)}
-          placeholder="Search contacts, projects, invoices…"
+          placeholder={t.topbar.searchPlaceholder}
           className="w-full h-[34px] pl-8 pr-11 text-[13px] bg-[#f6f6f3] border border-[#e7e6e1] rounded-lg text-[#0c1226] placeholder:text-[#8a8fa3] focus:outline-none focus:ring-2 focus:ring-brand-navy/20 focus:bg-white transition-colors"
         />
         <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[#8a8fa3] font-medium bg-white border border-[#e7e6e1] rounded px-1 py-0.5 pointer-events-none">⌘K</span>
@@ -156,13 +159,16 @@ export default function Topbar({ user, businesses, currentBusiness }: Props) {
         )}
         {searchOpen && search.length >= 2 && searchResults.length === 0 && (
           <div className="absolute left-0 top-full mt-1.5 w-full bg-white border border-[#e7e6e1] rounded-xl shadow-dropdown z-30 px-4 py-3 text-[13px] text-[#8a8fa3]">
-            No results for &ldquo;{search}&rdquo;
+            {t.topbar.noResultsFor} &ldquo;{search}&rdquo;
           </div>
         )}
       </div>
 
       {/* Right side */}
       <div className="ml-auto flex items-center gap-2">
+        {/* Language switcher */}
+        <LanguageSwitcher />
+
         {/* Bell */}
         <Link href="/notifications"
           className="relative w-8 h-8 flex items-center justify-center rounded-lg text-[#4a5168] hover:bg-[#f6f6f3] transition-colors">
@@ -201,17 +207,17 @@ export default function Topbar({ user, businesses, currentBusiness }: Props) {
               <div className="py-1">
                 <Link href="/profile" onClick={() => setUserOpen(false)}
                   className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-[#4a5168] hover:bg-[#f6f6f3] transition-colors">
-                  <UserCircle size={14} /> Profile
+                  <UserCircle size={14} /> {t.common.profile}
                 </Link>
                 <Link href="/settings" onClick={() => setUserOpen(false)}
                   className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-[#4a5168] hover:bg-[#f6f6f3] transition-colors">
-                  <Settings size={14} /> Settings
+                  <Settings size={14} /> {t.common.settings}
                 </Link>
               </div>
               <div className="border-t border-[#e7e6e1] py-1">
                 <button onClick={logout}
                   className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                  <LogOut size={14} /> Sign out
+                  <LogOut size={14} /> {t.common.signOut}
                 </button>
               </div>
             </div>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Plus, Users, LayoutGrid, List, SlidersHorizontal } from "lucide-react";
 import { EmptyState } from "@/components/ui";
 import { fmtDate } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 const AVATAR_COLORS = [
   "bg-[#2453E4]","bg-brand-green","bg-brand-navy","bg-[#7C3AED]",
@@ -26,6 +27,7 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function CustomersPage() {
+  const t = useT();
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading]     = useState(true);
   const [view, setView]           = useState<"grid" | "list">("grid");
@@ -60,7 +62,7 @@ export default function CustomersPage() {
   return (
     <div>
       <div className="mb-1">
-        <h1 className="page-title">Customers</h1>
+        <h1 className="page-title">{t.customers.title}</h1>
         <p className="page-desc">{customers.length} customers</p>
       </div>
 

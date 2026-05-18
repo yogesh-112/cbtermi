@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Plus, Receipt, Search, SlidersHorizontal, TrendingUp } from "lucide-react";
 import { EmptyState } from "@/components/ui";
 import { fmt, fmtDate } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 const AVATAR_COLORS = [
   "bg-[#2453E4]","bg-brand-green","bg-brand-navy","bg-[#7C3AED]",
@@ -11,19 +12,21 @@ const AVATAR_COLORS = [
 ];
 
 function InvStatusBadge({ inv }: { inv: any }) {
+  const t = useT();
   const now = new Date();
   const due = inv.due_date ? new Date(inv.due_date) : null;
   const daysOverdue = due && due < now ? Math.ceil((now.getTime() - due.getTime()) / 86400000) : 0;
   const daysTilDue  = due && due >= now ? Math.ceil((due.getTime() - now.getTime()) / 86400000) : 0;
 
-  if (inv.status === "paid") return <span className="badge bg-brand-green/10 text-brand-green">● Paid</span>;
-  if (daysOverdue > 0) return <span className="badge bg-red-50 text-red-600">● Overdue {daysOverdue}d</span>;
-  if (daysTilDue <= 7 && daysTilDue > 0) return <span className="badge bg-amber-50 text-amber-700">● Due soon</span>;
-  if (inv.status === "draft") return <span className="badge bg-[#f0efea] text-[#8a8fa3]">Draft</span>;
-  return <span className="badge bg-orange-50 text-orange-700">● Awaiting</span>;
+  if (inv.status === "paid") return <span className="badge bg-brand-green/10 text-brand-green">● {t.invoices.paid}</span>;
+  if (daysOverdue > 0) return <span className="badge bg-red-50 text-red-600">● {t.invoices.overdueLabel} {daysOverdue}d</span>;
+  if (daysTilDue <= 7 && daysTilDue > 0) return <span className="badge bg-amber-50 text-amber-700">● {t.invoices.dueSoon}</span>;
+  if (inv.status === "draft") return <span className="badge bg-[#f0efea] text-[#8a8fa3]">{t.common.draft}</span>;
+  return <span className="badge bg-orange-50 text-orange-700">● {t.invoices.awaiting}</span>;
 }
 
 export default function InvoicesPage() {
+  const t = useT();
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -51,11 +54,11 @@ export default function InvoicesPage() {
   });
 
   const STATUS_TABS = [
-    { key: "all",     label: "All",      count: invoices.length },
-    { key: "draft",   label: "Drafts",   count: invoices.filter(i => i.status === "draft").length },
-    { key: "sent",    label: "Sent",     count: invoices.filter(i => i.status === "sent").length },
-    { key: "overdue", label: "Overdue",  count: overdue.length },
-    { key: "paid",    label: "Paid",     count: invoices.filter(i => i.status === "paid").length },
+    { key: "all",     label: t.invoices.tabAll,     count: invoices.length },
+    { key: "draft",   label: t.invoices.tabDrafts,  count: invoices.filter(i => i.status === "draft").length },
+    { key: "sent",    label: t.invoices.tabSent,    count: invoices.filter(i => i.status === "sent").length },
+    { key: "overdue", label: t.invoices.tabOverdue, count: overdue.length },
+    { key: "paid",    label: t.invoices.tabPaid,    count: invoices.filter(i => i.status === "paid").length },
   ];
 
   const filtered = invoices.filter(i => {
@@ -78,32 +81,32 @@ export default function InvoicesPage() {
   return (
     <div>
       <div className="mb-1">
-        <h1 className="page-title">Invoices</h1>
-        <p className="page-desc">{fmt(outstandingAmt)} outstanding · {fmt(paidAmt)} paid this month</p>
+        <h1 className="page-title">{t.invoices.title}</h1>
+        <p className="page-desc">{fmt(outstandingAmt)} {t.invoices.outstanding.toLowerCase()} · {fmt(paidAmt)} {t.invoices.paidThisMonth.toLowerCase()}</p>
       </div>
 
       {/* 4 large stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         <div className="mini-stat mini-stat-rose">
-          <span className="mini-stat-label">Outstanding</span>
+          <span className="mini-stat-label">{t.invoices.outstanding}</span>
           <span className="mini-stat-value text-[20px]">{fmt(outstandingAmt)}</span>
           <span className="text-[11px] text-[#8a8fa3] mt-0.5">{outstanding.length} invoice{outstanding.length !== 1 ? "s" : ""}</span>
         </div>
         <div className="mini-stat mini-stat-blue">
-          <span className="mini-stat-label">Due this week</span>
+          <span className="mini-stat-label">{t.invoices.dueThisWeek}</span>
           <span className="mini-stat-value text-[20px]">{fmt(dueThisWeek.reduce((s, i) => s + (i.amount_due ?? 0), 0))}</span>
           <span className="text-[11px] text-[#8a8fa3] mt-0.5">{dueThisWeek.length} invoice{dueThisWeek.length !== 1 ? "s" : ""}</span>
         </div>
         <div className="mini-stat mini-stat-amber">
-          <span className="mini-stat-label">Overdue</span>
+          <span className="mini-stat-label">{t.invoices.overdue}</span>
           <span className="mini-stat-value text-[20px]">{fmt(overdue.reduce((s, i) => s + (i.amount_due ?? 0), 0))}</span>
           <span className="text-[11px] text-red-500 mt-0.5">{overdue.length} invoice{overdue.length !== 1 ? "s" : ""}</span>
         </div>
         <div className="mini-stat mini-stat-green">
-          <span className="mini-stat-label">Paid this month</span>
+          <span className="mini-stat-label">{t.invoices.paidThisMonth}</span>
           <span className="mini-stat-value text-[20px]">{fmt(paidAmt)}</span>
           <span className="text-[11px] text-brand-green flex items-center gap-1 mt-0.5">
-            <TrendingUp size={10} /> total received
+            <TrendingUp size={10} /> {t.invoices.totalReceived}
           </span>
         </div>
       </div>
@@ -111,12 +114,12 @@ export default function InvoicesPage() {
       {/* Filter tabs + search */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
         <div className="tabs-bar mb-0 flex-1">
-          {STATUS_TABS.map(t => (
-            <button key={t.key} onClick={() => setStatusFilter(t.key)}
-              className={`tab-btn ${statusFilter === t.key ? "active" : ""} flex items-center gap-1.5`}>
-              {t.label}
-              {t.count > 0 && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#f0efea] text-[#8a8fa3]">{t.count}</span>
+          {STATUS_TABS.map(st => (
+            <button key={st.key} onClick={() => setStatusFilter(st.key)}
+              className={`tab-btn ${statusFilter === st.key ? "active" : ""} flex items-center gap-1.5`}>
+              {st.label}
+              {st.count > 0 && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#f0efea] text-[#8a8fa3]">{st.count}</span>
               )}
             </button>
           ))}
@@ -125,7 +128,7 @@ export default function InvoicesPage() {
           <div className="input-group w-52">
             <Search size={13} className="input-icon" />
             <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Search invoices…" className="field" />
+              placeholder={t.invoices.searchPlaceholder} className="field" />
           </div>
           <button className="btn btn-outline btn-sm gap-1.5"><SlidersHorizontal size={13} /> Filters</button>
         </div>
@@ -136,8 +139,8 @@ export default function InvoicesPage() {
         {loading ? (
           [...Array(3)].map((_, i) => <div key={i} className="mobile-card animate-pulse h-28 skeleton" />)
         ) : filtered.length === 0 ? (
-          <EmptyState icon={<Receipt size={36} />} title="No invoices" description="No invoices match your filters."
-            action={<Link href="/invoices/new" className="btn btn-primary btn-sm"><Plus size={14} /> New Invoice</Link>} />
+          <EmptyState icon={<Receipt size={36} />} title={t.invoices.noInvoices} description={t.invoices.noInvoicesFilter}
+            action={<Link href="/invoices/new" className="btn btn-primary btn-sm"><Plus size={14} /> {t.invoices.newInvoice}</Link>} />
         ) : filtered.map(inv => (
           <Link key={inv.id} href={`/invoices/${inv.id}`} className="mobile-card block hover:shadow-card-md transition-shadow">
             <div className="mobile-card-row">
@@ -153,7 +156,7 @@ export default function InvoicesPage() {
             <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#f0efea]">
               <span className="text-xs text-[#8a8fa3]">{fmtDate(inv.created_at)}</span>
               <span className={`text-xs font-semibold ${(inv.amount_due ?? 0) > 0 ? "text-red-600" : "text-brand-green"}`}>
-                {(inv.amount_due ?? 0) > 0 ? `${fmt(inv.amount_due)} due` : "Paid"}
+                {(inv.amount_due ?? 0) > 0 ? `${fmt(inv.amount_due)} ${t.invoices.dueLabel}` : t.invoices.paid}
               </span>
             </div>
           </Link>
@@ -165,23 +168,23 @@ export default function InvoicesPage() {
         <table className="table-base">
           <thead>
             <tr>
-              <th>Invoice</th>
-              <th>Project</th>
-              <th>Customer</th>
-              <th>Amount</th>
-              <th>Issued</th>
-              <th>Due</th>
-              <th>Status</th>
+              <th>{t.invoices.invoiceCol}</th>
+              <th>{t.invoices.projectCol}</th>
+              <th>{t.invoices.customerCol}</th>
+              <th>{t.invoices.amountCol}</th>
+              <th>{t.invoices.issuedCol}</th>
+              <th>{t.invoices.dueCol}</th>
+              <th>{t.invoices.statusCol}</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={8} className="text-center py-10 text-[#8a8fa3]">Loading…</td></tr>
+              <tr><td colSpan={8} className="text-center py-10 text-[#8a8fa3]">{t.invoices.loading}</td></tr>
             ) : filtered.length === 0 ? (
               <tr><td colSpan={8}>
-                <EmptyState icon={<Receipt size={40} />} title="No invoices yet" description="Create your first invoice."
-                  action={<Link href="/invoices/new" className="btn btn-primary btn-sm"><Plus size={14} /> New Invoice</Link>} />
+                <EmptyState icon={<Receipt size={40} />} title={t.invoices.noInvoicesYet} description={t.invoices.noInvoicesDesc}
+                  action={<Link href="/invoices/new" className="btn btn-primary btn-sm"><Plus size={14} /> {t.invoices.newInvoice}</Link>} />
               </td></tr>
             ) : filtered.map((inv, idx) => {
               const name = inv.contacts?.full_name;

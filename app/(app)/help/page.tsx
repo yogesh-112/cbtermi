@@ -1,0 +1,337 @@
+"use client";
+import { useEffect, useState } from "react";
+import {
+  HelpCircle, ChevronDown, ChevronUp, Search, AlertCircle, Ticket,
+  ChevronRight, Plus, X, Paperclip, Send, RefreshCw, ExternalLink,
+} from "lucide-react";
+import {
+  Modal, ConfirmDialog, EmptyState, Spinner, toast, Tabs, FormField, SearchInput,
+} from "@/components/ui";
+import Link from "next/link";
+
+const TICKET_CATEGORIES = ["Account/Login","Billing/Subscription","Bug","Feature Request","Quotes","Invoices","Projects","Payments","Team","Other"];
+const TICKET_PRIORITIES = ["low","medium","high","urgent"];
+const STATUS_COLORS: Record<string, string> = {
+  open: "bg-blue-100 text-blue-700",
+  "in_progress": "bg-amber-100 text-amber-700",
+  "waiting_for_user": "bg-purple-100 text-purple-700",
+  resolved: "bg-green-100 text-green-700",
+  closed: "bg-gray-100 text-gray-600",
+};
+const PRIORITY_COLORS: Record<string, string> = {
+  low: "bg-gray-100 text-gray-600",
+  medium: "bg-blue-100 text-blue-700",
+  high: "bg-orange-100 text-orange-700",
+  urgent: "bg-red-100 text-red-700",
+};
+
+export default function HelpPage() {
+  const [tab, setTab] = useState<"faq"|"issues"|"tickets">("faq");
+  const [faqs, setFaqs] = useState<any[]>([]);
+  const [issues, setIssues] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [openFaq, setOpenFaq] = useState<string | null>(null);
+  const [openIssue, setOpenIssue] = useState<string | null>(null);
+  const [ticketModal, setTicketModal] = useState(false);
+  const [viewTicket, setViewTicket] = useState<any | null>(null);
+  const [ticketMessages, setTicketMessages] = useState<any[]>([]);
+  const [replyText, setReplyText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [form, setForm] = useState({ subject: "", category: "Bug", priority: "medium", description: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/help/faqs").then(r => r.json()),
+      fetch("/api/help/common-issues").then(r => r.json()),
+      fetch("/api/support/tickets").then(r => r.json()),
+    ]).then(([f, i, t]) => {
+      setFaqs(f.faqs ?? []);
+      setIssues(i.issues ?? []);
+      setTickets(t.tickets ?? []);
+    }).finally(() => setLoading(false));
+  }, []);
+
+  const faqCategories = ["All", ...Array.from(new Set(faqs.map((f: any) => f.category)))];
+
+  const filteredFaqs = faqs.filter(f => {
+    const matchCat = activeCategory === "All" || f.category === activeCategory;
+    const matchSearch = !search || f.question.toLowerCase().includes(search.toLowerCase()) || f.answer.toLowerCase().includes(search.toLowerCase());
+    return matchCat && matchSearch;
+  });
+
+  const groupedFaqs: Record<string, any[]> = {};
+  for (const faq of filteredFaqs) {
+    if (!groupedFaqs[faq.category]) groupedFaqs[faq.category] = [];
+    groupedFaqs[faq.category].push(faq);
+  }
+
+  const openTicketDetail = async (ticket: any) => {
+    setViewTicket(ticket);
+    const res = await fetch(`/api/support/tickets/${ticket.id}`);
+    const d = await res.json();
+    setTicketMessages(d.messages ?? []);
+  };
+
+  const submitTicket = async () => {
+    if (!form.subject.trim() || !form.description.trim()) { toast("Subject and description are required", "error"); return; }
+    setSubmitting(true);
+    const res = await fetch("/api/support/tickets", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    const d = await res.json();
+    setSubmitting(false);
+    if (res.ok) {
+      setTickets(prev => [d.ticket, ...prev]);
+      setTicketModal(false);
+      setForm({ subject: "", category: "Bug", priority: "medium", description: "" });
+      toast("Ticket submitted successfully", "success");
+    } else {
+      toast(d.message ?? "Failed to submit ticket", "error");
+    }
+  };
+
+  const sendReply = async () => {
+    if (!replyText.trim() || !viewTicket) return;
+    setSending(true);
+    const res = await fetch(`/api/support/tickets/${viewTicket.id}/messages`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: replyText }),
+    });
+    const d = await res.json();
+    setSending(false);
+    if (res.ok) {
+      setTicketMessages(prev => [...prev, d.message]);
+      setReplyText("");
+    } else {
+      toast(d.message ?? "Failed to send reply", "error");
+    }
+  };
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64"><Spinner /></div>
+  );
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Help &amp; Support</h1>
+          <p className="page-desc">Find answers, resolve issues, or contact our support team.</p>
+        </div>
+        <button onClick={() => setTicketModal(true)} className="btn btn-primary">
+          <Ticket size={15} /> Raise Ticket
+        </button>
+      </div>
+
+      <Tabs
+        tabs={[
+          { id: "faq", label: "FAQs" },
+          { id: "issues", label: "Common Issues" },
+          { id: "tickets", label: `My Tickets (${tickets.length})` },
+        ]}
+        active={tab}
+        onChange={(id) => setTab(id as any)}
+      />
+
+      {/* FAQ Tab */}
+      {tab === "faq" && (
+        <div className="mt-5 space-y-5">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1">
+              <SearchInput value={search} onChange={setSearch} placeholder="Search FAQs…" />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {faqCategories.map(cat => (
+              <button key={cat} onClick={() => setActiveCategory(cat)}
+                className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors ${
+                  activeCategory === cat
+                    ? "bg-[#123B5D] text-white"
+                    : "bg-white border border-[#e5e7eb] text-[#6b7280] hover:border-[#123B5D] hover:text-[#123B5D]"
+                }`}>
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {Object.keys(groupedFaqs).length === 0 && (
+            <EmptyState icon={HelpCircle} title="No FAQs found" description="Try a different search or category." />
+          )}
+
+          {Object.entries(groupedFaqs).map(([cat, items]) => (
+            <div key={cat} className="card p-0 overflow-hidden">
+              <div className="px-5 py-3 bg-[#f9fafb] border-b border-[#e5e7eb]">
+                <h3 className="font-semibold text-[#123B5D] text-[13px] uppercase tracking-wide">{cat}</h3>
+              </div>
+              <div className="divide-y divide-[#f3f4f6]">
+                {items.map(faq => (
+                  <div key={faq.id}>
+                    <button
+                      onClick={() => setOpenFaq(openFaq === faq.id ? null : faq.id)}
+                      className="w-full flex items-start justify-between gap-3 px-5 py-4 text-left hover:bg-[#fafafa] transition-colors">
+                      <span className="font-medium text-[14px] text-[#1f2937] flex-1">{faq.question}</span>
+                      {openFaq === faq.id ? <ChevronUp size={16} className="text-[#6b7280] mt-0.5 flex-shrink-0" /> : <ChevronDown size={16} className="text-[#6b7280] mt-0.5 flex-shrink-0" />}
+                    </button>
+                    {openFaq === faq.id && (
+                      <div className="px-5 pb-4 text-[14px] text-[#4b5563] leading-relaxed bg-[#fafafa] border-t border-[#f3f4f6]">
+                        {faq.answer}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Common Issues Tab */}
+      {tab === "issues" && (
+        <div className="mt-5 space-y-4">
+          {issues.map(issue => (
+            <div key={issue.id} className="card p-0 overflow-hidden">
+              <button
+                onClick={() => setOpenIssue(openIssue === issue.id ? null : issue.id)}
+                className="w-full flex items-start justify-between gap-3 px-5 py-4 text-left hover:bg-[#fafafa] transition-colors">
+                <div className="flex items-start gap-3 flex-1">
+                  <AlertCircle size={17} className="text-amber-500 mt-0.5 flex-shrink-0" />
+                  <span className="font-semibold text-[14px] text-[#1f2937]">{issue.title}</span>
+                </div>
+                {openIssue === issue.id ? <ChevronUp size={16} className="text-[#6b7280] mt-1 flex-shrink-0" /> : <ChevronDown size={16} className="text-[#6b7280] mt-1 flex-shrink-0" />}
+              </button>
+              {openIssue === issue.id && (
+                <div className="px-5 pb-5 border-t border-[#f3f4f6] bg-[#fafafa]">
+                  <p className="text-[13px] text-[#6b7280] mt-3 mb-3 italic">{issue.reason}</p>
+                  <ol className="space-y-2">
+                    {issue.steps.map((step: string, i: number) => (
+                      <li key={i} className="flex gap-2.5 text-[14px] text-[#374151]">
+                        <span className="w-5 h-5 rounded-full bg-[#123B5D] text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                        {step}
+                      </li>
+                    ))}
+                  </ol>
+                  {issue.action && (
+                    <div className="mt-4">
+                      <Link href={issue.action.href} className="btn btn-outline btn-sm">
+                        {issue.action.label} <ExternalLink size={12} />
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Tickets Tab */}
+      {tab === "tickets" && (
+        <div className="mt-5">
+          {tickets.length === 0 ? (
+            <EmptyState
+              icon={Ticket}
+              title="No support tickets"
+              description="Raise a ticket if you need help from our team."
+              action={{ label: "Raise a Ticket", onClick: () => setTicketModal(true) }}
+            />
+          ) : (
+            <div className="space-y-3">
+              {tickets.map(ticket => (
+                <div key={ticket.id} className="card card-hover p-4 cursor-pointer" onClick={() => openTicketDetail(ticket)}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-[14px] text-[#1f2937] truncate">{ticket.subject}</p>
+                      <p className="text-[12px] text-[#6b7280] mt-0.5">{ticket.category} · {new Date(ticket.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${PRIORITY_COLORS[ticket.priority]}`}>{ticket.priority}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${STATUS_COLORS[ticket.status]}`}>{ticket.status.replace("_"," ")}</span>
+                      <ChevronRight size={15} className="text-[#9ca3af]" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Raise Ticket Modal */}
+      <Modal open={ticketModal} onClose={() => setTicketModal(false)} title="Raise Support Ticket" size="md">
+        <div className="space-y-4">
+          <FormField label="Subject *">
+            <input className="field" placeholder="Brief description of the issue" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))} />
+          </FormField>
+          <div className="form-row">
+            <FormField label="Category">
+              <select className="field" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))}>
+                {TICKET_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+              </select>
+            </FormField>
+            <FormField label="Priority">
+              <select className="field" value={form.priority} onChange={e => setForm(p => ({ ...p, priority: e.target.value }))}>
+                {TICKET_PRIORITIES.map(p => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
+              </select>
+            </FormField>
+          </div>
+          <FormField label="Description *">
+            <textarea className="field min-h-[120px]" placeholder="Describe the issue in detail. Include steps to reproduce if applicable." value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+          </FormField>
+          <div className="flex justify-end gap-2 pt-2">
+            <button className="btn btn-outline" onClick={() => setTicketModal(false)}>Cancel</button>
+            <button className="btn btn-primary" onClick={submitTicket} disabled={submitting}>
+              {submitting ? <><Spinner size={16} /> Submitting…</> : <><Send size={14} /> Submit Ticket</>}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* View Ticket Modal */}
+      <Modal open={!!viewTicket} onClose={() => { setViewTicket(null); setTicketMessages([]); }} title={viewTicket?.subject ?? "Ticket"} size="lg">
+        {viewTicket && (
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2 text-[12px]">
+              <span className={`px-2 py-1 rounded-full font-medium ${STATUS_COLORS[viewTicket.status]}`}>Status: {viewTicket.status.replace("_"," ")}</span>
+              <span className={`px-2 py-1 rounded-full font-medium ${PRIORITY_COLORS[viewTicket.priority]}`}>Priority: {viewTicket.priority}</span>
+              <span className="px-2 py-1 rounded-full font-medium bg-gray-100 text-gray-600">Category: {viewTicket.category}</span>
+            </div>
+            <div className="bg-[#f9fafb] rounded-xl p-4 text-[14px] text-[#374151] whitespace-pre-wrap">{viewTicket.description}</div>
+
+            {ticketMessages.length > 0 && (
+              <div className="space-y-3 max-h-[240px] overflow-y-auto">
+                <p className="text-[12px] font-semibold text-[#6b7280] uppercase tracking-wide">Replies</p>
+                {ticketMessages.map((msg: any) => (
+                  <div key={msg.id} className={`p-3 rounded-xl text-[13px] ${msg.is_admin ? "bg-[#f0fdf4] border border-green-100 ml-4" : "bg-[#f3f4f6]"}`}>
+                    <p className="font-medium text-[#1f2937] mb-1">{msg.is_admin ? "Support Team" : "You"}</p>
+                    <p className="text-[#374151] whitespace-pre-wrap">{msg.message}</p>
+                    <p className="text-[11px] text-[#9ca3af] mt-1">{new Date(msg.created_at).toLocaleString()}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {viewTicket.status !== "closed" && viewTicket.status !== "resolved" && (
+              <div className="flex gap-2 pt-2 border-t border-[#f3f4f6]">
+                <textarea
+                  className="field flex-1 min-h-[72px] resize-none"
+                  placeholder="Add a follow-up message…"
+                  value={replyText}
+                  onChange={e => setReplyText(e.target.value)}
+                />
+                <button className="btn btn-primary self-end" onClick={sendReply} disabled={sending || !replyText.trim()}>
+                  {sending ? <Spinner size={16} /> : <Send size={14} />}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+}

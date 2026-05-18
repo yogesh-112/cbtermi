@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Plus, GitPullRequestDraft, MoreHorizontal } from "lucide-react";
 import { EmptyState, StatusBadge, toast } from "@/components/ui";
 import { fmt, fmtDate } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 const STATUS_COLORS: Record<string, string> = {
   draft: "bg-[#f0efea] text-[#4a5168]",
@@ -14,6 +15,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function ChangeOrdersPage() {
+  const t = useT();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,25 +34,25 @@ export default function ChangeOrdersPage() {
     <div>
       <div className="flex items-center justify-between mb-1">
         <div>
-          <h1 className="page-title">Change Orders</h1>
-          <p className="page-desc">{fmt(total)} total value · {orders.length} order{orders.length !== 1 ? "s" : ""}</p>
+          <h1 className="page-title">{t.changeOrders.title}</h1>
+          <p className="page-desc">{fmt(total)} {t.changeOrders.totalValue} · {orders.length} {t.changeOrders.orders}</p>
         </div>
         <Link href="/change-orders/new" className="btn btn-primary btn-sm flex items-center gap-1.5">
-          <Plus size={13} strokeWidth={2.5} /> New order
+          <Plus size={13} strokeWidth={2.5} /> {t.changeOrders.newOrder}
         </Link>
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-5">
         <div className="mini-stat mini-stat-blue">
-          <span className="mini-stat-label">Draft</span>
+          <span className="mini-stat-label">{t.changeOrders.tabDraft}</span>
           <span className="mini-stat-value">{draft}</span>
         </div>
         <div className="mini-stat mini-stat-amber">
-          <span className="mini-stat-label">Awaiting approval</span>
+          <span className="mini-stat-label">{t.changeOrders.tabAwaiting}</span>
           <span className="mini-stat-value">{pending}</span>
         </div>
         <div className="mini-stat mini-stat-green">
-          <span className="mini-stat-label">Approved</span>
+          <span className="mini-stat-label">{t.changeOrders.tabApproved}</span>
           <span className="mini-stat-value">{approved}</span>
         </div>
       </div>
@@ -59,23 +61,23 @@ export default function ChangeOrdersPage() {
         <table className="table-base">
           <thead>
             <tr>
-              <th>CO #</th>
-              <th>Title</th>
-              <th>Project</th>
-              <th>Contact</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Date</th>
+              <th>{t.changeOrders.coNumber}</th>
+              <th>{t.changeOrders.titleCol}</th>
+              <th>{t.changeOrders.projectCol}</th>
+              <th>{t.changeOrders.contactCol}</th>
+              <th>{t.changeOrders.totalCol}</th>
+              <th>{t.changeOrders.statusCol}</th>
+              <th>{t.changeOrders.dateCol}</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="text-center py-10 text-[#8a8fa3]">Loading…</td></tr>
+              <tr><td colSpan={7} className="text-center py-10 text-[#8a8fa3]">{t.changeOrders.loading}</td></tr>
             ) : orders.length === 0 ? (
               <tr><td colSpan={7}>
-                <EmptyState icon={<GitPullRequestDraft size={40} />} title="No change orders yet"
-                  description="Create your first change order to track scope changes on a project."
-                  action={<Link href="/change-orders/new" className="btn btn-primary btn-sm">New Change Order</Link>} />
+                <EmptyState icon={<GitPullRequestDraft size={40} />} title={t.changeOrders.noOrders}
+                  description={t.changeOrders.noOrdersDesc}
+                  action={<Link href="/change-orders/new" className="btn btn-primary btn-sm">{t.changeOrders.newChangeOrder}</Link>} />
               </td></tr>
             ) : orders.map(o => (
               <tr key={o.id} className="cursor-pointer" onClick={() => window.location.href = `/change-orders/${o.id}`}>
@@ -101,9 +103,9 @@ export default function ChangeOrdersPage() {
         {loading ? (
           [...Array(3)].map((_, i) => <div key={i} className="mobile-card animate-pulse h-20 skeleton" />)
         ) : orders.length === 0 ? (
-          <EmptyState icon={<GitPullRequestDraft size={36} />} title="No change orders yet"
-            description="Create your first change order."
-            action={<Link href="/change-orders/new" className="btn btn-primary btn-sm">New Change Order</Link>} />
+          <EmptyState icon={<GitPullRequestDraft size={36} />} title={t.changeOrders.noOrders}
+            description={t.changeOrders.noOrdersDesc}
+            action={<Link href="/change-orders/new" className="btn btn-primary btn-sm">{t.changeOrders.newChangeOrder}</Link>} />
         ) : orders.map(o => (
           <Link key={o.id} href={`/change-orders/${o.id}`} className="mobile-card block">
             <div className="mobile-card-row">

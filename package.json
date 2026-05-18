@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.96.0",
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.105.4",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",

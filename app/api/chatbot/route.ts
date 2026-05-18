@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { requireSession } from "@/lib/auth";
 
 const SYSTEM_PROMPT = `You are the ClearBuild USA in-app assistant — a smart helper for construction business management.
@@ -59,9 +59,9 @@ export async function POST(req: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json({
-      message: "The AI assistant isn't configured yet. Add **ANTHROPIC_API_KEY** to your environment variables to enable this feature.",
+      message: "The AI assistant isn't configured yet. Add **GEMINI_API_KEY** to your environment variables to enable this feature.",
       actions: [{ label: "Go to Help Center", type: "navigate", href: "/help" }],
     });
   }
@@ -71,18 +71,27 @@ export async function POST(req: NextRequest) {
     currentPage?: string;
   };
 
-  const contextNote = currentPage ? `\n\nCurrent page: ${currentPage}` : "";
-
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 512,
-    system: SYSTEM_PROMPT + contextNote,
-    messages: messages.slice(-10),
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    systemInstruction: SYSTEM_PROMPT + (currentPage ? `\n\nUser is currently on: ${currentPage}` : ""),
   });
 
-  const raw = response.content[0].type === "text" ? response.content[0].text.trim() : "";
+  // Gemini uses "model" instead of "assistant" for role
+  const history = messages.slice(0, -1).map(m => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
+  }));
+
+  const lastMessage = messages[messages.length - 1]?.content ?? "";
+
+  const chat = model.startChat({
+    history,
+    generationConfig: { maxOutputTokens: 512, temperature: 0.7 },
+  });
+
+  const result = await chat.sendMessage(lastMessage);
+  const raw = result.response.text().trim();
 
   let parsed: { message: string; actions?: unknown[] };
   try {

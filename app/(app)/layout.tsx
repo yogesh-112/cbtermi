@@ -8,6 +8,7 @@ import MobileNav from "@/components/layout/MobileNav";
 import Topbar from "@/components/layout/Topbar";
 import ImpersonationBanner from "@/components/layout/ImpersonationBanner";
 import ProductTour from "@/components/ProductTour";
+import Chatbot from "@/components/Chatbot";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
@@ -42,6 +43,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </main>
       <ProductTour />
+      <Chatbot />
     </div>
   );
 }

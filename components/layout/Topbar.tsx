@@ -195,6 +195,7 @@ export default function Topbar({ user, businesses, currentBusiness }: Props) {
         <div className="relative">
           <button
             onClick={() => { setUserOpen(!userOpen); setBizOpen(false); }}
+            aria-label="Open user menu"
             className="w-[30px] h-[30px] bg-brand-navy rounded-full flex items-center justify-center hover:ring-2 hover:ring-brand-navy/30 transition-all"
           >
             <span className="text-white text-[11px] font-bold tracking-wide">{initials}</span>

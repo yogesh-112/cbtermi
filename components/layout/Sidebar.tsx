@@ -172,6 +172,7 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
         {!inDrawer && (
           <button
             onClick={() => setCollapsed(c => !c)}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             className={`w-6 h-6 rounded-md flex items-center justify-center text-white/35 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0 ${collapsed ? "mt-1" : ""}`}
           >
@@ -267,7 +268,7 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/50 animate-fade-in" onClick={() => setMobileOpen(false)} />
           <div className="absolute left-0 top-0 bottom-0 w-[240px] bg-brand-navy shadow-modal animate-slide-up">
-            <button onClick={() => setMobileOpen(false)}
+            <button onClick={() => setMobileOpen(false)} aria-label="Close menu"
               className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all z-10">
               <X size={16} />
             </button>

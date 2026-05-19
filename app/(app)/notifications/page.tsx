@@ -189,7 +189,7 @@ export default function NotificationsPage() {
                   <div className="flex gap-1">
                     <button onClick={() => { loadTemplate(tmpl.id); setSModal(true); }}
                       className="btn btn-outline btn-sm gap-1"><Send size={11} /> Use</button>
-                    <button onClick={() => setDeleteId(tmpl.id)} className="btn btn-ghost btn-sm text-red-500 p-1.5"><Trash2 size={13} /></button>
+                    <button onClick={() => setDeleteId(tmpl.id)} aria-label="Delete template" className="btn btn-ghost btn-sm text-red-500 p-1.5"><Trash2 size={13} /></button>
                   </div>
                 </div>
               </div>

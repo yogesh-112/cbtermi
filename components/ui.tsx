@@ -22,7 +22,7 @@ export function Modal({ open, onClose, title, children, size = "md" }: {
                        max-h-[92vh] sm:max-h-[90vh] flex flex-col animate-slide-in-bottom sm:animate-scale-in`}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#e7e6e1] flex-shrink-0">
           <h2 className="text-base font-semibold text-[#0c1226]" style={{ letterSpacing: "-0.02em" }}>{title}</h2>
-          <button onClick={onClose}
+          <button onClick={onClose} aria-label="Close"
             className="w-8 h-8 flex items-center justify-center rounded-lg text-[#8a8fa3] hover:text-[#4a5168] hover:bg-[#f0efea] transition-all">
             <X size={16} />
           </button>
@@ -253,7 +253,7 @@ export function ActionMenu({ items }: {
 
   return (
     <div className="relative" ref={ref}>
-      <button onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
+      <button onClick={(e) => { e.stopPropagation(); setOpen(!open); }} aria-label="More options"
         className="btn btn-ghost btn-icon p-1.5 text-[#8a8fa3]">
         <MoreHorizontal size={16} />
       </button>

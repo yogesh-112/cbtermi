@@ -144,11 +144,11 @@ export default function InvoiceDetailPage() {
                 className="btn btn-outline btn-sm"><Link2 size={13} /> Share pay link</button>
             </>
           )}
-          <button onClick={duplicate} className="btn btn-outline btn-sm"><Copy size={13} /></button>
+          <button onClick={duplicate} aria-label="Duplicate invoice" className="btn btn-outline btn-sm"><Copy size={13} /></button>
           {invoice.status !== "voided" && (
-            <button onClick={voidInvoice} className="btn btn-ghost btn-sm text-[#4a5168]"><Ban size={13} /></button>
+            <button onClick={voidInvoice} aria-label="Void invoice" className="btn btn-ghost btn-sm text-[#4a5168]"><Ban size={13} /></button>
           )}
-          <button onClick={() => setDelConfirm(true)} className="btn btn-danger btn-sm"><Trash2 size={13} /></button>
+          <button onClick={() => setDelConfirm(true)} aria-label="Delete invoice" className="btn btn-danger btn-sm"><Trash2 size={13} /></button>
         </div>
       </div>
 

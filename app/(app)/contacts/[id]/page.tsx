@@ -83,7 +83,7 @@ export default function ContactDetailPage() {
             </button>
           )}
           <button onClick={() => setEditing(!editing)} className="btn btn-outline btn-sm"><Edit2 size={13} /> Edit</button>
-          <button onClick={() => setDelConfirm(true)} className="btn btn-danger btn-sm"><Trash2 size={13} /></button>
+          <button onClick={() => setDelConfirm(true)} aria-label="Delete contact" className="btn btn-danger btn-sm"><Trash2 size={13} /></button>
         </div>
       </div>
 

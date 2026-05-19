@@ -181,8 +181,8 @@ export default function SchedulingPage() {
                         <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${SLOT_STATUS_COLORS[slot.status] ?? "bg-gray-100 text-gray-500"}`}>{slot.status}</span>
                         {slot.status === "available" && (
                           <>
-                            <button className="btn btn-ghost btn-sm" onClick={() => openEditSlot(slot)}><Pencil size={13} /></button>
-                            <button className="btn btn-ghost btn-sm text-red-500" onClick={() => setDeleteSlotId(slot.id)}><Trash2 size={13} /></button>
+                            <button className="btn btn-ghost btn-sm" aria-label="Edit slot" onClick={() => openEditSlot(slot)}><Pencil size={13} /></button>
+                            <button className="btn btn-ghost btn-sm text-red-500" aria-label="Delete slot" onClick={() => setDeleteSlotId(slot.id)}><Trash2 size={13} /></button>
                           </>
                         )}
                       </div>

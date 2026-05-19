@@ -115,8 +115,8 @@ export default function QuoteDetailPage() {
               <Briefcase size={13} /> {converting ? "Creating…" : "Convert to project"}
             </button>
           )}
-          <button onClick={() => window.print()} className="btn btn-outline btn-sm"><Printer size={13} /></button>
-          <button onClick={() => setDelConfirm(true)} className="btn btn-danger btn-sm"><Trash2 size={13} /></button>
+          <button onClick={() => window.print()} aria-label="Print quote" className="btn btn-outline btn-sm"><Printer size={13} /></button>
+          <button onClick={() => setDelConfirm(true)} aria-label="Delete quote" className="btn btn-danger btn-sm"><Trash2 size={13} /></button>
         </div>
       </div>
 

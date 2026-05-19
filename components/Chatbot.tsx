@@ -107,7 +107,7 @@ export default function Chatbot() {
           currentPage: pathname,
         }),
       });
-      const data = await res.json();
+      const data = res.ok ? await res.json() : await res.json().catch(() => ({}));
       setMessages(prev => [...prev, {
         id: `a_${Date.now()}`,
         role: "assistant",

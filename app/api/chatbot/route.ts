@@ -71,36 +71,45 @@ export async function POST(req: NextRequest) {
     currentPage?: string;
   };
 
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
-    systemInstruction: SYSTEM_PROMPT + (currentPage ? `\n\nUser is currently on: ${currentPage}` : ""),
-  });
-
-  // Gemini uses "model" instead of "assistant" for role
-  const history = messages.slice(0, -1).map(m => ({
-    role: m.role === "assistant" ? "model" : "user",
-    parts: [{ text: m.content }],
-  }));
-
-  const lastMessage = messages[messages.length - 1]?.content ?? "";
-
-  const chat = model.startChat({
-    history,
-    generationConfig: { maxOutputTokens: 512, temperature: 0.7 },
-  });
-
-  const result = await chat.sendMessage(lastMessage);
-  const raw = result.response.text().trim();
-
-  let parsed: { message: string; actions?: unknown[] };
   try {
-    const start = raw.indexOf("{");
-    const end = raw.lastIndexOf("}");
-    parsed = start !== -1 && end !== -1 ? JSON.parse(raw.slice(start, end + 1)) : { message: raw };
-  } catch {
-    parsed = { message: raw || "Sorry, I couldn't process that. Please try again." };
-  }
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: SYSTEM_PROMPT + (currentPage ? `\n\nUser is currently on: ${currentPage}` : ""),
+    });
 
-  return NextResponse.json(parsed);
+    // Gemini uses "model" instead of "assistant" for role
+    const history = messages.slice(0, -1).map(m => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
+
+    const lastMessage = messages[messages.length - 1]?.content ?? "";
+
+    const chat = model.startChat({
+      history,
+      generationConfig: { maxOutputTokens: 512, temperature: 0.7 },
+    });
+
+    const result = await chat.sendMessage(lastMessage);
+    const raw = result.response.text().trim();
+
+    let parsed: { message: string; actions?: unknown[] };
+    try {
+      const start = raw.indexOf("{");
+      const end = raw.lastIndexOf("}");
+      parsed = start !== -1 && end !== -1 ? JSON.parse(raw.slice(start, end + 1)) : { message: raw };
+    } catch {
+      parsed = { message: raw || "Sorry, I couldn't process that. Please try again." };
+    }
+
+    return NextResponse.json(parsed);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[chatbot] Gemini error:", msg);
+    return NextResponse.json(
+      { message: "The assistant ran into an issue. Please try again in a moment.", actions: [] },
+      { status: 500 }
+    );
+  }
 }

@@ -40,9 +40,10 @@ export async function POST(request: NextRequest) {
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
 
   if (items?.length) {
-    await supabase.from("change_order_items").insert(
+    const { error: itemsErr } = await supabase.from("change_order_items").insert(
       items.map((item: any, i: number) => ({ ...item, change_order_id: co.id, sort_order: i }))
     );
+    if (itemsErr) console.error("[change-orders] change_order_items insert failed:", itemsErr.message);
   }
   return NextResponse.json({ changeOrder: co }, { status: 201 });
 }

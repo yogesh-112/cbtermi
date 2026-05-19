@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
 
   if (items?.length) {
-    await supabase.from("quote_items").insert(items.map((item: any, i: number) => ({ ...item, quote_id: quote.id, sort_order: i })));
+    const { error: itemsErr } = await supabase.from("quote_items").insert(items.map((item: any, i: number) => ({ ...item, quote_id: quote.id, sort_order: i })));
+    if (itemsErr) console.error("[quotes] quote_items insert failed:", itemsErr.message);
   }
   return NextResponse.json({ quote }, { status: 201 });
 }

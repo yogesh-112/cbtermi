@@ -41,7 +41,8 @@ export async function POST(request: NextRequest) {
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
 
   if (items?.length) {
-    await supabase.from("invoice_items").insert(items.map((item: any, i: number) => ({ ...item, invoice_id: invoice.id, sort_order: i })));
+    const { error: itemsErr } = await supabase.from("invoice_items").insert(items.map((item: any, i: number) => ({ ...item, invoice_id: invoice.id, sort_order: i })));
+    if (itemsErr) console.error("[invoices] invoice_items insert failed:", itemsErr.message);
   }
   await logAudit({ businessId: session.businessId, userId: session.id, entityType: "invoice", entityId: invoice.id, action: "created", payload: { invoice_number: invoice.invoice_number, total } });
 

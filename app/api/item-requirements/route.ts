@@ -15,6 +15,9 @@ export async function POST(request: NextRequest) {
   const { items, ...body } = await request.json();
   const { data: list, error } = await supabase.from("item_requirement_lists").insert({ ...body, business_id: session.businessId, created_by: session.id }).select().single();
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
-  if (items?.length) await supabase.from("item_requirements").insert(items.map((i: any, idx: number) => ({ ...i, list_id: list.id, sort_order: idx })));
+  if (items?.length) {
+    const { error: itemsErr } = await supabase.from("item_requirements").insert(items.map((i: any, idx: number) => ({ ...i, list_id: list.id, sort_order: idx })));
+    if (itemsErr) console.error("[item-requirements] item_requirements insert failed:", itemsErr.message);
+  }
   return NextResponse.json({ list }, { status: 201 });
 }

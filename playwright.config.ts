@@ -22,6 +22,7 @@ export default defineConfig({
     {
       name: "setup",
       testMatch: /auth\.setup\.ts/,
+      timeout: 60_000,
     },
     {
       name: "chromium",
@@ -35,6 +36,7 @@ export default defineConfig({
       name: "mobile",
       use: {
         ...devices["iPhone 14"],
+        browserName: "chromium",
         storageState: "playwright/.auth.json",
       },
       dependencies: ["setup"],

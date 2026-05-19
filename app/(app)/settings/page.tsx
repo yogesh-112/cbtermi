@@ -187,7 +187,7 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <div className="flex items-start gap-6">
+      <div className="flex flex-col lg:flex-row items-start gap-6">
         {/* Left sidebar nav */}
         <div className="w-52 flex-shrink-0 hidden lg:block">
           <nav className="space-y-0.5">

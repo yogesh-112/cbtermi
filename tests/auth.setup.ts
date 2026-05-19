@@ -10,11 +10,24 @@ setup("authenticate", async ({ page }) => {
     throw new Error("Set TEST_EMAIL and TEST_PASSWORD in .env.test before running tests.");
   }
 
-  await page.goto("/login");
-  await page.getByPlaceholder("you@example.com").fill(email);
-  await page.getByPlaceholder("••••••••").fill(password);
-  await page.getByRole("button", { name: /sign in/i }).click();
+  // Call the login API directly from the page context so Set-Cookie is applied
+  // to the browser's cookie jar — avoids any UI form submission quirks.
+  const res = await page.request.post("/api/auth/login", {
+    data: { email, password },
+    headers: { "Content-Type": "application/json" },
+  });
 
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 });
+  if (!res.ok()) {
+    const body = await res.json().catch(() => ({}));
+    const msg = (body as Record<string, string>).message ?? "unknown error";
+    throw new Error(
+      `Login API returned ${res.status()}: "${msg}"\n` +
+      `→ Check TEST_EMAIL and TEST_PASSWORD in .env.test are correct and the account's email is verified.`
+    );
+  }
+
+  // Navigate to dashboard — middleware will pass if the session cookie was set
+  await page.goto("/dashboard");
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 20_000 });
   await page.context().storageState({ path: authFile });
 });

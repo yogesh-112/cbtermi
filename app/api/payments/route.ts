@@ -15,6 +15,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  if (!["owner", "admin"].includes(session.role ?? "")) return NextResponse.json({ message: "Only owners and admins can record payments." }, { status: 403 });
   const trialErr = await checkTrialAccess(session.businessId);
   if (trialErr) return trialErr;
   const body = await request.json();

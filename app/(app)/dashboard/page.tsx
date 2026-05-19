@@ -107,6 +107,15 @@ export default function DashboardPage() {
             </div>
           </div>
           {(() => {
+            const hasData = chartData.some(d => d.invoiced > 0 || d.paid > 0);
+            if (!hasData) {
+              return (
+                <div className="h-36 flex flex-col items-center justify-center text-[#8a8fa3] text-[13px]">
+                  <p className="font-medium">No activity yet</p>
+                  <p className="text-[11px] mt-1">Data will appear once you create invoices or record payments.</p>
+                </div>
+              );
+            }
             const maxVal = Math.max(...chartData.map(d => Math.max(d.invoiced, d.paid)), 1);
             const startLabel = chartData[0]?.date ? new Date(chartData[0].date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
             const midLabel = chartData[6]?.date ? new Date(chartData[6].date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
@@ -114,7 +123,7 @@ export default function DashboardPage() {
             return (
               <>
                 <div className="flex items-end gap-1.5 h-32 w-full">
-                  {(chartData.length ? chartData : Array.from({ length: 14 }, () => ({ invoiced: 0, paid: 0 }))).map((d: any, i: number) => {
+                  {chartData.map((d: any, i: number) => {
                     const invH = Math.max((d.invoiced / maxVal) * 100, d.invoiced > 0 ? 4 : 0);
                     const paidH = Math.max((d.paid / maxVal) * 100, d.paid > 0 ? 4 : 0);
                     return (

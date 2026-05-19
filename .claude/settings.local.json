@@ -51,7 +51,9 @@
       "Bash(curl *)",
       "Bash(dir E:\\\\cbv1\\\\.env*)",
       "Bash(npx vercel *)",
-      "Bash(Get-ChildItem -Recurse -Directory)"
+      "Bash(Get-ChildItem -Recurse -Directory)",
+      "WebFetch(domain:clearbuildusa.com)",
+      "WebFetch(domain:www.clearbuildusa.com)"
     ]
   }
 }

@@ -55,7 +55,7 @@ function InvoiceForm() {
 
   const setItem = (i: number, k: string, v: any) => {
     const arr = [...items];
-    arr[i] = calcItem({ ...arr[i], [k]: ["quantity","unit_price","tax_rate","discount"].includes(k) ? parseFloat(v) || 0 : v });
+    arr[i] = calcItem({ ...arr[i], [k]: ["quantity","unit_price","tax_rate","discount"].includes(k) ? Math.max(0, parseFloat(v) || 0) : v });
     setItems(arr);
   };
 
@@ -70,9 +70,10 @@ function InvoiceForm() {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...form, status, items }),
     });
+    const d = await res.json().catch(() => ({}));
     setSaving(false);
-    if (res.ok) { const d = await res.json(); toast("Invoice saved"); router.push(`/invoices/${d.invoice.id}`); }
-    else toast("Failed to save", "error");
+    if (res.ok) { toast("Invoice saved"); router.push(`/invoices/${d.invoice.id}`); }
+    else toast(d.message || "Failed to save", "error");
   };
 
   const selectedContact = contacts.find(c => c.id === form.contact_id);
@@ -136,40 +137,43 @@ function InvoiceForm() {
               <h2 className="section-title mb-0">Line items</h2>
             </div>
 
-            {/* Header row */}
-            <div className="grid text-[11px] text-[#8a8fa3] uppercase tracking-wide font-semibold mb-2 px-1"
-              style={{ gridTemplateColumns: "1fr 60px 60px 80px 70px 24px" }}>
-              <span>Item · description</span>
-              <span className="text-right">Unit</span>
-              <span className="text-right">Qty</span>
-              <span className="text-right">Rate</span>
-              <span className="text-right">Amount</span>
-              <span />
-            </div>
+            <div className="overflow-x-auto -mx-5 px-5">
+              {/* Header row */}
+              <div className="grid text-[11px] text-[#8a8fa3] uppercase tracking-wide font-semibold mb-2 px-1 min-w-[400px]"
+                style={{ gridTemplateColumns: "1fr 60px 60px 80px 70px 24px" }}>
+                <span>Item · description</span>
+                <span className="text-right">Unit</span>
+                <span className="text-right">Qty</span>
+                <span className="text-right">Rate</span>
+                <span className="text-right">Amount</span>
+                <span />
+              </div>
 
-            <div className="space-y-2">
-              {items.map((item, i) => (
-                <div key={i} className="grid gap-1.5 items-start"
-                  style={{ gridTemplateColumns: "1fr 60px 60px 80px 70px 24px" }}>
-                  <div>
-                    <input value={item.item_name} onChange={e => setItem(i, "item_name", e.target.value)}
-                      placeholder="Item name" className="field text-[13px] mb-1" />
-                    <input value={item.description} onChange={e => setItem(i, "description", e.target.value)}
-                      placeholder="Description (optional)" className="field text-[12px] text-[#8a8fa3]" />
+              <div className="space-y-2 min-w-[400px]">
+                {items.map((item, i) => (
+                  <div key={i} className="grid gap-1.5 items-start"
+                    style={{ gridTemplateColumns: "1fr 60px 60px 80px 70px 24px" }}>
+                    <div>
+                      <input value={item.item_name} onChange={e => setItem(i, "item_name", e.target.value)}
+                        placeholder="Item name" className="field text-[13px] mb-1" />
+                      <input value={item.description} onChange={e => setItem(i, "description", e.target.value)}
+                        placeholder="Description (optional)" className="field text-[12px] text-[#8a8fa3]" />
+                    </div>
+                    <input value={item.unit} onChange={e => setItem(i, "unit", e.target.value)}
+                      placeholder="SF" className="field text-[12px] text-right" />
+                    <input type="number" value={item.quantity} onChange={e => setItem(i, "quantity", e.target.value)}
+                      className="field text-[12px] text-right" min={0} />
+                    <input type="number" value={item.unit_price} onChange={e => setItem(i, "unit_price", e.target.value)}
+                      className="field text-[12px] text-right" min={0} step={0.01} />
+                    <p className="text-right font-semibold text-[13px] text-[#0c1226] pt-2">{fmt(item.total)}</p>
+                    <button onClick={() => setItems(items.filter((_, idx) => idx !== i))}
+                      aria-label="Remove item"
+                      className="text-[#d8d6cf] hover:text-red-500 transition-colors pt-2">
+                      <Trash2 size={13} />
+                    </button>
                   </div>
-                  <input value={item.unit} onChange={e => setItem(i, "unit", e.target.value)}
-                    placeholder="SF" className="field text-[12px] text-right" />
-                  <input type="number" value={item.quantity} onChange={e => setItem(i, "quantity", e.target.value)}
-                    className="field text-[12px] text-right" min={0} />
-                  <input type="number" value={item.unit_price} onChange={e => setItem(i, "unit_price", e.target.value)}
-                    className="field text-[12px] text-right" min={0} step={0.01} />
-                  <p className="text-right font-semibold text-[13px] text-[#0c1226] pt-2">{fmt(item.total)}</p>
-                  <button onClick={() => setItems(items.filter((_, idx) => idx !== i))}
-                    className="text-[#d8d6cf] hover:text-red-500 transition-colors pt-2">
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
             <div className="flex items-center gap-4 mt-3 pt-3 border-t border-[#f0efea]">

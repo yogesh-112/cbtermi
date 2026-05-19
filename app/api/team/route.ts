@@ -42,7 +42,11 @@ export async function DELETE(request: NextRequest) {
   }
   const { userId, invitationId } = await request.json();
 
-  if (userId) await supabase.from("business_members").delete().eq("business_id", session.businessId).eq("user_id", userId);
+  if (userId) {
+    await supabase.from("business_members").delete().eq("business_id", session.businessId).eq("user_id", userId);
+    // Invalidate all active JWTs for the removed user so they can't continue accessing this business
+    await supabase.from("users").update({ force_logout_at: new Date().toISOString() }).eq("id", userId);
+  }
   if (invitationId) await supabase.from("team_invitations").delete().eq("id", invitationId).eq("business_id", session.businessId);
   return NextResponse.json({ message: "Removed" });
 }

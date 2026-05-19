@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -68,7 +69,7 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
     localStorage.setItem("sb-collapsed", collapsed ? "1" : "0");
   }, [collapsed]);
 
-  // Fetch nav counts + trial info
+  // Fetch nav counts + trial info — re-run on each navigation so counts stay fresh
   useEffect(() => {
     Promise.all([
       fetch("/api/contacts").then(r => r.json()),
@@ -87,8 +88,8 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
         ));
         setTrialDays({ used, total: 15 });
       }
-    }).catch(() => {});
-  }, []);
+    }).catch(err => console.error("[sidebar] counts fetch failed:", err));
+  }, [pathname]);
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/dashboard" && pathname.startsWith(href + "/"));
@@ -159,13 +160,11 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
         {collapsed && !inDrawer ? (
           /* Compact: show icon portion of logo */
           <Link href="/dashboard" title="Clear Build USA">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="CB" width={30} height={30} className="object-contain object-left" />
+            <Image src="/logo.png" alt="CB" width={30} height={30} className="object-contain object-left" />
           </Link>
         ) : (
           <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Clear Build USA" width={126} height={34} className="object-contain object-left" />
+            <Image src="/logo.png" alt="Clear Build USA" width={126} height={34} className="object-contain object-left" />
           </Link>
         )}
 

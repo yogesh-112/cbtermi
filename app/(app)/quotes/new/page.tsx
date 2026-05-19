@@ -46,7 +46,7 @@ function QuoteForm() {
     contact_email: "",
     title: "",
     issue_date: new Date().toISOString().split("T")[0],
-    valid_until: "",
+    valid_until: new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
     project_type: "",
     project_address: "",
     notes: "",
@@ -88,7 +88,7 @@ function QuoteForm() {
   const setItem = (i: number, k: string, v: any) => {
     const arr = [...items];
     const numFields = ["quantity", "unit_price", "tax_rate", "discount"];
-    arr[i] = calcItem({ ...arr[i], [k]: numFields.includes(k) ? parseFloat(v) || 0 : v });
+    arr[i] = calcItem({ ...arr[i], [k]: numFields.includes(k) ? Math.max(0, parseFloat(v) || 0) : v });
     setItems(arr);
   };
 
@@ -99,19 +99,22 @@ function QuoteForm() {
 
   const save = async (status = "draft") => {
     if (!form.contact_id) { toast("Please select a contact", "error"); return; }
+    if (form.valid_until && new Date(form.valid_until) < new Date()) {
+      toast("Valid until date must be in the future", "error"); return;
+    }
     setSaving(true);
     const res = await fetch("/api/quotes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...form, status, items }),
     });
+    const d = await res.json().catch(() => ({}));
     setSaving(false);
     if (res.ok) {
-      const d = await res.json();
       toast("Quote saved");
       router.push(`/quotes/${d.quote.id}`);
     } else {
-      toast("Failed to save quote", "error");
+      toast(d.message || "Failed to save quote", "error");
     }
   };
 
@@ -125,7 +128,9 @@ function QuoteForm() {
           <ArrowLeft size={16} />
         </Link>
         <div className="flex-1">
+          <label htmlFor="quote-title" className="sr-only">Quote title</label>
           <input
+            id="quote-title"
             value={form.title}
             onChange={e => set("title", e.target.value)}
             placeholder="Quote title (e.g. Hartwell Kitchen Remodel)"

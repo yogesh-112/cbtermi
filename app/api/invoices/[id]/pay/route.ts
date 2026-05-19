@@ -24,7 +24,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     .single();
 
   if (error || !invoice) return NextResponse.json({ message: "Invoice not found" }, { status: 404 });
-  if (invoice.status === "paid") return NextResponse.json({ message: "Invoice already paid" }, { status: 400 });
+  const payableStatuses = ["sent", "due", "overdue", "partial"];
+  if (!payableStatuses.includes(invoice.status)) return NextResponse.json({ message: "Invoice is not payable" }, { status: 400 });
 
   const amountDue = Math.round((invoice.amount_due ?? 0) * 100); // cents
   if (amountDue < 50) return NextResponse.json({ message: "Amount too small" }, { status: 400 });

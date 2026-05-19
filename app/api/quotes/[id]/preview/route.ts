@@ -19,6 +19,15 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const allowed = ["approved", "rejected"] as const;
   if (!allowed.includes(body.status)) return NextResponse.json({ message: "Invalid status" }, { status: 400 });
 
+  // Verify the quote is still awaiting customer action
+  const { data: existing, error: fetchErr } = await supabase
+    .from("quotes")
+    .select("id, status")
+    .eq("id", id)
+    .single();
+  if (fetchErr || !existing) return NextResponse.json({ message: "Quote not found" }, { status: 404 });
+  if (existing.status !== "sent") return NextResponse.json({ message: "Quote is not awaiting approval" }, { status: 409 });
+
   const updates: Record<string, unknown> = {
     status: body.status,
     updated_at: new Date().toISOString(),

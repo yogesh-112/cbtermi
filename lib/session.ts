@@ -10,10 +10,10 @@ export interface SessionPayload {
 }
 
 export const SESSION_COOKIE = "cb_session";
-if (!process.env.JWT_SECRET && process.env.NODE_ENV === "production") {
-  throw new Error("JWT_SECRET environment variable is not set");
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is not set. Add it to .env (see .env.example).");
 }
-const secret = new TextEncoder().encode(process.env.JWT_SECRET ?? "dev-fallback-secret-local-only");
+const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function signToken(payload: SessionPayload) {
   return new SignJWT(payload as unknown as Record<string, unknown>)

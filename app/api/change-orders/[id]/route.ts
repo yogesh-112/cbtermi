@@ -27,11 +27,20 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (["approved", "converted"].includes(existing.status) && body.status !== "voided") {
     return NextResponse.json({ message: `Cannot edit an ${existing.status} change order.` }, { status: 400 });
   }
+  if (["approved", "voided"].includes(body.status) && !["owner", "admin"].includes(session.role ?? "")) {
+    return NextResponse.json({ message: "Only owners and admins can approve or void change orders." }, { status: 403 });
+  }
 
   if (items) {
     await supabase.from("change_order_items").delete().eq("change_order_id", id);
-    const subtotal = items.reduce((s: number, i: any) => s + (i.total ?? 0), 0);
-    const tax_amount = items.reduce((s: number, i: any) => s + ((i.total ?? 0) * (i.tax_rate ?? 0) / 100), 0);
+    const subtotal = items.reduce((s: number, i: any) => {
+      const base = (i.quantity ?? 0) * (i.unit_price ?? 0);
+      return s + base * (1 - (i.discount ?? 0) / 100);
+    }, 0);
+    const tax_amount = items.reduce((s: number, i: any) => {
+      const base = (i.quantity ?? 0) * (i.unit_price ?? 0);
+      return s + base * (1 - (i.discount ?? 0) / 100) * ((i.tax_rate ?? 0) / 100);
+    }, 0);
     body.subtotal = subtotal; body.tax_amount = tax_amount; body.total = subtotal + tax_amount;
     await supabase.from("change_order_items").insert(items.map((item: any, i: number) => ({ ...item, change_order_id: id, sort_order: i })));
   }

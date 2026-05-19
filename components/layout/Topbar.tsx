@@ -51,6 +51,7 @@ export default function Topbar({ user, businesses, currentBusiness }: Props) {
     if (search.length < 2) { setSearchResults([]); setSearchOpen(false); return; }
     searchTimer.current = setTimeout(async () => {
       const res = await fetch(`/api/search?q=${encodeURIComponent(search)}`);
+      if (!res.ok) return;
       const data = await res.json();
       setSearchResults(data.results ?? []);
       setSearchOpen(true);

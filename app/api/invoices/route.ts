@@ -33,8 +33,14 @@ export async function POST(request: NextRequest) {
   const { count } = await supabase.from("invoices").select("*", { count: "exact", head: true }).eq("business_id", session.businessId);
   const invoice_number = body.invoice_number || `${biz?.invoice_prefix ?? "INV-"}${String((count ?? 0) + 1).padStart(4, "0")}`;
 
-  const subtotal = (items ?? []).reduce((s: number, i: any) => s + (i.total ?? 0), 0);
-  const tax_amount = (items ?? []).reduce((s: number, i: any) => s + ((i.total ?? 0) * (i.tax_rate ?? 0) / 100), 0);
+  const subtotal = (items ?? []).reduce((s: number, i: any) => {
+    const base = (i.quantity ?? 0) * (i.unit_price ?? 0);
+    return s + base * (1 - (i.discount ?? 0) / 100);
+  }, 0);
+  const tax_amount = (items ?? []).reduce((s: number, i: any) => {
+    const base = (i.quantity ?? 0) * (i.unit_price ?? 0);
+    return s + base * (1 - (i.discount ?? 0) / 100) * ((i.tax_rate ?? 0) / 100);
+  }, 0);
   const total = subtotal + tax_amount;
 
   const { data: invoice, error } = await supabase.from("invoices").insert({ ...body, invoice_number, project_id, business_id: session.businessId, subtotal, tax_amount, total, amount_due: total, created_by: session.id }).select().single();

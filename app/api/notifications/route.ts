@@ -16,6 +16,9 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
 
   if (body.action === "send") {
+    if (!["owner", "admin"].includes(session.role ?? "")) {
+      return NextResponse.json({ message: "Only owners and admins can send notifications." }, { status: 403 });
+    }
     const { template_id, contact_id, subject, message, channel } = body;
     const { data: contact } = await supabase.from("contacts").select("email, phone, whatsapp, full_name").eq("id", contact_id).single();
     const { data: biz } = await supabase.from("businesses").select("name").eq("id", session.businessId).single();

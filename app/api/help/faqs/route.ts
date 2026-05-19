@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 export async function GET(request: NextRequest) {
   const category = request.nextUrl.searchParams.get("category");
   const search = request.nextUrl.searchParams.get("search");
+  if (search && search.length > 200) return NextResponse.json({ faqs: [] });
 
   let q = supabase
     .from("help_faqs")

@@ -29,6 +29,11 @@ export async function POST(request: NextRequest) {
   if (!body.title?.trim()) return NextResponse.json({ message: "Title is required" }, { status: 400 });
   if (!body.slot_ids?.length) return NextResponse.json({ message: "At least one slot is required" }, { status: 400 });
 
+  if (body.contact_id) {
+    const { data: contactCheck } = await supabase.from("contacts").select("id").eq("id", body.contact_id).eq("business_id", session.businessId).single();
+    if (!contactCheck) return NextResponse.json({ message: "Contact not found" }, { status: 404 });
+  }
+
   const token = crypto.randomBytes(24).toString("hex");
 
   const { data: link, error } = await supabase

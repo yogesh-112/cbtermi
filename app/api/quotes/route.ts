@@ -21,8 +21,14 @@ export async function POST(request: NextRequest) {
   const { count } = await supabase.from("quotes").select("*", { count: "exact", head: true }).eq("business_id", session.businessId);
   const quote_number = body.quote_number || `${biz?.quote_prefix ?? "Q-"}${String((count ?? 0) + 1).padStart(4, "0")}`;
 
-  const subtotal = (items ?? []).reduce((s: number, i: any) => s + (i.total ?? 0), 0);
-  const tax_amount = (items ?? []).reduce((s: number, i: any) => s + ((i.total ?? 0) * (i.tax_rate ?? 0) / 100), 0);
+  const subtotal = (items ?? []).reduce((s: number, i: any) => {
+    const base = (i.quantity ?? 0) * (i.unit_price ?? 0);
+    return s + base * (1 - (i.discount ?? 0) / 100);
+  }, 0);
+  const tax_amount = (items ?? []).reduce((s: number, i: any) => {
+    const base = (i.quantity ?? 0) * (i.unit_price ?? 0);
+    return s + base * (1 - (i.discount ?? 0) / 100) * ((i.tax_rate ?? 0) / 100);
+  }, 0);
   const total = subtotal + tax_amount;
 
   const { data: quote, error } = await supabase.from("quotes").insert({ ...body, quote_number, business_id: session.businessId, subtotal, tax_amount, total, created_by: session.id }).select().single();

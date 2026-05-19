@@ -10,11 +10,23 @@ export async function GET() {
   return NextResponse.json({ settings: data });
 }
 
+const ALLOWED_SETTINGS_FIELDS = [
+  "name", "phone", "email", "address", "city", "state", "zip", "country",
+  "logo_url", "business_type", "timezone", "currency", "tax_rate",
+  "quote_prefix", "invoice_prefix", "project_prefix",
+  "website", "about", "facebook", "instagram", "twitter", "whatsapp",
+  "default_payment_terms", "default_notes",
+];
+
 export async function PATCH(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   const body = await request.json();
-  const { data, error } = await supabase.from("businesses").update({ ...body, updated_at: new Date().toISOString() }).eq("id", session.businessId).select().single();
+  const update: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  for (const key of ALLOWED_SETTINGS_FIELDS) {
+    if (key in body) update[key] = body[key];
+  }
+  const { data, error } = await supabase.from("businesses").update(update).eq("id", session.businessId).select().single();
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
 
   const newToken = await signToken({ id: session.id, name: session.name, email: session.email, businessId: session.businessId, role: session.role });

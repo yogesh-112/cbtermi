@@ -112,7 +112,7 @@ export default function ProjectDetailPage() {
   const [saving, setSaving] = useState(false);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [assignOpen, setAssignOpen] = useState(false);
-  const [assignedTeam, setAssignedTeam] = useState<any[]>([]);
+  const [assignedTeam, setAssignedTeam] = useState<Array<{ id: string; userId: string; name: string }>>([]);
   const [tasks, setTasks] = useState<Array<{ id: string; label: string; done: boolean }>>([]);
   const [newTask, setNewTask] = useState("");
   const [docs, setDocs] = useState<Array<{ name: string; size: string }>>([]);
@@ -122,6 +122,12 @@ export default function ProjectDetailPage() {
     fetch(`/api/projects/${id}`).then(r => r.json()).then(d => {
       setData(d);
       setEditForm(d.project ?? {});
+      setTasks((d.tasks ?? []).map((t: any) => ({ id: t.id, label: t.label, done: t.done })));
+      setAssignedTeam((d.members ?? []).map((m: any) => ({
+        id: m.id,
+        userId: m.user_id,
+        name: m.users?.full_name ?? m.users?.email ?? "Member",
+      })));
     });
 
   useEffect(() => {
@@ -154,18 +160,54 @@ export default function ProjectDetailPage() {
     setUpdateForm({ title: "", message: "", status_milestone: "" }); load();
   };
 
-  const addTask = () => {
+  const addTask = async () => {
     if (!newTask.trim()) return;
-    setTasks(t => [...t, { id: crypto.randomUUID(), label: newTask.trim(), done: false }]);
+    const label = newTask.trim();
     setNewTask("");
+    const res = await fetch(`/api/projects/${id}/tasks`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ label }),
+    });
+    if (res.ok) {
+      const d = await res.json();
+      setTasks(t => [...t, { id: d.task.id, label: d.task.label, done: d.task.done }]);
+    }
   };
 
-  const toggleTask = (taskId: string) =>
+  const toggleTask = async (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
     setTasks(t => t.map(x => x.id === taskId ? { ...x, done: !x.done } : x));
+    await fetch(`/api/projects/${id}/tasks/${taskId}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ done: !task.done }),
+    });
+  };
 
-  const assignMember = (m: any) => {
-    if (!assignedTeam.find(t => t.id === m.id)) setAssignedTeam(p => [...p, m]);
+  const deleteTask = async (taskId: string) => {
+    setTasks(t => t.filter(x => x.id !== taskId));
+    await fetch(`/api/projects/${id}/tasks/${taskId}`, { method: "DELETE" });
+  };
+
+  const clearDoneTasks = async () => {
+    const doneTasks = tasks.filter(t => t.done);
+    setTasks(t => t.filter(x => !x.done));
+    await Promise.all(doneTasks.map(t => fetch(`/api/projects/${id}/tasks/${t.id}`, { method: "DELETE" })));
+  };
+
+  const assignMember = async (m: any) => {
+    if (assignedTeam.find(t => t.userId === m.id)) { setAssignOpen(false); return; }
     setAssignOpen(false);
+    const res = await fetch(`/api/projects/${id}/team`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ user_id: m.id }),
+    });
+    if (res.ok) {
+      const d = await res.json();
+      setAssignedTeam(p => [...p, { id: d.member.id, userId: m.id, name: m.name }]);
+    }
+  };
+
+  const removeMember = async (memberId: string) => {
+    setAssignedTeam(t => t.filter(x => x.id !== memberId));
+    await fetch(`/api/projects/${id}/team/${memberId}`, { method: "DELETE" });
   };
 
   const handleFileAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -339,7 +381,7 @@ export default function ProjectDetailPage() {
                       {t.done ? <CheckSquare size={16} className="text-brand-green" /> : <Square size={16} />}
                     </button>
                     <span className={`flex-1 text-[13px] ${t.done ? "line-through text-[#8a8fa3]" : "text-[#0c1226]"}`}>{t.label}</span>
-                    <button onClick={() => setTasks(tasks.filter(x => x.id !== t.id))}
+                    <button onClick={() => deleteTask(t.id)}
                       className="opacity-0 group-hover:opacity-100 text-[#d8d6cf] hover:text-red-500 transition-all">
                       <X size={13} />
                     </button>
@@ -357,7 +399,7 @@ export default function ProjectDetailPage() {
               {tasks.length > 0 && (
                 <div className="mt-4 pt-3 border-t border-[#f0efea] flex justify-between text-[12px] text-[#8a8fa3]">
                   <span>{tasks.filter(t => t.done).length} of {tasks.length} completed</span>
-                  <button onClick={() => setTasks(t => t.filter(x => !x.done))}
+                  <button onClick={clearDoneTasks}
                     className="text-red-500 hover:underline">Clear done</button>
                 </div>
               )}
@@ -517,7 +559,7 @@ export default function ProjectDetailPage() {
               )}
               {assignedTeam.map((m, i) => {
                 const ini = m.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
-                const roleLabel = i === 0 ? "Project lead" : m.role;
+                const roleLabel = i === 0 ? "Project lead" : "Team member";
                 const avatarColor = ["bg-brand-navy", "bg-brand-green", "bg-[#7C3AED]", "bg-[#D97706]"][i % 4];
                 return (
                   <div key={m.id} className="flex items-center gap-2.5">
@@ -528,7 +570,7 @@ export default function ProjectDetailPage() {
                       <p className="text-[12px] font-medium text-[#0c1226] truncate">{m.name}</p>
                       <p className="text-[10px] text-[#8a8fa3] capitalize">{roleLabel}</p>
                     </div>
-                    <button onClick={() => setAssignedTeam(assignedTeam.filter(t => t.id !== m.id))}
+                    <button onClick={() => removeMember(m.id)}
                       className="text-[#d8d6cf] hover:text-red-400 transition-colors">
                       <X size={12} />
                     </button>
@@ -549,7 +591,7 @@ export default function ProjectDetailPage() {
                       <div className="px-3 py-2 text-[12px] text-[#8a8fa3]">No team members</div>
                     ) : teamMembers.map(m => (
                       <button key={m.id} onClick={() => assignMember(m)}
-                        className={`w-full text-left px-3 py-2.5 text-[13px] hover:bg-[#f6f6f3] transition-colors ${assignedTeam.find(t => t.id === m.id) ? "opacity-40 pointer-events-none" : ""}`}>
+                        className={`w-full text-left px-3 py-2.5 text-[13px] hover:bg-[#f6f6f3] transition-colors ${assignedTeam.find(t => t.userId === m.id) ? "opacity-40 pointer-events-none" : ""}`}>
                         {m.name}
                         <span className="text-[10px] text-[#8a8fa3] ml-2 capitalize">{m.role}</span>
                       </button>

@@ -9,20 +9,22 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
   const { data } = await supabase.from("projects").select("*, contacts(*)").eq("id", id).eq("business_id", session.businessId).single();
   if (!data) return NextResponse.json({ message: "Not found" }, { status: 404 });
 
-  const [{ data: quotes }, { data: invoices }, { data: payments }, { data: updates }, { data: feedback }, { data: lists }] = await Promise.all([
+  const [{ data: quotes }, { data: invoices }, { data: payments }, { data: updates }, { data: feedback }, { data: lists }, { data: tasks }, { data: members }] = await Promise.all([
     supabase.from("quotes").select("id,quote_number,title,total,status,created_at").eq("project_id", id),
     supabase.from("invoices").select("id,invoice_number,total,amount_paid,amount_due,status,created_at").eq("project_id", id),
     supabase.from("payments").select("id,amount,payment_date,payment_method").eq("project_id", id),
     supabase.from("project_updates").select("*").eq("project_id", id).order("created_at", { ascending: false }),
     supabase.from("feedback").select("*").eq("project_id", id),
     supabase.from("item_requirement_lists").select("*").eq("project_id", id),
+    supabase.from("project_tasks").select("*").eq("project_id", id).eq("business_id", session.businessId).order("created_at", { ascending: true }),
+    supabase.from("project_members").select("*, users(id, full_name, email)").eq("project_id", id).eq("business_id", session.businessId).order("created_at", { ascending: true }),
   ]);
 
   const totalInvoiced = (invoices ?? []).reduce((s, i) => s + (i.total ?? 0), 0);
   const totalPaid     = (invoices ?? []).reduce((s, i) => s + (i.amount_paid ?? 0), 0);
   const totalQuoted   = (quotes ?? []).reduce((s, q) => s + (q.total ?? 0), 0);
 
-  return NextResponse.json({ project: data, quotes: quotes ?? [], invoices: invoices ?? [], payments: payments ?? [], updates: updates ?? [], feedback: feedback ?? [], lists: lists ?? [], stats: { totalInvoiced, totalPaid, totalQuoted, totalDue: totalInvoiced - totalPaid } });
+  return NextResponse.json({ project: data, quotes: quotes ?? [], invoices: invoices ?? [], payments: payments ?? [], updates: updates ?? [], feedback: feedback ?? [], lists: lists ?? [], tasks: tasks ?? [], members: members ?? [], stats: { totalInvoiced, totalPaid, totalQuoted, totalDue: totalInvoiced - totalPaid } });
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

@@ -17,31 +17,28 @@ const CARD_GRADIENTS = [
 
 export default function ProjectsPage() {
   const t = useT();
+  const PAGE_SIZE = 50;
   const [projects, setProjects] = useState<any[]>([]);
-  const [all, setAll] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [counts, setCounts] = useState({ active: 0, scheduled: 0, on_hold: 0, completed: 0 });
 
-  const load = () => {
+  const load = (p: number, f: string) => {
     setLoading(true);
-    fetch("/api/projects").then(r => r.json()).then(d => {
-      setAll(d.projects ?? []);
-      setProjects(filter ? (d.projects ?? []).filter((p: any) => p.status === filter) : (d.projects ?? []));
+    const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(p * PAGE_SIZE) });
+    if (f) params.set("status", f);
+    fetch(`/api/projects?${params}`).then(r => r.json()).then(d => {
+      setProjects(d.projects ?? []);
+      setTotal(d.total ?? 0);
+      if (d.counts) setCounts(d.counts);
     }).finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(0, ""); }, []);
 
-  useEffect(() => {
-    setProjects(filter ? all.filter(p => p.status === filter) : all);
-  }, [filter, all]);
-
-  const counts = {
-    active:    all.filter(p => p.status === "active").length,
-    scheduled: all.filter(p => p.status === "scheduled").length,
-    on_hold:   all.filter(p => p.status === "on_hold").length,
-    completed: all.filter(p => p.status === "completed").length,
-  };
+  const handleFilter = (f: string) => { setFilter(f); setPage(0); load(0, f); };
 
   const getDayCount = (start: string, end: string) => {
     if (!start || !end) return null;
@@ -93,7 +90,7 @@ export default function ProjectsPage() {
       {/* Filter tabs */}
       <div className="tabs-bar mb-5">
         {STATUS_FILTERS.map(s => (
-          <button key={s.key} onClick={() => setFilter(s.key)}
+          <button key={s.key} onClick={() => handleFilter(s.key)}
             className={`tab-btn ${filter === s.key ? "active" : ""} flex items-center gap-1.5`}>
             {s.label}
             {s.key && counts[s.key as keyof typeof counts] > 0 && (
@@ -213,6 +210,20 @@ export default function ProjectsPage() {
           </div>
         )}
       </div>
+
+      {total > PAGE_SIZE && (
+        <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#f0efea]">
+          <span className="text-[13px] text-[#8a8fa3]">
+            Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} of {total}
+          </span>
+          <div className="flex gap-2">
+            <button onClick={() => { const p = page - 1; setPage(p); load(p, filter); }} disabled={page === 0}
+              className="btn btn-outline btn-sm disabled:opacity-40">Previous</button>
+            <button onClick={() => { const p = page + 1; setPage(p); load(p, filter); }} disabled={(page + 1) * PAGE_SIZE >= total}
+              className="btn btn-outline btn-sm disabled:opacity-40">Next</button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

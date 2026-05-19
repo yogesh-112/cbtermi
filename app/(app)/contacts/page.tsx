@@ -28,10 +28,14 @@ type Tab = "all" | "lead" | "customer";
 
 export default function ContactsPage() {
   const t = useT();
+  const PAGE_SIZE = 50;
   const [contacts, setContacts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<Tab>("all");
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [aggCounts, setAggCounts] = useState({ all: 0, leads: 0, customers: 0 });
   const [modal, setModal] = useState(false);
   const [editContact, setEditContact] = useState<any | null>(null);
   const [form, setForm] = useState<typeof EMPTY_FORM>({ ...EMPTY_FORM });
@@ -40,16 +44,21 @@ export default function ContactsPage() {
   const [statusPopup, setStatusPopup] = useState<string | null>(null);
   const popupRef = useRef<HTMLDivElement>(null);
 
-  const load = () => {
+  const load = (p = page) => {
     setLoading(true);
-    const q = tab !== "all" ? `?type=${tab}` : "";
-    fetch(`/api/contacts${q}`)
+    const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(p * PAGE_SIZE) });
+    if (tab !== "all") params.set("type", tab);
+    fetch(`/api/contacts?${params}`)
       .then((r) => r.json())
-      .then((d) => setContacts(d.contacts ?? []))
+      .then((d) => {
+        setContacts(d.contacts ?? []);
+        setTotal(d.total ?? 0);
+        if (d.counts) setAggCounts({ all: d.counts.all, leads: d.counts.leads, customers: d.counts.customers });
+      })
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, [tab]);
+  useEffect(() => { setPage(0); load(0); }, [tab]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -147,15 +156,14 @@ export default function ContactsPage() {
   const AVATAR_COLORS = ["bg-brand-navy", "bg-brand-green", "bg-[#7C3AED]", "bg-[#D97706]", "bg-[#0D9488]", "bg-[#2563EB]"];
   const avatarColor = (name: string) => AVATAR_COLORS[name?.charCodeAt(0) % AVATAR_COLORS.length] ?? "bg-brand-navy";
 
-  const leads     = contacts.filter(c => c.contact_type === "lead").length;
-  const customers = contacts.filter(c => c.contact_type === "customer").length;
+  // leads/customers counts now come from aggCounts (server-side, accurate across all pages)
 
   return (
     <div>
       <div className="page-header">
         <div>
           <h1 className="page-title">{t.contacts.title}</h1>
-          <p className="page-desc">{contacts.length} {t.contacts.totalContacts}</p>
+          <p className="page-desc">{total} {t.contacts.totalContacts}</p>
         </div>
         <button className="btn btn-primary" onClick={openAdd}>
           <Plus size={15} /> {t.contacts.addContact}
@@ -166,15 +174,15 @@ export default function ContactsPage() {
       <div className="grid grid-cols-3 gap-3 mb-5">
         <div className="mini-stat mini-stat-navy">
           <span className="mini-stat-label">{t.contacts.totalLabel}</span>
-          <span className="mini-stat-value">{contacts.length}</span>
+          <span className="mini-stat-value">{aggCounts.all}</span>
         </div>
         <div className="mini-stat mini-stat-blue">
           <span className="mini-stat-label">{t.contacts.leadsLabel}</span>
-          <span className="mini-stat-value">{leads}</span>
+          <span className="mini-stat-value">{aggCounts.leads}</span>
         </div>
         <div className="mini-stat mini-stat-green">
           <span className="mini-stat-label">{t.contacts.customersLabel}</span>
-          <span className="mini-stat-value">{customers}</span>
+          <span className="mini-stat-value">{aggCounts.customers}</span>
         </div>
       </div>
 
@@ -386,6 +394,20 @@ export default function ContactsPage() {
 
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={deleteContact}
         title={t.contacts.deleteTitle} message={t.contacts.deleteMessage} danger />
+
+      {total > PAGE_SIZE && (
+        <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#f0efea]">
+          <span className="text-[13px] text-[#8a8fa3]">
+            Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} of {total}
+          </span>
+          <div className="flex gap-2">
+            <button onClick={() => { setPage(p => p - 1); load(page - 1); }} disabled={page === 0}
+              className="btn btn-outline btn-sm disabled:opacity-40">Previous</button>
+            <button onClick={() => { setPage(p => p + 1); load(page + 1); }} disabled={(page + 1) * PAGE_SIZE >= total}
+              className="btn btn-outline btn-sm disabled:opacity-40">Next</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

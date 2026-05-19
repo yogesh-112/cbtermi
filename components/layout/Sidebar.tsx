@@ -72,15 +72,15 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
   // Fetch nav counts + trial info — re-run on each navigation so counts stay fresh
   useEffect(() => {
     Promise.all([
-      fetch("/api/contacts").then(r => r.json()),
-      fetch("/api/contacts?type=lead").then(r => r.json()),
-      fetch("/api/contacts?type=customer").then(r => r.json()),
+      fetch("/api/contacts?limit=1").then(r => r.json()),
+      fetch("/api/contacts?type=lead&limit=1").then(r => r.json()),
+      fetch("/api/contacts?type=customer&limit=1").then(r => r.json()),
       fetch("/api/subscription").then(r => r.json()),
     ]).then(([all, leads, customers, sub]) => {
       setCounts({
-        contacts:  (all.contacts ?? []).length,
-        leads:     (leads.contacts ?? []).length,
-        customers: (customers.contacts ?? []).length,
+        contacts:  all.total ?? 0,
+        leads:     leads.total ?? 0,
+        customers: customers.total ?? 0,
       });
       if (sub.subscription?.created_at) {
         const used = Math.max(0, Math.min(14,

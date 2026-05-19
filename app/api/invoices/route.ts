@@ -5,11 +5,44 @@ import { checkTrialAccess } from "@/lib/trial";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, invoiceEmail } from "@/lib/email";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  const { data } = await supabase.from("invoices").select("*, contacts(full_name), projects(name)").eq("business_id", session.businessId).order("created_at", { ascending: false });
-  return NextResponse.json({ invoices: data ?? [] });
+  const sp = request.nextUrl.searchParams;
+  const status = sp.get("status");
+  const limit = Math.min(parseInt(sp.get("limit") ?? "50"), 100);
+  const offset = parseInt(sp.get("offset") ?? "0");
+  let q = supabase.from("invoices").select("*, contacts(full_name), projects(name)", { count: "exact" }).eq("business_id", session.businessId);
+  if (status && status !== "all") q = q.eq("status", status);
+  const { data, count } = await q.order("created_at", { ascending: false }).range(offset, offset + limit - 1);
+  // Fetch summary fields for accurate stats regardless of pagination
+  const { data: allInv } = await supabase.from("invoices").select("status, total, amount_due, due_date").eq("business_id", session.businessId);
+  const now = new Date();
+  const outstanding = allInv?.filter(i => !["paid","voided","draft"].includes(i.status)) ?? [];
+  const overdue = outstanding.filter(i => { const d = i.due_date ? new Date(i.due_date) : null; return d && d < now; });
+  const dueThisWeekArr = outstanding.filter(i => {
+    const d = i.due_date ? new Date(i.due_date) : null;
+    if (!d) return false;
+    const diff = (d.getTime() - now.getTime()) / 86400000;
+    return diff >= 0 && diff <= 7;
+  });
+  const summary = {
+    outstandingAmt: outstanding.reduce((s, i) => s + (i.amount_due ?? 0), 0),
+    paidAmt: allInv?.filter(i => i.status === "paid").reduce((s, i) => s + (i.total ?? 0), 0) ?? 0,
+    dueThisWeekAmt: dueThisWeekArr.reduce((s, i) => s + (i.amount_due ?? 0), 0),
+    dueThisWeekCount: dueThisWeekArr.length,
+    overdueAmt: overdue.reduce((s, i) => s + (i.amount_due ?? 0), 0),
+    overdueCount: overdue.length,
+    outstandingCount: outstanding.length,
+    counts: {
+      all: allInv?.length ?? 0,
+      draft: allInv?.filter(i => i.status === "draft").length ?? 0,
+      sent: allInv?.filter(i => i.status === "sent").length ?? 0,
+      overdue: overdue.length,
+      paid: allInv?.filter(i => i.status === "paid").length ?? 0,
+    },
+  };
+  return NextResponse.json({ invoices: data ?? [], total: count ?? 0, summary });
 }
 
 export async function POST(request: NextRequest) {

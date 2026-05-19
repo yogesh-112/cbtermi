@@ -27,47 +27,45 @@ function InvStatusBadge({ inv }: { inv: any }) {
 
 export default function InvoicesPage() {
   const t = useT();
+  const PAGE_SIZE = 50;
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [summary, setSummary] = useState({
+    outstandingAmt: 0, paidAmt: 0,
+    dueThisWeekAmt: 0, dueThisWeekCount: 0,
+    overdueAmt: 0, overdueCount: 0, outstandingCount: 0,
+    counts: { all: 0, draft: 0, sent: 0, overdue: 0, paid: 0 },
+  });
 
-  const load = () => {
+  const load = (p: number, sf: string) => {
     setLoading(true);
-    fetch("/api/invoices").then(r => r.json()).then(d => setInvoices(d.invoices ?? [])).finally(() => setLoading(false));
+    const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(p * PAGE_SIZE) });
+    if (sf !== "all") params.set("status", sf);
+    fetch(`/api/invoices?${params}`).then(r => r.json()).then(d => {
+      setInvoices(d.invoices ?? []);
+      setTotal(d.total ?? 0);
+      if (d.summary) setSummary(d.summary);
+    }).finally(() => setLoading(false));
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(0, "all"); }, []);
 
-  const now = new Date();
-  const outstanding = invoices.filter(i => i.status !== "paid" && i.status !== "voided" && i.status !== "draft");
-  const outstandingAmt = outstanding.reduce((s, i) => s + (i.amount_due ?? 0), 0);
-  const paidAmt = invoices.filter(i => i.status === "paid").reduce((s, i) => s + (i.total ?? 0), 0);
-  const dueThisWeek = outstanding.filter(i => {
-    const d = i.due_date ? new Date(i.due_date) : null;
-    if (!d) return false;
-    const diff = (d.getTime() - now.getTime()) / 86400000;
-    return diff >= 0 && diff <= 7;
-  });
-  const overdue = outstanding.filter(i => {
-    const d = i.due_date ? new Date(i.due_date) : null;
-    return d && d < now;
-  });
+  const handleFilter = (sf: string) => { setStatusFilter(sf); setPage(0); load(0, sf); };
 
   const STATUS_TABS = [
-    { key: "all",     label: t.invoices.tabAll,     count: invoices.length },
-    { key: "draft",   label: t.invoices.tabDrafts,  count: invoices.filter(i => i.status === "draft").length },
-    { key: "sent",    label: t.invoices.tabSent,    count: invoices.filter(i => i.status === "sent").length },
-    { key: "overdue", label: t.invoices.tabOverdue, count: overdue.length },
-    { key: "paid",    label: t.invoices.tabPaid,    count: invoices.filter(i => i.status === "paid").length },
+    { key: "all",     label: t.invoices.tabAll,     count: summary.counts.all },
+    { key: "draft",   label: t.invoices.tabDrafts,  count: summary.counts.draft },
+    { key: "sent",    label: t.invoices.tabSent,    count: summary.counts.sent },
+    { key: "overdue", label: t.invoices.tabOverdue, count: summary.counts.overdue },
+    { key: "paid",    label: t.invoices.tabPaid,    count: summary.counts.paid },
   ];
 
+  const now = new Date();
+
   const filtered = invoices.filter(i => {
-    if (statusFilter === "overdue") {
-      const d = i.due_date ? new Date(i.due_date) : null;
-      if (!d || d >= now || i.status === "paid") return false;
-    } else if (statusFilter !== "all" && i.status !== statusFilter) {
-      return false;
-    }
     if (!search) return true;
     const s = search.toLowerCase();
     return i.invoice_number?.toLowerCase().includes(s) ||
@@ -82,29 +80,29 @@ export default function InvoicesPage() {
     <div>
       <div className="mb-1">
         <h1 className="page-title">{t.invoices.title}</h1>
-        <p className="page-desc">{fmt(outstandingAmt)} {t.invoices.outstanding.toLowerCase()} · {fmt(paidAmt)} {t.invoices.paidThisMonth.toLowerCase()}</p>
+        <p className="page-desc">{fmt(summary.outstandingAmt)} {t.invoices.outstanding.toLowerCase()} · {fmt(summary.paidAmt)} {t.invoices.paidThisMonth.toLowerCase()}</p>
       </div>
 
       {/* 4 large stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         <div className="mini-stat mini-stat-rose">
           <span className="mini-stat-label">{t.invoices.outstanding}</span>
-          <span className="mini-stat-value text-[20px]">{fmt(outstandingAmt)}</span>
-          <span className="text-[11px] text-[#8a8fa3] mt-0.5">{outstanding.length} invoice{outstanding.length !== 1 ? "s" : ""}</span>
+          <span className="mini-stat-value text-[20px]">{fmt(summary.outstandingAmt)}</span>
+          <span className="text-[11px] text-[#8a8fa3] mt-0.5">{summary.outstandingCount} invoice{summary.outstandingCount !== 1 ? "s" : ""}</span>
         </div>
         <div className="mini-stat mini-stat-blue">
           <span className="mini-stat-label">{t.invoices.dueThisWeek}</span>
-          <span className="mini-stat-value text-[20px]">{fmt(dueThisWeek.reduce((s, i) => s + (i.amount_due ?? 0), 0))}</span>
-          <span className="text-[11px] text-[#8a8fa3] mt-0.5">{dueThisWeek.length} invoice{dueThisWeek.length !== 1 ? "s" : ""}</span>
+          <span className="mini-stat-value text-[20px]">{fmt(summary.dueThisWeekAmt)}</span>
+          <span className="text-[11px] text-[#8a8fa3] mt-0.5">{summary.dueThisWeekCount} invoice{summary.dueThisWeekCount !== 1 ? "s" : ""}</span>
         </div>
         <div className="mini-stat mini-stat-amber">
           <span className="mini-stat-label">{t.invoices.overdue}</span>
-          <span className="mini-stat-value text-[20px]">{fmt(overdue.reduce((s, i) => s + (i.amount_due ?? 0), 0))}</span>
-          <span className="text-[11px] text-red-500 mt-0.5">{overdue.length} invoice{overdue.length !== 1 ? "s" : ""}</span>
+          <span className="mini-stat-value text-[20px]">{fmt(summary.overdueAmt)}</span>
+          <span className="text-[11px] text-red-500 mt-0.5">{summary.overdueCount} invoice{summary.overdueCount !== 1 ? "s" : ""}</span>
         </div>
         <div className="mini-stat mini-stat-green">
           <span className="mini-stat-label">{t.invoices.paidThisMonth}</span>
-          <span className="mini-stat-value text-[20px]">{fmt(paidAmt)}</span>
+          <span className="mini-stat-value text-[20px]">{fmt(summary.paidAmt)}</span>
           <span className="text-[11px] text-brand-green flex items-center gap-1 mt-0.5">
             <TrendingUp size={10} /> {t.invoices.totalReceived}
           </span>
@@ -115,7 +113,7 @@ export default function InvoicesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
         <div className="tabs-bar mb-0 flex-1">
           {STATUS_TABS.map(st => (
-            <button key={st.key} onClick={() => setStatusFilter(st.key)}
+            <button key={st.key} onClick={() => handleFilter(st.key)}
               className={`tab-btn ${statusFilter === st.key ? "active" : ""} flex items-center gap-1.5`}>
               {st.label}
               {st.count > 0 && (
@@ -227,6 +225,20 @@ export default function InvoicesPage() {
           </tbody>
         </table>
       </div>
+
+      {total > PAGE_SIZE && (
+        <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#f0efea]">
+          <span className="text-[13px] text-[#8a8fa3]">
+            Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} of {total}
+          </span>
+          <div className="flex gap-2">
+            <button onClick={() => { const p = page - 1; setPage(p); load(p, statusFilter); }} disabled={page === 0}
+              className="btn btn-outline btn-sm disabled:opacity-40">Previous</button>
+            <button onClick={() => { const p = page + 1; setPage(p); load(p, statusFilter); }} disabled={(page + 1) * PAGE_SIZE >= total}
+              className="btn btn-outline btn-sm disabled:opacity-40">Next</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

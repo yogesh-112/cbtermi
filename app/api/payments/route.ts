@@ -5,11 +5,14 @@ import { checkTrialAccess } from "@/lib/trial";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, paymentConfirmEmail } from "@/lib/email";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  const { data } = await supabase.from("payments").select("*, contacts(full_name), invoices(invoice_number)").eq("business_id", session.businessId).eq("is_reversed", false).order("created_at", { ascending: false });
-  return NextResponse.json({ payments: data ?? [] });
+  const sp = request.nextUrl.searchParams;
+  const limit = Math.min(parseInt(sp.get("limit") ?? "50"), 100);
+  const offset = parseInt(sp.get("offset") ?? "0");
+  const { data, count } = await supabase.from("payments").select("*, contacts(full_name), invoices(invoice_number)", { count: "exact" }).eq("business_id", session.businessId).eq("is_reversed", false).order("created_at", { ascending: false }).range(offset, offset + limit - 1);
+  return NextResponse.json({ payments: data ?? [], total: count ?? 0 });
 }
 
 export async function POST(request: NextRequest) {

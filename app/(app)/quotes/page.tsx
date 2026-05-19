@@ -13,45 +13,45 @@ const AVATAR_COLORS = [
 
 export default function QuotesPage() {
   const t = useT();
+  const PAGE_SIZE = 50;
   const [quotes, setQuotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [counts, setCounts] = useState({ all: 0, draft: 0, sent: 0, approved: 0, rejected: 0, totalValue: 0 });
 
-  const load = () => {
+  const load = (p: number, sf: string) => {
     setLoading(true);
-    fetch("/api/quotes").then(r => r.json()).then(d => setQuotes(d.quotes ?? [])).finally(() => setLoading(false));
+    const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(p * PAGE_SIZE) });
+    if (sf !== "all") params.set("status", sf);
+    fetch(`/api/quotes?${params}`).then(r => r.json()).then(d => {
+      setQuotes(d.quotes ?? []);
+      setTotal(d.total ?? 0);
+      if (d.counts) setCounts(d.counts);
+    }).finally(() => setLoading(false));
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(0, "all"); }, []);
+
+  const handleFilter = (sf: string) => { setStatusFilter(sf); setPage(0); load(0, sf); };
 
   const del = async () => {
     if (!deleteId) return;
     await fetch(`/api/quotes/${deleteId}`, { method: "DELETE" });
-    toast(t.quotes.deleteTitle); setDeleteId(null); load();
+    toast(t.quotes.deleteTitle); setDeleteId(null); load(page, statusFilter);
   };
 
-  const draft    = quotes.filter(q => q.status === "draft").length;
-  const sent     = quotes.filter(q => ["sent","viewed"].includes(q.status)).length;
-  const approved = quotes.filter(q => q.status === "approved").length;
-  const expired  = quotes.filter(q => q.status === "expired").length;
-  const rejected = quotes.filter(q => q.status === "rejected").length;
-  const totalValue = quotes.filter(q => q.status === "approved").reduce((s, q) => s + (q.total ?? 0), 0);
-  const allValue   = quotes.reduce((s, q) => s + (q.total ?? 0), 0);
-
   const STATUS_TABS = [
-    { key: "all",      label: t.quotes.tabAll,      count: quotes.length },
-    { key: "draft",    label: t.quotes.tabDraft,    count: draft },
-    { key: "sent",     label: t.quotes.tabSent,     count: sent },
-    { key: "approved", label: t.quotes.tabApproved, count: approved },
-    { key: "rejected", label: t.quotes.tabRejected, count: rejected },
+    { key: "all",      label: t.quotes.tabAll,      count: counts.all },
+    { key: "draft",    label: t.quotes.tabDraft,    count: counts.draft },
+    { key: "sent",     label: t.quotes.tabSent,     count: counts.sent },
+    { key: "approved", label: t.quotes.tabApproved, count: counts.approved },
+    { key: "rejected", label: t.quotes.tabRejected, count: counts.rejected },
   ];
 
   const filtered = quotes.filter(q => {
-    if (statusFilter !== "all") {
-      if (statusFilter === "sent" && !["sent","viewed"].includes(q.status)) return false;
-      if (statusFilter !== "sent" && q.status !== statusFilter) return false;
-    }
     if (!search) return true;
     const s = search.toLowerCase();
     return q.quote_number?.toLowerCase().includes(s) ||
@@ -67,30 +67,30 @@ export default function QuotesPage() {
     <div>
       <div className="mb-1">
         <h1 className="page-title">{t.quotes.title}</h1>
-        <p className="page-desc">{fmt(allValue)} quoted · {approved} {t.quotes.tabApproved.toLowerCase()}</p>
+        <p className="page-desc">{fmt(counts.totalValue)} quoted · {counts.approved} {t.quotes.tabApproved.toLowerCase()}</p>
       </div>
 
       {/* 5 stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-5">
         <div className="mini-stat mini-stat-navy">
           <span className="mini-stat-label">{t.quotes.draft}</span>
-          <span className="mini-stat-value">{draft}</span>
+          <span className="mini-stat-value">{counts.draft}</span>
         </div>
         <div className="mini-stat mini-stat-blue">
           <span className="mini-stat-label">{t.quotes.sent}</span>
-          <span className="mini-stat-value">{sent}</span>
+          <span className="mini-stat-value">{counts.sent}</span>
         </div>
         <div className="mini-stat mini-stat-green">
           <span className="mini-stat-label">{t.quotes.approved}</span>
-          <span className="mini-stat-value">{approved}</span>
+          <span className="mini-stat-value">{counts.approved}</span>
         </div>
         <div className="mini-stat mini-stat-amber">
           <span className="mini-stat-label">{t.quotes.expired}</span>
-          <span className="mini-stat-value">{expired}</span>
+          <span className="mini-stat-value">{counts.all - counts.draft - counts.sent - counts.approved - counts.rejected}</span>
         </div>
         <div className="mini-stat mini-stat-rose lg:col-span-1 col-span-2 sm:col-span-1">
           <span className="mini-stat-label">{t.quotes.totalValue}</span>
-          <span className="mini-stat-value text-[18px]">{fmt(allValue)}</span>
+          <span className="mini-stat-value text-[18px]">{fmt(counts.totalValue)}</span>
         </div>
       </div>
 
@@ -98,7 +98,7 @@ export default function QuotesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
         <div className="tabs-bar mb-0 flex-1">
           {STATUS_TABS.map(st => (
-            <button key={st.key} onClick={() => setStatusFilter(st.key)}
+            <button key={st.key} onClick={() => handleFilter(st.key)}
               className={`tab-btn ${statusFilter === st.key ? "active" : ""} flex items-center gap-1.5`}>
               {st.label}
               {st.count > 0 && (
@@ -205,6 +205,20 @@ export default function QuotesPage() {
           </tbody>
         </table>
       </div>
+
+      {total > PAGE_SIZE && (
+        <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#f0efea]">
+          <span className="text-[13px] text-[#8a8fa3]">
+            Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} of {total}
+          </span>
+          <div className="flex gap-2">
+            <button onClick={() => { const p = page - 1; setPage(p); load(p, statusFilter); }} disabled={page === 0}
+              className="btn btn-outline btn-sm disabled:opacity-40">Previous</button>
+            <button onClick={() => { const p = page + 1; setPage(p); load(p, statusFilter); }} disabled={(page + 1) * PAGE_SIZE >= total}
+              className="btn btn-outline btn-sm disabled:opacity-40">Next</button>
+          </div>
+        </div>
+      )}
 
       <ConfirmDialog open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={del}
         title={t.quotes.deleteTitle} message={t.quotes.deleteMessage} danger />

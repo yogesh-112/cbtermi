@@ -5,12 +5,23 @@ import { requireSession } from "@/lib/auth";
 export async function GET(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  const status = request.nextUrl.searchParams.get("status");
-  let q = supabase.from("projects").select("*, contacts(full_name, email, phone)").eq("business_id", session.businessId).order("created_at", { ascending: false });
+  const sp = request.nextUrl.searchParams;
+  const status = sp.get("status");
+  const limit = Math.min(parseInt(sp.get("limit") ?? "50"), 100);
+  const offset = parseInt(sp.get("offset") ?? "0");
+  let q = supabase.from("projects").select("*, contacts(full_name, email, phone)", { count: "exact" }).eq("business_id", session.businessId);
   if (status) q = q.eq("status", status);
-  const { data, error } = await q;
+  const { data, count, error } = await q.order("created_at", { ascending: false }).range(offset, offset + limit - 1);
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
-  return NextResponse.json({ projects: data ?? [] });
+  // Fetch status counts for accurate filter badges
+  const { data: allStatuses } = await supabase.from("projects").select("status").eq("business_id", session.businessId);
+  const counts = {
+    active:    allStatuses?.filter(p => p.status === "active").length ?? 0,
+    scheduled: allStatuses?.filter(p => p.status === "scheduled").length ?? 0,
+    on_hold:   allStatuses?.filter(p => p.status === "on_hold").length ?? 0,
+    completed: allStatuses?.filter(p => p.status === "completed").length ?? 0,
+  };
+  return NextResponse.json({ projects: data ?? [], total: count ?? 0, counts });
 }
 
 export async function POST(request: NextRequest) {

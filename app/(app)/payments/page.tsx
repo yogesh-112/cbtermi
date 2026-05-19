@@ -35,14 +35,21 @@ export default function PaymentsPage() {
     bank_transfer: t.payments.transfer, credit_card: t.payments.card, other: t.payments.other,
   };
 
-  const load = () => {
+  const PAGE_SIZE = 50;
+  const [page, setPage] = useState(0);
+  const [recordCount, setRecordCount] = useState(0);
+
+  const load = (p = 0) => {
     setLoading(true);
-    fetch("/api/payments").then(r => r.json()).then(d => setPayments(d.payments ?? [])).finally(() => setLoading(false));
+    fetch(`/api/payments?limit=${PAGE_SIZE}&offset=${p * PAGE_SIZE}`).then(r => r.json()).then(d => {
+      setPayments(d.payments ?? []);
+      setRecordCount(d.total ?? 0);
+    }).finally(() => setLoading(false));
   };
   useEffect(() => {
     load();
-    fetch("/api/invoices").then(r => r.json()).then(d => setInvoices(d.invoices ?? []));
-    fetch("/api/contacts").then(r => r.json()).then(d => setContacts(d.contacts ?? []));
+    fetch("/api/invoices?limit=100").then(r => r.json()).then(d => setInvoices(d.invoices ?? []));
+    fetch("/api/contacts?limit=100").then(r => r.json()).then(d => setContacts(d.contacts ?? []));
   }, []);
 
   const reversePayment = async (payment: any) => {
@@ -217,6 +224,20 @@ export default function PaymentsPage() {
           </tbody>
         </table>
       </div>
+
+      {recordCount > PAGE_SIZE && (
+        <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#f0efea]">
+          <span className="text-[13px] text-[#8a8fa3]">
+            Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, recordCount)} of {recordCount}
+          </span>
+          <div className="flex gap-2">
+            <button onClick={() => { const p = page - 1; setPage(p); load(p); }} disabled={page === 0}
+              className="btn btn-outline btn-sm disabled:opacity-40">Previous</button>
+            <button onClick={() => { const p = page + 1; setPage(p); load(p); }} disabled={(page + 1) * PAGE_SIZE >= recordCount}
+              className="btn btn-outline btn-sm disabled:opacity-40">Next</button>
+          </div>
+        </div>
+      )}
 
       <ConfirmDialog
         open={!!confirmReverse}

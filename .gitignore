@@ -21,3 +21,9 @@ next-env.d.ts
 .DS_Store
 
 .vercel
+
+# playwright
+playwright/.auth.json
+playwright-report/
+test-results/
+.env.test

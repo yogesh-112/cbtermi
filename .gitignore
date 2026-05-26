@@ -27,3 +27,6 @@ playwright/.auth.json
 playwright-report/
 test-results/
 .env.test
+
+# BrowserStack credentials
+.env.browserstack

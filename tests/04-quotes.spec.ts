@@ -50,16 +50,17 @@ test.describe("Quotes", () => {
   });
 
   test("creates a draft quote end-to-end", async ({ page }) => {
+    test.slow(); // triple timeout — mobile is slower on create+redirect flows
     await page.goto("/quotes/new");
     await expect(page.getByPlaceholder("Search or add…")).toBeVisible({ timeout: 10_000 });
 
+    // Click to open dropdown then wait for contacts to render
     await page.getByPlaceholder("Search or add…").click();
     const firstContact = page.locator(".absolute button").first();
-    if (!await firstContact.isVisible({ timeout: 3_000 }).catch(() => false)) {
-      test.skip(true, "No contacts in account — skip");
-      return;
-    }
+    await expect(firstContact).toBeVisible({ timeout: 10_000 });
     await firstContact.click();
+    // Confirm contact was selected — search input is replaced by the contact avatar/name row
+    await expect(page.getByPlaceholder("Search or add…")).not.toBeVisible({ timeout: 5_000 });
 
     await page.getByPlaceholder("Item name").fill("Test Labor");
     // quantity input (nth 0) and unit_price input (nth 1 — type=number fields)
@@ -68,7 +69,11 @@ test.describe("Quotes", () => {
     await numInputs.nth(1).fill("100");
 
     await page.getByRole("button", { name: /save draft/i }).first().click();
-    await expect(page).toHaveURL(/\/quotes\/[a-z0-9-]+$/, { timeout: 15_000 });
-    await expect(page.locator("text=Q-")).toBeVisible();
+    // Exclude /quotes/new — require at least 10 chars after /quotes/ to match a UUID
+    await expect(page).toHaveURL(/\/quotes\/[a-z0-9-]{10,}$/, { timeout: 20_000 });
+    // Wait for quote data to load (remote browsers can take longer for the Supabase fetch)
+    await expect(page.locator("h1")).toBeVisible({ timeout: 40_000 });
+    // Duplicate button is always visible once quote detail data loads
+    await expect(page.getByRole("button", { name: /duplicate/i })).toBeVisible({ timeout: 10_000 });
   });
 });

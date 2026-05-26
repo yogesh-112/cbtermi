@@ -50,15 +50,13 @@ test.describe("Invoices", () => {
   });
 
   test("creates a draft invoice end-to-end", async ({ page }) => {
+    test.slow(); // triple timeout — mobile is slower on create+redirect flows
     await page.goto("/invoices/new");
     // First select is the Customer select
     const customerSelect = page.locator("select").first();
     await expect(customerSelect).toBeVisible({ timeout: 10_000 });
-    const options = await customerSelect.locator("option").count();
-    if (options <= 1) {
-      test.skip(true, "No contacts available — skip");
-      return;
-    }
+    // Wait for contacts to populate — retry until a real contact option appears beyond placeholder
+    await expect(customerSelect.locator("option[value]:not([value=''])")).not.toHaveCount(0, { timeout: 10_000 });
     await customerSelect.selectOption({ index: 1 });
 
     await page.getByPlaceholder("Item name").fill("Test Service");
@@ -66,8 +64,11 @@ test.describe("Invoices", () => {
     await page.locator("input[step='0.01']").first().fill("500");
 
     await page.getByRole("button", { name: /save draft/i }).click();
-    await expect(page).toHaveURL(/\/invoices\/[a-z0-9-]+$/, { timeout: 15_000 });
-    await expect(page.locator("text=INV-")).toBeVisible();
+    await expect(page).toHaveURL(/\/invoices\/[a-z0-9-]{10,}$/, { timeout: 20_000 });
+    // Wait for invoice data to load (remote browsers can take longer for the Supabase fetch)
+    await expect(page.locator("h1")).toBeVisible({ timeout: 40_000 });
+    // "Duplicate invoice" aria-label button renders once data is loaded
+    await expect(page.getByRole("button", { name: /duplicate invoice/i })).toBeVisible({ timeout: 10_000 });
   });
 
   test("invoice detail page shows status badge and actions", async ({ page }) => {

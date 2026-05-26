@@ -86,9 +86,14 @@ export default function PaymentsPage() {
 
   return (
     <div>
-      <div className="mb-1">
-        <h1 className="page-title">{t.payments.title}</h1>
-        <p className="page-desc">{fmt(total)} {t.payments.received} · {payments.length} {t.payments.totalPayments}</p>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">{t.payments.title}</h1>
+          <p className="page-desc">{fmt(total)} {t.payments.received} · {payments.length} {t.payments.totalPayments}</p>
+        </div>
+        <button className="btn btn-green" onClick={() => setModal(true)}>
+          <Plus size={15} /> {t.payments.recordPayment}
+        </button>
       </div>
 
       {/* 4 stat cards */}

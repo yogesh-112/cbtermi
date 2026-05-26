@@ -38,21 +38,24 @@ test.describe("Projects", () => {
   });
 
   test("creates a new project", async ({ page }) => {
+    test.slow(); // triple timeout — mobile is slower on create+redirect flows
     await page.goto("/projects/new");
     await expect(page.getByPlaceholder("Search or add…")).toBeVisible({ timeout: 10_000 });
 
+    // Click to open dropdown then wait for contacts to render
     await page.getByPlaceholder("Search or add…").click();
     const firstContact = page.locator(".absolute button").first();
-    if (!await firstContact.isVisible({ timeout: 3_000 }).catch(() => false)) {
-      test.skip(true, "No contacts in account — skip");
-      return;
-    }
+    await expect(firstContact).toBeVisible({ timeout: 10_000 });
     await firstContact.click();
+    // Confirm contact was selected — search input is replaced by the contact avatar/name row
+    await expect(page.getByPlaceholder("Search or add…")).not.toBeVisible({ timeout: 5_000 });
 
     await page.getByPlaceholder("Hartwell Kitchen Remodel").fill(`Test Project ${Date.now()}`);
     await page.getByRole("button", { name: /create project|save/i }).first().click();
 
-    await expect(page).toHaveURL(/\/projects\/[a-z0-9-]+$/, { timeout: 15_000 });
-    await expect(page.locator("text=PRJ-")).toBeVisible();
+    // Exclude /projects/new — require at least 10 chars to match a UUID
+    await expect(page).toHaveURL(/\/projects\/[a-z0-9-]{10,}$/, { timeout: 20_000 });
+    // Edit button is always visible once project detail data loads
+    await expect(page.getByRole("button", { name: /edit/i }).first()).toBeVisible({ timeout: 20_000 });
   });
 });

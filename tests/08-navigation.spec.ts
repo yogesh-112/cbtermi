@@ -63,12 +63,17 @@ test.describe("Sidebar navigation", () => {
   });
 
   test("browser back/forward works across pages", async ({ page }) => {
+    test.slow(); // beforeEach loads dashboard, then two more full-page loads before goBack/goForward
+    // Wait for each page to fully settle before adding to browser history
     await page.goto("/quotes");
+    await expect(page.locator("h1")).toBeVisible({ timeout: 12_000 });
     await page.goto("/invoices");
-    await page.goBack();
-    await expect(page).toHaveURL("/quotes");
-    await page.goForward();
-    await expect(page).toHaveURL("/invoices");
+    await expect(page.locator("h1")).toBeVisible({ timeout: 12_000 });
+
+    await page.goBack({ timeout: 15_000 });
+    await expect(page).toHaveURL("/quotes", { timeout: 10_000 });
+    await page.goForward({ timeout: 15_000 });
+    await expect(page).toHaveURL("/invoices", { timeout: 10_000 });
   });
 });
 

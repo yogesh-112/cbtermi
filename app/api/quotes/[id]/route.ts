@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
 import { sendEmail, quoteSentEmail } from "@/lib/email";
+import { triggerNotificationRule } from "@/lib/notification-rules";
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession().catch(() => null);
@@ -51,6 +52,15 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         html: quoteSentEmail(contact.full_name ?? "Customer", biz?.name ?? "Your Contractor", data.quote_number, fmtMoney(data.total ?? 0), `${appUrl}/quotes/${id}/preview`),
       });
     }
+    // Trigger automation rule (fire-and-forget)
+    triggerNotificationRule({ businessId: session.businessId, ruleType: "quote_sent", contactId: data.contact_id, entityType: "quote", entityId: id }).catch(() => {});
+  }
+
+  if (body.status === "approved" && existing.status !== "approved") {
+    triggerNotificationRule({ businessId: session.businessId, ruleType: "quote_approved", contactId: data.contact_id, entityType: "quote", entityId: id }).catch(() => {});
+  }
+  if (body.status === "rejected" && existing.status !== "rejected") {
+    triggerNotificationRule({ businessId: session.businessId, ruleType: "quote_rejected", contactId: data.contact_id, entityType: "quote", entityId: id }).catch(() => {});
   }
 
   return NextResponse.json({ quote: data });

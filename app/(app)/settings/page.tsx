@@ -79,6 +79,11 @@ export default function SettingsPage() {
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [savingTemplate, setSavingTemplate] = useState<string | null>(null);
 
+  // Automation rules state
+  const [notifRules, setNotifRules]     = useState<any[]>([]);
+  const [rulesLoading, setRulesLoading] = useState(false);
+  const [savingRule, setSavingRule]     = useState<string | null>(null);
+
   // Webhooks state
   const [webhooks, setWebhooks] = useState<any[]>([]);
   const [webhooksLoading, setWebhooksLoading] = useState(false);
@@ -100,6 +105,10 @@ export default function SettingsPage() {
         });
         setTemplates(merged);
       }).finally(() => setTemplatesLoading(false));
+    }
+    if (section === "notifications" && notifRules.length === 0) {
+      setRulesLoading(true);
+      fetch("/api/notification-rules").then(r => r.json()).then(d => setNotifRules(d.rules ?? [])).finally(() => setRulesLoading(false));
     }
     if (section === "api" && webhooks.length === 0) {
       setWebhooksLoading(true);
@@ -161,6 +170,18 @@ export default function SettingsPage() {
       setNewWebhook({ url: "", events: [] });
       toast("Webhook created — copy the secret now, it won't be shown again.", "info");
     } else toast(data.message ?? "Failed", "error");
+  };
+
+  const toggleRule = async (rule: any) => {
+    setSavingRule(rule.rule_type);
+    const newEnabled = !rule.is_enabled;
+    const res = await fetch("/api/notification-rules", {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rule_type: rule.rule_type, is_enabled: newEnabled, channel: rule.channel, delay_days: rule.delay_days }),
+    });
+    setSavingRule(null);
+    if (res.ok) setNotifRules(rs => rs.map(r => r.rule_type === rule.rule_type ? { ...r, is_enabled: newEnabled } : r));
+    else toast("Failed to update rule", "error");
   };
 
   const deleteWebhook = async (id: string) => {
@@ -379,26 +400,80 @@ export default function SettingsPage() {
           )}
 
           {section === "notifications" && (
-            <div className="card p-5">
-              <h3 className="section-title mb-4">{t.settings.notifPrefs.sectionTitle}</h3>
-              <div className="space-y-1">
-                {[
-                  { key: "n_payment", label: t.settings.notifPrefs.paymentReceived, desc: t.settings.notifPrefs.paymentReceivedDesc },
-                  { key: "n_quote",   label: t.settings.notifPrefs.quoteAction,      desc: t.settings.notifPrefs.quoteActionDesc },
-                  { key: "n_invoice", label: t.settings.notifPrefs.invoiceOverdue,   desc: t.settings.notifPrefs.invoiceOverdueDesc },
-                  { key: "n_message", label: t.settings.notifPrefs.newMessage,       desc: t.settings.notifPrefs.newMessageDesc },
-                  { key: "n_review",  label: t.settings.notifPrefs.newReview,        desc: t.settings.notifPrefs.newReviewDesc },
-                ].map(({ key, label, desc }) => (
-                  <div key={key} className="flex items-center justify-between py-3.5 border-b border-[#f0efea] last:border-0">
-                    <div><p className="text-[13px] font-medium text-[#0c1226]">{label}</p><p className="text-[11px] text-[#8a8fa3] mt-0.5">{desc}</p></div>
-                    <button className={`w-10 h-6 rounded-full transition-colors relative ${settings[key] !== false ? "bg-brand-navy" : "bg-[#e7e6e1]"}`}
-                      onClick={() => setSettings((s: any) => ({ ...s, [key]: s[key] === false ? true : false }))}>
-                      <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${settings[key] !== false ? "translate-x-5" : "translate-x-1"}`} />
-                    </button>
-                  </div>
-                ))}
+            <div className="space-y-5">
+              {/* In-app notification preferences */}
+              <div className="card p-5">
+                <h3 className="section-title mb-4">{t.settings.notifPrefs.sectionTitle}</h3>
+                <div className="space-y-1">
+                  {[
+                    { key: "n_payment", label: t.settings.notifPrefs.paymentReceived, desc: t.settings.notifPrefs.paymentReceivedDesc },
+                    { key: "n_quote",   label: t.settings.notifPrefs.quoteAction,      desc: t.settings.notifPrefs.quoteActionDesc },
+                    { key: "n_invoice", label: t.settings.notifPrefs.invoiceOverdue,   desc: t.settings.notifPrefs.invoiceOverdueDesc },
+                    { key: "n_message", label: t.settings.notifPrefs.newMessage,       desc: t.settings.notifPrefs.newMessageDesc },
+                    { key: "n_review",  label: t.settings.notifPrefs.newReview,        desc: t.settings.notifPrefs.newReviewDesc },
+                  ].map(({ key, label, desc }) => (
+                    <div key={key} className="flex items-center justify-between py-3.5 border-b border-[#f0efea] last:border-0">
+                      <div><p className="text-[13px] font-medium text-[#0c1226]">{label}</p><p className="text-[11px] text-[#8a8fa3] mt-0.5">{desc}</p></div>
+                      <button className={`w-10 h-6 rounded-full transition-colors relative ${settings[key] !== false ? "bg-brand-navy" : "bg-[#e7e6e1]"}`}
+                        onClick={() => setSettings((s: any) => ({ ...s, [key]: s[key] === false ? true : false }))}>
+                        <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${settings[key] !== false ? "translate-x-5" : "translate-x-1"}`} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={save} disabled={saving} className="btn btn-primary btn-sm mt-4">{saving ? t.common.saving : t.settings.notifPrefs.savePrefs}</button>
               </div>
-              <button onClick={save} disabled={saving} className="btn btn-primary btn-sm mt-4">{saving ? t.common.saving : t.settings.notifPrefs.savePrefs}</button>
+
+              {/* Automation rules */}
+              <div className="card p-5">
+                <div className="mb-4">
+                  <h3 className="section-title mb-1">Automation Rules</h3>
+                  <p className="text-[12px] text-[#8a8fa3]">
+                    Automatically send emails to customers when key events happen. Toggle on to activate each rule.
+                  </p>
+                </div>
+
+                {rulesLoading ? (
+                  <div className="space-y-3">{[...Array(5)].map((_, i) => <div key={i} className="h-14 skeleton rounded-xl animate-pulse" />)}</div>
+                ) : (() => {
+                  const categories = [...new Set(notifRules.map(r => r.category))];
+                  return categories.map(cat => (
+                    <div key={cat} className="mb-5 last:mb-0">
+                      <p className="text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-2">{cat}</p>
+                      <div className="space-y-0 border border-[#f0efea] rounded-xl overflow-hidden">
+                        {notifRules.filter(r => r.category === cat).map((rule, idx, arr) => (
+                          <div key={rule.rule_type}
+                            className={`flex items-center justify-between px-4 py-3.5 bg-white ${idx < arr.length - 1 ? "border-b border-[#f0efea]" : ""}`}>
+                            <div className="flex-1 min-w-0 mr-3">
+                              <div className="flex items-center gap-2">
+                                <p className="text-[13px] font-medium text-[#0c1226]">{rule.label}</p>
+                                {rule.timeBased && (
+                                  <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-full font-medium">Daily check</span>
+                                )}
+                              </div>
+                              <p className="text-[11px] text-[#8a8fa3] mt-0.5 truncate">{rule.description}</p>
+                            </div>
+                            <button
+                              disabled={savingRule === rule.rule_type}
+                              onClick={() => toggleRule(rule)}
+                              className={`w-10 h-6 rounded-full transition-colors relative flex-shrink-0 ${
+                                savingRule === rule.rule_type ? "opacity-50" :
+                                rule.is_enabled ? "bg-brand-green" : "bg-[#e7e6e1]"
+                              }`}>
+                              <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${rule.is_enabled ? "translate-x-5" : "translate-x-1"}`} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ));
+                })()}
+
+                <p className="text-[11px] text-[#8a8fa3] mt-4">
+                  Customize email content in the <button onClick={() => setSection("email")} className="text-brand-navy hover:underline">Email Templates</button> tab.
+                  Time-based rules run daily.
+                </p>
+              </div>
             </div>
           )}
 

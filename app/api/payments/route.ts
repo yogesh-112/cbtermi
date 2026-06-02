@@ -4,6 +4,7 @@ import { requireSession } from "@/lib/auth";
 import { checkTrialAccess } from "@/lib/trial";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, paymentConfirmEmail } from "@/lib/email";
+import { triggerNotificationRule } from "@/lib/notification-rules";
 
 export async function GET(request: NextRequest) {
   const session = await requireSession().catch(() => null);
@@ -54,6 +55,11 @@ export async function POST(request: NextRequest) {
         html: paymentConfirmEmail(contact.full_name ?? "Customer", bizInfo?.name ?? "your contractor", inv.invoice_number, fmtMoney(body.amount)),
       });
     }
+  }
+
+  // Trigger payment_received automation rule
+  if (body.contact_id) {
+    triggerNotificationRule({ businessId: session.businessId, ruleType: "payment_received", contactId: body.contact_id, entityType: "payment", entityId: payment.id }).catch(() => {});
   }
 
   return NextResponse.json({ payment }, { status: 201 });

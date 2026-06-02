@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
 import { checkTrialAccess } from "@/lib/trial";
+import { triggerNotificationRule } from "@/lib/notification-rules";
 
 export async function GET(request: NextRequest) {
   const session = await requireSession().catch(() => null);
@@ -33,5 +34,11 @@ export async function POST(request: NextRequest) {
   if (!body.full_name) return NextResponse.json({ message: "Full name required" }, { status: 400 });
   const { data, error } = await supabase.from("contacts").insert({ ...body, business_id: session.businessId, created_by: session.id }).select().single();
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
+
+  // Trigger new_lead automation if this is a lead
+  if (data.contact_type === "lead") {
+    triggerNotificationRule({ businessId: session.businessId, ruleType: "new_lead", contactId: data.id, entityType: "contact", entityId: data.id }).catch(() => {});
+  }
+
   return NextResponse.json({ contact: data }, { status: 201 });
 }

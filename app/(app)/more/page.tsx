@@ -4,7 +4,7 @@ import Link from "next/link";
 import {
   GitPullRequestDraft, ClipboardList, MessagesSquare, Star, Bell,
   UserCog, CreditCard, Settings, ChevronRight, ArrowRight,
-  Calendar, LayoutTemplate, HelpCircle,
+  Calendar, LayoutTemplate, HelpCircle, Wallet,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
@@ -30,6 +30,7 @@ export default function MorePage() {
 
   const WORKSPACE = [
     { href: "/scheduling",        icon: Calendar,            label: "Scheduling",             badge: null },
+    { href: "/expenses",          icon: Wallet,              label: t.expenses.title,         badge: null },
     { href: "/templates",         icon: LayoutTemplate,      label: "Templates",              badge: null },
     { href: "/change-orders",     icon: GitPullRequestDraft, label: t.more.changeOrders,      badge: null },
     { href: "/item-requirements", icon: ClipboardList,       label: t.more.itemRequirements,  badge: null },

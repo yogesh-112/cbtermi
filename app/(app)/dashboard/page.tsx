@@ -6,26 +6,43 @@ import { PageSkeleton } from "@/components/ui";
 import { useT } from "@/lib/i18n";
 import {
   TrendingUp, ArrowRight, FileText, Receipt,
-  CreditCard, Users, CheckCircle,
+  CreditCard, Users, CheckCircle, Target, Briefcase,
+  Calendar, Wallet, AlertCircle, Clock, Star,
 } from "lucide-react";
+
+const URGENCY_DOT: Record<string, string> = {
+  high:   "bg-red-500",
+  medium: "bg-amber-400",
+  low:    "bg-brand-green",
+};
+
+const ACTION_ICON: Record<string, any> = {
+  invoice:     Receipt,
+  quote:       FileText,
+  opportunity: Target,
+  lead:        Users,
+  schedule:    Calendar,
+};
 
 export default function DashboardPage() {
   const t = useT();
-  const [stats, setStats] = useState<any>(null);
-  const [activity, setActivity] = useState<any[]>([]);
+  const [stats, setStats]         = useState<any>(null);
+  const [activity, setActivity]   = useState<any[]>([]);
+  const [pendingActions, setPendingActions] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [outstandingInvoices, setOutstandingInvoices] = useState<any[]>([]);
-  const [userName, setUserName] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [userName, setUserName]   = useState("");
+  const [loading, setLoading]     = useState(true);
 
   useEffect(() => {
     Promise.all([
       fetch("/api/dashboard").then(r => r.json()),
       fetch("/api/auth/me").then(r => r.ok ? r.json() : null),
-      fetch("/api/invoices").then(r => r.json()),
+      fetch("/api/invoices?limit=20").then(r => r.json()),
     ]).then(([dash, me, inv]: [any, any, any]) => {
       setStats(dash.stats);
       setActivity(dash.recentActivity ?? []);
+      setPendingActions(dash.pendingActions ?? []);
       setChartData(dash.chartData ?? []);
       setUserName(me?.user?.name ?? me?.user?.full_name ?? "");
       const invs: any[] = inv.invoices ?? [];
@@ -35,20 +52,24 @@ export default function DashboardPage() {
 
   if (loading) return <PageSkeleton />;
 
-  const firstName = userName.split(" ")[0] || "there";
-  const outstanding = stats?.outstandingAmount ?? 0;
-  const received = stats?.receivedAmount ?? 0;
-  const activeProjects = stats?.activeProjects ?? 0;
-  const pendingQuotes = stats?.pendingQuotes ?? 0;
+  const firstName       = userName.split(" ")[0] || "there";
+  const outstanding     = stats?.outstandingAmount ?? 0;
+  const received        = stats?.receivedAmount ?? 0;
+  const activeProjects  = stats?.activeProjects ?? 0;
+  const pendingQuotes   = stats?.pendingQuotes ?? 0;
+  const openOpps        = stats?.openOpportunities ?? 0;
+  const pipeline        = stats?.pipelineValue ?? 0;
 
   const h = new Date().getHours();
   const greeting = h < 12 ? t.dashboard.greetingMorning : h < 17 ? t.dashboard.greetingAfternoon : t.dashboard.greetingEvening;
 
   const quickActions = [
-    { href: "/contacts/new",   icon: Users,      label: t.dashboard.newContact,   bg: "bg-brand-navy" },
-    { href: "/quotes/new",     icon: FileText,   label: t.dashboard.newQuote,     bg: "bg-[#2453E4]" },
-    { href: "/invoices/new",   icon: Receipt,    label: t.dashboard.newInvoice,   bg: "bg-brand-green" },
-    { href: "/payments",       icon: CreditCard, label: t.dashboard.payments,     bg: "bg-[#7C3AED]" },
+    { href: "/contacts?new=lead",  icon: Users,     label: t.dashboard.newContact,    bg: "bg-brand-navy" },
+    { href: "/opportunities",      icon: Target,    label: t.opportunities.title,     bg: "bg-[#2453E4]" },
+    { href: "/quotes/new",         icon: FileText,  label: t.dashboard.newQuote,      bg: "bg-[#7C3AED]" },
+    { href: "/projects/new",       icon: Briefcase, label: t.nav.projects,            bg: "bg-[#0D9488]" },
+    { href: "/invoices/new",       icon: Receipt,   label: t.dashboard.newInvoice,    bg: "bg-brand-green" },
+    { href: "/expenses",           icon: Wallet,    label: t.expenses.title,          bg: "bg-[#D97706]" },
   ];
 
   return (
@@ -59,9 +80,11 @@ export default function DashboardPage() {
           {greeting}, {firstName}.
         </h1>
         <p className="text-[14px] text-[#8a8fa3] mt-0.5">
-          {pendingQuotes > 0
-            ? `${pendingQuotes} ${pendingQuotes !== 1 ? t.dashboard.quotesAwaitingPlural : t.dashboard.quotesAwaiting}`
-            : t.dashboard.overviewToday}
+          {pendingActions.filter(a => a.urgency === "high").length > 0
+            ? `${pendingActions.filter(a => a.urgency === "high").length} item(s) need immediate attention.`
+            : pendingQuotes > 0
+              ? `${pendingQuotes} ${pendingQuotes !== 1 ? t.dashboard.quotesAwaitingPlural : t.dashboard.quotesAwaiting}`
+              : t.dashboard.overviewToday}
         </p>
       </div>
 
@@ -71,7 +94,7 @@ export default function DashboardPage() {
           <span className="mini-stat-label">{t.dashboard.outstandingInvoices}</span>
           <span className="mini-stat-value text-[20px]">{fmt(outstanding)}</span>
           <span className="text-[11px] text-[#8a8fa3] flex items-center gap-1 mt-0.5">
-            <TrendingUp size={11} className="text-brand-green" /> {stats?.pendingInvoices ?? 0} {t.dashboard.openInvoices}
+            <AlertCircle size={10} className="text-red-400" /> {stats?.pendingInvoices ?? 0} {t.dashboard.openInvoices}
           </span>
         </div>
         <div className="mini-stat mini-stat-blue">
@@ -92,6 +115,20 @@ export default function DashboardPage() {
           </span>
         </div>
       </div>
+
+      {/* Pipeline row */}
+      {(openOpps > 0 || pipeline > 0) && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-brand-navy/5 rounded-xl border border-brand-navy/10">
+          <Target size={16} className="text-brand-navy flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <span className="text-[13px] font-semibold text-brand-navy">{openOpps} open {openOpps === 1 ? "opportunity" : "opportunities"}</span>
+            <span className="text-[12px] text-[#8a8fa3] ml-2">· {fmt(pipeline)} in pipeline</span>
+          </div>
+          <Link href="/opportunities" className="text-[12px] text-brand-navy font-medium hover:underline flex items-center gap-1 flex-shrink-0">
+            View all <ArrowRight size={11} />
+          </Link>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Cash in & out chart */}
@@ -118,13 +155,13 @@ export default function DashboardPage() {
             }
             const maxVal = Math.max(...chartData.map(d => Math.max(d.invoiced, d.paid)), 1);
             const startLabel = chartData[0]?.date ? new Date(chartData[0].date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
-            const midLabel = chartData[6]?.date ? new Date(chartData[6].date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
-            const endLabel = chartData[13]?.date ? new Date(chartData[13].date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
+            const midLabel   = chartData[6]?.date ? new Date(chartData[6].date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
+            const endLabel   = chartData[13]?.date ? new Date(chartData[13].date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
             return (
               <>
                 <div className="flex items-end gap-1.5 h-32 w-full">
                   {chartData.map((d: any, i: number) => {
-                    const invH = Math.max((d.invoiced / maxVal) * 100, d.invoiced > 0 ? 4 : 0);
+                    const invH  = Math.max((d.invoiced / maxVal) * 100, d.invoiced > 0 ? 4 : 0);
                     const paidH = Math.max((d.paid / maxVal) * 100, d.paid > 0 ? 4 : 0);
                     return (
                       <div key={i} className="flex-1 flex items-end gap-0.5 h-full group relative">
@@ -148,28 +185,37 @@ export default function DashboardPage() {
         <div className="card p-5">
           <div className="flex items-center justify-between mb-3">
             <h2 className="section-title mb-0">{t.dashboard.pendingActions}</h2>
-            {activity.length > 0 && (
-              <span className="text-[11px] text-[#8a8fa3]">{activity.slice(0, 5).length} {t.dashboard.items}</span>
+            {pendingActions.length > 0 && (
+              <span className="text-[11px] font-semibold text-[#8a8fa3] bg-[#f3f4f6] px-2 py-0.5 rounded-full">
+                {pendingActions.length}
+              </span>
             )}
           </div>
-          {activity.length === 0 ? (
+          {pendingActions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <CheckCircle size={24} className="text-brand-green mb-2" />
               <p className="text-sm font-medium text-[#0c1226]">{t.dashboard.allCaughtUp}</p>
               <p className="text-xs text-[#8a8fa3] mt-0.5">{t.dashboard.noPendingActions}</p>
             </div>
           ) : (
-            <div className="space-y-2">
-              {activity.slice(0, 5).map((a: any, i: number) => (
-                <div key={a.id ?? i} className="flex items-start gap-2.5 py-2 border-b border-[#f0efea] last:border-0">
-                  <div className="w-1.5 h-1.5 rounded-full bg-brand-green mt-1.5 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-[#0c1226] truncate">{a.subject || a.type}</p>
-                    <p className="text-[11px] text-[#8a8fa3] truncate">{a.contacts?.full_name ?? a.channel}</p>
-                  </div>
-                  <span className="text-[11px] text-[#8a8fa3] whitespace-nowrap flex-shrink-0">{fmtDate(a.created_at)}</span>
-                </div>
-              ))}
+            <div className="space-y-1">
+              {pendingActions.map((a: any, i: number) => {
+                const Icon = ACTION_ICON[a.type] ?? Star;
+                return (
+                  <Link key={i} href={a.href}
+                    className="flex items-start gap-2.5 py-2.5 px-2 -mx-2 rounded-lg hover:bg-[#f6f6f3] transition-colors group">
+                    <div className="flex items-center gap-1.5 mt-0.5 flex-shrink-0">
+                      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${URGENCY_DOT[a.urgency]}`} />
+                      <Icon size={13} className="text-[#8a8fa3] group-hover:text-brand-navy transition-colors" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-medium text-[#0c1226] truncate leading-tight">{a.label}</p>
+                      <p className="text-[11px] text-[#8a8fa3] truncate">{a.sub}</p>
+                    </div>
+                    <ArrowRight size={12} className="text-[#d8d6cf] group-hover:text-brand-navy mt-1 flex-shrink-0 transition-colors" />
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>
@@ -206,7 +252,7 @@ export default function DashboardPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] text-[#0c1226] truncate">
                         {name && <span className="font-semibold">{name}</span>}
-                        {name ? ", " : ""}{a.subject || a.type}
+                        {name ? " — " : ""}{a.subject || a.type}
                       </p>
                     </div>
                     <span className="text-[11px] text-[#8a8fa3] whitespace-nowrap">{fmtDate(a.created_at)}</span>
@@ -244,7 +290,8 @@ export default function DashboardPage() {
                     <span className="text-[13px] font-semibold text-[#0c1226] whitespace-nowrap">{fmt(inv.amount_due)}</span>
                   </div>
                   {inv.due_date && (
-                    <p className={`text-[11px] mt-0.5 ${new Date(inv.due_date) < new Date() ? "text-red-500" : "text-[#8a8fa3]"}`}>
+                    <p className={`text-[11px] mt-0.5 flex items-center gap-1 ${new Date(inv.due_date) < new Date() ? "text-red-500" : "text-[#8a8fa3]"}`}>
+                      {new Date(inv.due_date) < new Date() && <AlertCircle size={9} />}
                       {t.dashboard.due} {fmtDate(inv.due_date)}
                     </p>
                   )}
@@ -261,17 +308,17 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Quick actions */}
+      {/* Quick actions — 6 items */}
       <div className="card p-5">
         <h2 className="section-title mb-4">{t.dashboard.quickActions}</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
           {quickActions.map(({ href, icon: Icon, label, bg }) => (
             <Link key={href} href={href}
-              className={`${bg} text-white rounded-xl p-4 flex items-center gap-3 hover:opacity-90 active:scale-[0.97] transition-all`}>
-              <div className="w-8 h-8 bg-white/15 rounded-lg flex items-center justify-center flex-shrink-0">
+              className={`${bg} text-white rounded-xl p-3.5 flex flex-col items-center gap-2 hover:opacity-90 active:scale-[0.97] transition-all text-center`}>
+              <div className="w-8 h-8 bg-white/15 rounded-lg flex items-center justify-center">
                 <Icon size={15} />
               </div>
-              <span className="text-[13px] font-semibold">{label}</span>
+              <span className="text-[11px] font-semibold leading-tight">{label}</span>
             </Link>
           ))}
         </div>

@@ -2,7 +2,7 @@
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Send, CheckCircle, Trash2 } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle, Trash2, Link2, Copy } from "lucide-react";
 import { ConfirmDialog, toast } from "@/components/ui";
 import { fmt, fmtDate } from "@/lib/utils";
 
@@ -162,7 +162,7 @@ export default function ChangeOrderDetailPage({ params }: { params: Promise<{ id
         </div>
 
         {/* Summary sidebar */}
-        <div>
+        <div className="space-y-4">
           <div className="card p-5">
             <h3 className="section-title mb-3">Summary</h3>
             <div className="space-y-2 text-[13px]">
@@ -170,6 +170,31 @@ export default function ChangeOrderDetailPage({ params }: { params: Promise<{ id
               <div className="flex justify-between text-[#4a5168]"><span>Tax</span><span>{fmt(co.tax_amount)}</span></div>
               <div className="flex justify-between font-bold text-[#0c1226] pt-2 border-t border-[#e7e6e1] text-[15px]"><span>Total</span><span>{fmt(co.total)}</span></div>
             </div>
+          </div>
+
+          {/* Customer approval link */}
+          <div className="card p-5">
+            <h3 className="section-title mb-2 flex items-center gap-1.5">
+              <Link2 size={13} className="text-[#8a8fa3]" /> Customer Approval
+            </h3>
+            <p className="text-[12px] text-[#8a8fa3] mb-3">
+              Share this link for the customer to review and approve the change order online.
+            </p>
+            <button
+              onClick={() => {
+                const url = `${window.location.origin}/change-orders/${id}/preview`;
+                navigator.clipboard.writeText(url).then(() => toast("Link copied!"));
+              }}
+              className="btn btn-outline btn-sm w-full">
+              <Copy size={12} /> Copy approval link
+            </button>
+            <a
+              href={`/change-orders/${id}/preview`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-ghost btn-sm w-full mt-1.5 text-[#8a8fa3]">
+              Preview as customer ↗
+            </a>
           </div>
         </div>
       </div>

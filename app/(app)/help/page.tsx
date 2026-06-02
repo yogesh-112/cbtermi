@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
   HelpCircle, ChevronDown, ChevronUp, Search, AlertCircle, Ticket,
   ChevronRight, Plus, X, Paperclip, Send, RefreshCw, ExternalLink,
+  PlayCircle,
 } from "lucide-react";
 import {
   Modal, ConfirmDialog, EmptyState, Spinner, toast, Tabs, FormField, SearchInput,
@@ -25,8 +26,18 @@ const PRIORITY_COLORS: Record<string, string> = {
   urgent: "bg-red-100 text-red-700",
 };
 
+const TUTORIALS = [
+  { id: "1", title: "Getting Started with Clear Build", topic: "Onboarding", duration: "3:45", youtubeId: "dQw4w9WgXcQ" },
+  { id: "2", title: "Creating and Sending Quotes",      topic: "Quotes",    duration: "5:20", youtubeId: "dQw4w9WgXcQ" },
+  { id: "3", title: "Managing Projects and Milestones", topic: "Projects",  duration: "4:10", youtubeId: "dQw4w9WgXcQ" },
+  { id: "4", title: "Recording Payments and Invoices",  topic: "Billing",   duration: "3:55", youtubeId: "dQw4w9WgXcQ" },
+  { id: "5", title: "Using the Scheduling Module",      topic: "Scheduling",duration: "4:30", youtubeId: "dQw4w9WgXcQ" },
+  { id: "6", title: "Tracking Expenses on Projects",    topic: "Expenses",  duration: "2:50", youtubeId: "dQw4w9WgXcQ" },
+];
+
 export default function HelpPage() {
-  const [tab, setTab] = useState<"faq"|"issues"|"tickets">("faq");
+  const [tab, setTab] = useState<"faq"|"issues"|"tickets"|"tutorials">("faq");
+  const [activeTutorial, setActiveTutorial] = useState<typeof TUTORIALS[0] | null>(null);
   const [faqs, setFaqs] = useState<any[]>([]);
   const [issues, setIssues] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
@@ -130,9 +141,10 @@ export default function HelpPage() {
 
       <Tabs
         tabs={[
-          { id: "faq", label: "FAQs" },
-          { id: "issues", label: "Common Issues" },
-          { id: "tickets", label: `My Tickets (${tickets.length})` },
+          { id: "faq",       label: "FAQs" },
+          { id: "tutorials", label: "Tutorials" },
+          { id: "issues",    label: "Common Issues" },
+          { id: "tickets",   label: `My Tickets (${tickets.length})` },
         ]}
         active={tab}
         onChange={(id) => setTab(id as any)}
@@ -188,6 +200,55 @@ export default function HelpPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Tutorials Tab */}
+      {tab === "tutorials" && (
+        <div className="mt-5">
+          {activeTutorial ? (
+            <div>
+              <button onClick={() => setActiveTutorial(null)}
+                className="flex items-center gap-1.5 text-[13px] text-[#8a8fa3] hover:text-brand-navy mb-4 transition-colors">
+                ← Back to tutorials
+              </button>
+              <div className="card overflow-hidden mb-4">
+                <div className="aspect-video w-full bg-[#000]">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${activeTutorial.youtubeId}?autoplay=1`}
+                    title={activeTutorial.title}
+                    className="w-full h-full"
+                    allowFullScreen
+                    allow="autoplay; encrypted-media"
+                  />
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold text-[16px] text-[#0c1226]">{activeTutorial.title}</h3>
+                  <p className="text-[12px] text-[#8a8fa3] mt-1">{activeTutorial.topic} · {activeTutorial.duration}</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {TUTORIALS.map(tut => (
+                <button key={tut.id} onClick={() => setActiveTutorial(tut)}
+                  className="card p-0 overflow-hidden text-left hover:shadow-md transition-shadow group">
+                  <div className="aspect-video bg-gradient-to-br from-brand-navy to-[#2453E4] flex items-center justify-center relative">
+                    <PlayCircle size={40} className="text-white/80 group-hover:text-white group-hover:scale-110 transition-all" />
+                    <span className="absolute bottom-2 right-2 bg-black/60 text-white text-[11px] px-1.5 py-0.5 rounded">
+                      {tut.duration}
+                    </span>
+                  </div>
+                  <div className="p-3.5">
+                    <span className="text-[10px] font-semibold text-brand-navy bg-brand-navy/10 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                      {tut.topic}
+                    </span>
+                    <p className="text-[13px] font-semibold text-[#0c1226] mt-2 leading-tight">{tut.title}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

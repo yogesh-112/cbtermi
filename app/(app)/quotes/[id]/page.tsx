@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowLeft, Copy, Trash2, CheckCircle, Printer, Briefcase,
   Receipt, XCircle, Mail, MessageCircle, Phone, Clock, Send,
+  History, Plus,
 } from "lucide-react";
 import { StatusBadge, toast, ConfirmDialog } from "@/components/ui";
 import { fmt, fmtDate } from "@/lib/utils";
@@ -22,8 +23,24 @@ export default function QuoteDetailPage() {
   const [sendWhatsApp, setSendWhatsApp] = useState(true);
   const [sendSMS, setSendSMS]           = useState(false);
 
+  const [versions, setVersions]     = useState<any[]>([]);
+  const [savingVer, setSavingVer]   = useState(false);
+  const [versionNote, setVersionNote] = useState("");
+
   const load = () => fetch(`/api/quotes/${id}`).then(r => r.json()).then(setData);
-  useEffect(() => { load(); }, [id]);
+  const loadVersions = () => fetch(`/api/quotes/${id}/versions`).then(r => r.json()).then(d => setVersions(d.versions ?? []));
+  useEffect(() => { load(); loadVersions(); }, [id]);
+
+  const saveVersion = async () => {
+    setSavingVer(true);
+    const res = await fetch(`/api/quotes/${id}/versions`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ note: versionNote }),
+    });
+    setSavingVer(false);
+    if (res.ok) { toast("Version saved"); setVersionNote(""); loadVersions(); }
+    else toast("Failed to save version", "error");
+  };
 
   const markStatus = async (status: string) => {
     await fetch(`/api/quotes/${id}`, {
@@ -321,6 +338,53 @@ export default function QuoteDetailPage() {
               <Link href={`/contacts/${quote.contact_id}`} className="btn btn-outline btn-sm w-full mt-3">View contact</Link>
             </div>
           )}
+
+          {/* Version history */}
+          <div className="card p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="section-title mb-0 flex items-center gap-1.5">
+                <History size={14} className="text-[#8a8fa3]" /> Version History
+              </h3>
+              <span className="text-[11px] text-[#8a8fa3]">{versions.length} saved</span>
+            </div>
+
+            {/* Save version form */}
+            <div className="flex gap-2 mb-3">
+              <input
+                value={versionNote}
+                onChange={e => setVersionNote(e.target.value)}
+                placeholder="Optional note (e.g. revised pricing)"
+                className="field text-[12px] py-1.5 flex-1"
+              />
+              <button onClick={saveVersion} disabled={savingVer}
+                className="btn btn-outline btn-sm flex-shrink-0">
+                <Plus size={12} /> {savingVer ? "Saving…" : "Save"}
+              </button>
+            </div>
+
+            {versions.length === 0 ? (
+              <p className="text-[12px] text-[#8a8fa3] text-center py-3">
+                No saved versions. Click Save to snapshot the current state.
+              </p>
+            ) : (
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {versions.map((v: any) => (
+                  <div key={v.id}
+                    className="flex items-start justify-between gap-2 py-2 border-b border-[#f0efea] last:border-0">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-semibold text-[#0c1226]">v{v.version_number}</p>
+                      {v.note && <p className="text-[11px] text-[#4a5168] truncate">{v.note}</p>}
+                      <p className="text-[10px] text-[#8a8fa3]">{fmtDate(v.created_at)}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-[12px] font-semibold text-brand-green">{fmt(v.total)}</p>
+                      <span className="text-[10px] text-[#8a8fa3] capitalize">{v.status}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

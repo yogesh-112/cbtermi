@@ -9,6 +9,7 @@ import {
   Modal, ConfirmDialog, EmptyState, Spinner, toast, Tabs, FormField, SearchInput,
 } from "@/components/ui";
 import Link from "next/link";
+import { useT } from "@/lib/i18n";
 
 const TICKET_CATEGORIES = ["Account/Login","Billing/Subscription","Bug","Feature Request","Quotes","Invoices","Projects","Payments","Team","Other"];
 const TICKET_PRIORITIES = ["low","medium","high","urgent"];
@@ -36,6 +37,7 @@ const TUTORIALS = [
 ];
 
 export default function HelpPage() {
+  const t = useT();
   const [tab, setTab] = useState<"faq"|"issues"|"tickets"|"tutorials">("faq");
   const [activeTutorial, setActiveTutorial] = useState<typeof TUTORIALS[0] | null>(null);
   const [faqs, setFaqs] = useState<any[]>([]);
@@ -131,20 +133,20 @@ export default function HelpPage() {
     <div className="max-w-4xl mx-auto">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Help &amp; Support</h1>
-          <p className="page-desc">Find answers, resolve issues, or contact our support team.</p>
+          <h1 className="page-title">{t.help.title}</h1>
+          <p className="page-desc">{t.help.subtitle}</p>
         </div>
         <button onClick={() => setTicketModal(true)} className="btn btn-primary">
-          <Ticket size={15} /> Raise Ticket
+          <Ticket size={15} /> {t.help.raiseTicket}
         </button>
       </div>
 
       <Tabs
         tabs={[
-          { id: "faq",       label: "FAQs" },
-          { id: "tutorials", label: "Tutorials" },
-          { id: "issues",    label: "Common Issues" },
-          { id: "tickets",   label: `My Tickets (${tickets.length})` },
+          { id: "faq",       label: t.help.tabFaq },
+          { id: "tutorials", label: t.help.tabTutorials },
+          { id: "issues",    label: t.help.tabIssues },
+          { id: "tickets",   label: `${t.help.tabTickets} (${tickets.length})` },
         ]}
         active={tab}
         onChange={(id) => setTab(id as any)}
@@ -155,7 +157,7 @@ export default function HelpPage() {
         <div className="mt-5 space-y-5">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
-              <SearchInput value={search} onChange={setSearch} placeholder="Search FAQs…" />
+              <SearchInput value={search} onChange={setSearch} placeholder={t.help.searchFaqs} />
             </div>
           </div>
 
@@ -173,7 +175,7 @@ export default function HelpPage() {
           </div>
 
           {Object.keys(groupedFaqs).length === 0 && (
-            <EmptyState icon={HelpCircle} title="No FAQs found" description="Try a different search or category." />
+            <EmptyState icon={HelpCircle} title={t.help.noFaqs} description={t.help.noFaqsDesc} />
           )}
 
           {Object.entries(groupedFaqs).map(([cat, items]) => (
@@ -210,7 +212,7 @@ export default function HelpPage() {
             <div>
               <button onClick={() => setActiveTutorial(null)}
                 className="flex items-center gap-1.5 text-[13px] text-[#8a8fa3] hover:text-brand-navy mb-4 transition-colors">
-                ← Back to tutorials
+                {t.help.backToTutorials}
               </button>
               <div className="card overflow-hidden mb-4">
                 <div className="aspect-video w-full bg-[#000]">
@@ -297,9 +299,9 @@ export default function HelpPage() {
           {tickets.length === 0 ? (
             <EmptyState
               icon={Ticket}
-              title="No support tickets"
-              description="Raise a ticket if you need help from our team."
-              action={{ label: "Raise a Ticket", onClick: () => setTicketModal(true) }}
+              title={t.help.noTickets}
+              description={t.help.noTicketsDesc}
+              action={{ label: t.help.raiseTicket, onClick: () => setTicketModal(true) }}
             />
           ) : (
             <div className="space-y-3">
@@ -324,30 +326,30 @@ export default function HelpPage() {
       )}
 
       {/* Raise Ticket Modal */}
-      <Modal open={ticketModal} onClose={() => setTicketModal(false)} title="Raise Support Ticket" size="md">
+      <Modal open={ticketModal} onClose={() => setTicketModal(false)} title={t.help.raiseTicketTitle} size="md">
         <div className="space-y-4">
-          <FormField label="Subject *">
-            <input className="field" placeholder="Brief description of the issue" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))} />
+          <FormField label={t.help.subjectLabel}>
+            <input className="field" placeholder={t.help.subjectPlaceholder} value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))} />
           </FormField>
           <div className="form-row">
-            <FormField label="Category">
+            <FormField label={t.help.categoryLabel}>
               <select className="field" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))}>
                 {TICKET_CATEGORIES.map(c => <option key={c}>{c}</option>)}
               </select>
             </FormField>
-            <FormField label="Priority">
+            <FormField label={t.help.priorityLabel}>
               <select className="field" value={form.priority} onChange={e => setForm(p => ({ ...p, priority: e.target.value }))}>
                 {TICKET_PRIORITIES.map(p => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
               </select>
             </FormField>
           </div>
-          <FormField label="Description *">
-            <textarea className="field min-h-[120px]" placeholder="Describe the issue in detail. Include steps to reproduce if applicable." value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+          <FormField label={t.help.descriptionLabel}>
+            <textarea className="field min-h-[120px]" placeholder={t.help.descriptionPlaceholder} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
           </FormField>
           <div className="flex justify-end gap-2 pt-2">
-            <button className="btn btn-outline" onClick={() => setTicketModal(false)}>Cancel</button>
+            <button className="btn btn-outline" onClick={() => setTicketModal(false)}>{t.help.cancelBtn}</button>
             <button className="btn btn-primary" onClick={submitTicket} disabled={submitting}>
-              {submitting ? <><Spinner size={16} /> Submitting…</> : <><Send size={14} /> Submit Ticket</>}
+              {submitting ? <><Spinner size={16} /> {t.help.submitting}</> : <><Send size={14} /> {t.help.submitBtn}</>}
             </button>
           </div>
         </div>

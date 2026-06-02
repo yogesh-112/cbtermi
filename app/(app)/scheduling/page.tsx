@@ -6,14 +6,16 @@ import {
   Mail, MessageSquare, Phone,
 } from "lucide-react";
 import { Modal, ConfirmDialog, EmptyState, Spinner, toast, Tabs, FormField } from "@/components/ui";
+import { useT } from "@/lib/i18n";
 
 const MEETING_TYPES = ["Consultation","Site Visit","Estimate Meeting","Project Discussion","Final Walkthrough","Follow-up Call","Other"];
-const REPEAT_OPTIONS = [{ value:"none", label:"Does not repeat" },{ value:"daily", label:"Daily" },{ value:"weekly", label:"Weekly" },{ value:"monthly", label:"Monthly" }];
+const REPEAT_OPTIONS_KEYS = ["none","daily","weekly","monthly"] as const;
 const SLOT_STATUSES = ["available","booked","expired","canceled"];
 const MEETING_STATUSES = [{ value:"scheduled",label:"Scheduled",color:"bg-blue-100 text-blue-700" },{ value:"confirmed",label:"Confirmed",color:"bg-indigo-100 text-indigo-700" },{ value:"completed",label:"Completed",color:"bg-green-100 text-green-700" },{ value:"canceled",label:"Canceled",color:"bg-red-100 text-red-700" },{ value:"no_show",label:"No Show",color:"bg-gray-100 text-gray-600" },{ value:"rescheduled",label:"Rescheduled",color:"bg-amber-100 text-amber-700" }];
 const SLOT_STATUS_COLORS: Record<string,string> = { available:"bg-green-100 text-green-700", booked:"bg-blue-100 text-blue-700", expired:"bg-gray-100 text-gray-500", canceled:"bg-red-100 text-red-600" };
 
 export default function SchedulingPage() {
+  const t = useT();
   const [tab, setTab] = useState<"slots"|"links"|"meetings"|"settings">("slots");
   const [slots, setSlots] = useState<any[]>([]);
   const [links, setLinks] = useState<any[]>([]);
@@ -54,7 +56,7 @@ export default function SchedulingPage() {
   const openEditSlot = (s: any) => { setEditSlot(s); setSlotForm({ slot_date: s.slot_date, start_time: s.start_time ?? "", end_time: s.end_time ?? "", purpose: s.purpose ?? "", meeting_type: s.meeting_type ?? "Consultation", location: s.location ?? "", notes: s.notes ?? "", time_zone: s.time_zone ?? "America/New_York", repeat_option: "none", repeat_count: "1" }); setSlotModal(true); };
 
   const saveSlot = async () => {
-    if (!slotForm.slot_date) { toast("Date is required", "error"); return; }
+    if (!slotForm.slot_date) { toast(t.scheduling.dateRequired, "error"); return; }
     setSaving(true);
     const url = editSlot ? `/api/scheduling/slots/${editSlot.id}` : "/api/scheduling/slots";
     const method = editSlot ? "PATCH" : "POST";
@@ -116,11 +118,11 @@ export default function SchedulingPage() {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Scheduling</h1>
-          <p className="page-desc">Create time slots, generate booking links, and manage meetings.</p>
+          <h1 className="page-title">{t.scheduling.title}</h1>
+          <p className="page-desc">{t.scheduling.subtitle}</p>
         </div>
         {tab === "slots" && (
-          <button className="btn btn-primary" onClick={openCreateSlot}><Plus size={15} /> New Slot</button>
+          <button className="btn btn-primary" onClick={openCreateSlot}><Plus size={15} /> {t.scheduling.newSlot}</button>
         )}
         {tab === "links" && (
           <button className="btn btn-primary" onClick={() => { setLinkForm({ title: "", purpose: "", contact_id: "", expiry_date: "", internal_notes: "", message_to_recipient: "", slot_ids: [] }); setLinkModal(true); }}>
@@ -132,10 +134,10 @@ export default function SchedulingPage() {
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         {[
-          { label: "Available Slots", value: slots.filter(s=>s.status==="available").length, color: "mini-stat-green" },
-          { label: "Active Links", value: links.filter(l=>l.status==="active").length, color: "mini-stat-navy" },
-          { label: "Scheduled Meetings", value: meetings.filter(m=>m.status==="scheduled").length, color: "mini-stat" },
-          { label: "Completed", value: meetings.filter(m=>m.status==="completed").length, color: "mini-stat-green" },
+          { label: t.scheduling.availableSlots, value: slots.filter(s=>s.status==="available").length, color: "mini-stat-green" },
+          { label: t.scheduling.activeLinks, value: links.filter(l=>l.status==="active").length, color: "mini-stat-navy" },
+          { label: t.scheduling.scheduledMeetings, value: meetings.filter(m=>m.status==="scheduled").length, color: "mini-stat" },
+          { label: t.scheduling.completed, value: meetings.filter(m=>m.status==="completed").length, color: "mini-stat-green" },
         ].map(s => (
           <div key={s.label} className={`mini-stat ${s.color}`}>
             <span className="stat-value text-[22px]">{s.value}</span>
@@ -145,10 +147,10 @@ export default function SchedulingPage() {
       </div>
 
       <Tabs tabs={[
-        { id: "slots", label: `Availability (${availableSlots.length})` },
-        { id: "links", label: `Booking Links (${links.length})` },
-        { id: "meetings", label: `Meetings (${meetings.length})` },
-        { id: "settings", label: "Settings" },
+        { id: "slots", label: `${t.scheduling.tabAvailability} (${availableSlots.length})` },
+        { id: "links", label: `${t.scheduling.tabLinks} (${links.length})` },
+        { id: "meetings", label: `${t.scheduling.tabMeetings} (${meetings.length})` },
+        { id: "settings", label: t.scheduling.tabSettings },
       ]} active={tab} onChange={id => setTab(id as any)} />
 
       {loading ? <div className="flex justify-center py-16"><Spinner /></div> : (
@@ -157,7 +159,7 @@ export default function SchedulingPage() {
           {tab === "slots" && (
             <div className="mt-5">
               {slots.length === 0 ? (
-                <EmptyState icon={Calendar} title="No slots yet" description="Create your first availability slot." action={{ label: "New Slot", onClick: openCreateSlot }} />
+                <EmptyState icon={Calendar} title={t.scheduling.noSlots} description={t.scheduling.noSlotsDesc} action={{ label: t.scheduling.newSlot, onClick: openCreateSlot }} />
               ) : (
                 <div className="space-y-3">
                   {slots.map(slot => (
@@ -197,7 +199,7 @@ export default function SchedulingPage() {
           {tab === "links" && (
             <div className="mt-5">
               {links.length === 0 ? (
-                <EmptyState icon={Link2} title="No booking links" description="Create a booking link to share with contacts." action={{ label: "Create Link", onClick: () => setLinkModal(true) }} />
+                <EmptyState icon={Link2} title={t.scheduling.noLinks} description={t.scheduling.noLinksDesc} action={{ label: t.scheduling.newLink, onClick: () => setLinkModal(true) }} />
               ) : (
                 <div className="space-y-3">
                   {links.map(link => {
@@ -244,7 +246,7 @@ export default function SchedulingPage() {
           {tab === "meetings" && (
             <div className="mt-5">
               {meetings.length === 0 ? (
-                <EmptyState icon={Users} title="No meetings yet" description="Meetings will appear here once customers book a slot." />
+                <EmptyState icon={Users} title={t.scheduling.noMeetings} description={t.scheduling.noMeetingsDesc} />
               ) : (
                 <div className="space-y-3">
                   {meetings.map(m => {
@@ -283,8 +285,8 @@ export default function SchedulingPage() {
           {tab === "settings" && (
             <div className="mt-5">
               <div className="card p-6 max-w-lg">
-                <h3 className="font-semibold text-[15px] text-[#1f2937] mb-1">Calendar Settings</h3>
-                <p className="text-[13px] text-[#6b7280] mb-4">Advanced calendar integrations and preferences coming soon.</p>
+                <h3 className="font-semibold text-[15px] text-[#1f2937] mb-1">{t.scheduling.calSettings}</h3>
+                <p className="text-[13px] text-[#6b7280] mb-4">{t.scheduling.calSettingsDesc}</p>
                 <div className="space-y-3">
                   {[
                     "Google Calendar sync",
@@ -306,53 +308,55 @@ export default function SchedulingPage() {
       )}
 
       {/* Slot Modal */}
-      <Modal open={slotModal} onClose={() => setSlotModal(false)} title={editSlot ? "Edit Slot" : "New Availability Slot"} size="md">
+      <Modal open={slotModal} onClose={() => setSlotModal(false)} title={editSlot ? t.scheduling.editSlot : t.scheduling.newSlotTitle} size="md">
         <div className="space-y-4">
-          <FormField label="Date *">
+          <FormField label={t.scheduling.dateRequired}>
             <input type="date" className="field" value={slotForm.slot_date} onChange={e => setSlotForm(p=>({...p, slot_date:e.target.value}))} />
           </FormField>
           <div className="form-row">
-            <FormField label="Start Time (optional)">
+            <FormField label={t.scheduling.startTime}>
               <input type="time" className="field" value={slotForm.start_time} onChange={e => setSlotForm(p=>({...p, start_time:e.target.value}))} />
             </FormField>
-            <FormField label="End Time (optional)">
+            <FormField label={t.scheduling.endTime}>
               <input type="time" className="field" value={slotForm.end_time} onChange={e => setSlotForm(p=>({...p, end_time:e.target.value}))} />
             </FormField>
           </div>
           <div className="form-row">
-            <FormField label="Meeting Type">
+            <FormField label={t.scheduling.meetingType}>
               <select className="field" value={slotForm.meeting_type} onChange={e => setSlotForm(p=>({...p, meeting_type:e.target.value}))}>
-                {MEETING_TYPES.map(t => <option key={t}>{t}</option>)}
+                {MEETING_TYPES.map(mt => <option key={mt}>{mt}</option>)}
               </select>
             </FormField>
             <FormField label="Purpose">
               <input className="field" placeholder="e.g. Kitchen estimate" value={slotForm.purpose} onChange={e => setSlotForm(p=>({...p, purpose:e.target.value}))} />
             </FormField>
           </div>
-          <FormField label="Location / Meeting Method">
+          <FormField label={t.scheduling.location}>
             <input className="field" placeholder="e.g. On-site, Zoom, Phone call" value={slotForm.location} onChange={e => setSlotForm(p=>({...p, location:e.target.value}))} />
           </FormField>
           {!editSlot && (
             <div className="form-row">
-              <FormField label="Repeat">
+              <FormField label={t.scheduling.repeat}>
                 <select className="field" value={slotForm.repeat_option} onChange={e => setSlotForm(p=>({...p, repeat_option:e.target.value}))}>
-                  {REPEAT_OPTIONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                  {REPEAT_OPTIONS_KEYS.map(k => (
+                    <option key={k} value={k}>{t.scheduling[k === "none" ? "noRepeat" : k === "daily" ? "daily" : k === "weekly" ? "weekly" : "monthly"]}</option>
+                  ))}
                 </select>
               </FormField>
               {slotForm.repeat_option !== "none" && (
-                <FormField label="Number of times">
+                <FormField label={t.scheduling.repeatCount}>
                   <input type="number" min="2" max="52" className="field" value={slotForm.repeat_count} onChange={e => setSlotForm(p=>({...p, repeat_count:e.target.value}))} />
                 </FormField>
               )}
             </div>
           )}
-          <FormField label="Notes">
+          <FormField label={t.common.notes}>
             <textarea className="field" rows={2} value={slotForm.notes} onChange={e => setSlotForm(p=>({...p, notes:e.target.value}))} />
           </FormField>
           <div className="flex justify-end gap-2 pt-2">
-            <button className="btn btn-outline" onClick={() => setSlotModal(false)}>Cancel</button>
+            <button className="btn btn-outline" onClick={() => setSlotModal(false)}>{t.common.cancel}</button>
             <button className="btn btn-primary" onClick={saveSlot} disabled={saving}>
-              {saving ? <><Spinner size={16} /> Saving…</> : editSlot ? "Update Slot" : "Create Slot"}
+              {saving ? <><Spinner size={16} /> {t.common.saving}</> : editSlot ? t.scheduling.slotUpdated.replace("updated","Update") : t.scheduling.slotCreated.replace("created","Create")}
             </button>
           </div>
         </div>

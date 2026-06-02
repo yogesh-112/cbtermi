@@ -29,11 +29,11 @@ export default function MorePage() {
   }, []);
 
   const WORKSPACE = [
-    { href: "/scheduling",        icon: Calendar,            label: "Scheduling",             badge: null },
+    { href: "/scheduling",        icon: Calendar,            label: t.scheduling.title,       badge: null },
     { href: "/expenses",          icon: Wallet,              label: t.expenses.title,         badge: null },
     { href: "/templates",         icon: LayoutTemplate,      label: "Templates",              badge: null },
     { href: "/change-orders",     icon: GitPullRequestDraft, label: t.more.changeOrders,      badge: null },
-    { href: "/item-requirements", icon: ClipboardList,       label: t.more.itemRequirements,  badge: null },
+    { href: "/item-requirements", icon: ClipboardList,       label: t.itemRequirements.title, badge: null },
     { href: "/communications",    icon: MessagesSquare,      label: t.more.communications,    badge: null },
     { href: "/feedback",          icon: Star,                label: t.more.feedback,          badge: null },
     { href: "/notifications",     icon: Bell,                label: t.more.notifications,     badge: null },

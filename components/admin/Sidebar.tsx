@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Building2, Users, CreditCard, Receipt,
   ClipboardList, Shield, Settings, LogOut,
-  Activity, Layers, BarChart2, Megaphone, Tag, PlayCircle,
+  Activity, Layers, BarChart2, Megaphone, Tag, PlayCircle, HelpCircle,
 } from "lucide-react";
 
 const NAV = [
@@ -26,6 +26,7 @@ const NAV = [
   { section: "Tools", items: [
     { href: "/admin/broadcasts", icon: Megaphone,       label: "Broadcasts" },
     { href: "/admin/tutorials",  icon: PlayCircle,      label: "Tutorials" },
+    { href: "/admin/faqs",       icon: HelpCircle,      label: "FAQs" },
   ]},
   { section: "System", items: [
     { href: "/admin/audit-logs", icon: ClipboardList,   label: "Audit Logs" },

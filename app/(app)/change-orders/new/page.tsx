@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
-import { toast } from "@/components/ui";
+import { toast, InfoTooltip } from "@/components/ui";
 import { fmt } from "@/lib/utils";
 
 const EMPTY_ITEM = { description: "", qty: 1, unit: "", rate: 0, tax_rate: 0, total: 0 };
@@ -90,7 +90,10 @@ export default function NewChangeOrderPage() {
                 </select>
               </div>
               <div className="md:col-span-2">
-                <label className="label">Title</label>
+                <label className="label flex items-center gap-1">
+                  Title
+                  <InfoTooltip text="A short title for the scope change — e.g. 'Add recessed lighting in kitchen'. This appears on the customer-facing approval page." side="right" />
+                </label>
                 <input value={form.title} onChange={setF("title")} className="field" placeholder="Brief description of the change" />
               </div>
             </div>
@@ -146,7 +149,10 @@ export default function NewChangeOrderPage() {
                 <textarea value={form.notes} onChange={setF("notes")} rows={2} className="field resize-none" placeholder="Additional notes for the customer…" />
               </div>
               <div>
-                <label className="label">Terms</label>
+                <label className="label flex items-center gap-1">
+                  Terms
+                  <InfoTooltip text="Payment and legal terms for this scope change. The default requires payment upon customer approval. You can customize per project." side="right" />
+                </label>
                 <textarea value={form.terms} onChange={setF("terms")} rows={2} className="field resize-none" />
               </div>
             </div>

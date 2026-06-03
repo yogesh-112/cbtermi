@@ -97,7 +97,8 @@ export default function SettingsPage() {
   useEffect(() => {
     if (section === "email" && templates.length === 0) {
       setTemplatesLoading(true);
-      fetch("/api/notifications").then(r => r.json()).then(d => {
+      const settingsLang = settings?.language ?? "en";
+      fetch(`/api/notifications?lang=${settingsLang}`).then(r => r.json()).then(d => {
         const loaded = d.templates ?? [];
         const merged = DEFAULT_TEMPLATES.map(def => {
           const found = loaded.find((t: any) => t.name === def.name);
@@ -479,7 +480,29 @@ export default function SettingsPage() {
 
           {section === "email" && (
             <div className="space-y-5">
-              <p className="text-[13px] text-[#8a8fa3]">Customize the emails sent to customers. Use <code className="text-[12px] bg-[#f0efea] px-1 rounded">{"{{contact_name}}"}</code> and <code className="text-[12px] bg-[#f0efea] px-1 rounded">{"{{business_name}}"}</code> as placeholders.</p>
+              <div className="flex items-center justify-between">
+                <p className="text-[13px] text-[#8a8fa3]">Customize the emails sent to customers. Use <code className="text-[12px] bg-[#f0efea] px-1 rounded">{"{{contact_name}}"}</code> and <code className="text-[12px] bg-[#f0efea] px-1 rounded">{"{{business_name}}"}</code> as placeholders.</p>
+                <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                  <span className="text-[12px] text-[#8a8fa3]">Language:</span>
+                  {["en","es","pt"].map(l => (
+                    <button key={l} onClick={() => {
+                      setTemplates([]);
+                      setTemplatesLoading(true);
+                      fetch(`/api/notifications?lang=${l}`).then(r => r.json()).then(d => {
+                        const loaded = d.templates ?? [];
+                        const merged = DEFAULT_TEMPLATES.map(def => {
+                          const found = loaded.find((t: any) => t.name === def.name);
+                          return found ? { ...def, ...found, _lang: l } : { ...def, id: null, _lang: l };
+                        });
+                        setTemplates(merged);
+                      }).finally(() => setTemplatesLoading(false));
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-[12px] font-medium transition-colors ${(settings?.language ?? "en") === l ? "bg-brand-navy text-white" : "bg-[#f0efea] text-[#4a5168] hover:bg-[#e7e6e1]"}`}>
+                      {l.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
               {templatesLoading ? (
                 <div className="space-y-4">{[...Array(3)].map((_, i) => <div key={i} className="h-40 skeleton rounded-xl animate-pulse" />)}</div>
               ) : templates.map(tpl => (

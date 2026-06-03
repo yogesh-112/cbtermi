@@ -3,7 +3,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, Trash2, ArrowLeft, ChevronDown, X, Mail, MessageCircle, Phone } from "lucide-react";
-import { toast } from "@/components/ui";
+import { toast, InfoTooltip } from "@/components/ui";
 import { fmt } from "@/lib/utils";
 
 const EMPTY_ITEM = {
@@ -205,7 +205,10 @@ function QuoteForm() {
 
               {/* Valid through */}
               <div className="md:pl-4">
-                <p className="text-[10px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-2">Valid through</p>
+                <p className="text-[10px] font-semibold text-[#8a8fa3] uppercase tracking-wider mb-2 flex items-center gap-1">
+                  Valid through
+                  <InfoTooltip text="The date by which the customer must approve this quote. After this date the quote expires and a new version must be sent." side="top" />
+                </p>
                 <input
                   type="date"
                   value={form.valid_until}
@@ -231,7 +234,10 @@ function QuoteForm() {
                     <th className="text-left py-2.5 px-2 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide w-14">Unit</th>
                     <th className="text-left py-2.5 px-2 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide w-14">QTY</th>
                     <th className="text-left py-2.5 px-2 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide w-24">Rate</th>
-                    <th className="text-right py-2.5 px-4 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide w-24">Total</th>
+                    <th className="text-right py-2.5 px-4 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide w-24 flex items-center justify-end gap-1">
+                      Total
+                      <InfoTooltip text="Unit price × quantity − discount, then tax is added. Optional items are included in the total but shown as add-ons to the customer." side="bottom" />
+                    </th>
                     <th className="w-8" />
                   </tr>
                 </thead>

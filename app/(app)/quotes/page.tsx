@@ -114,6 +114,8 @@ export default function QuotesPage() {
               placeholder={t.quotes.searchPlaceholder} className="field" />
           </div>
           <button className="btn btn-outline btn-sm gap-1.5"><SlidersHorizontal size={13} /> Filters</button>
+          <a href="/api/quotes?format=csv" download className="btn btn-outline btn-sm">↓ CSV</a>
+          <Link href="/quotes/new" className="btn btn-primary btn-sm"><Plus size={13} /> {t.quotes.newQuote}</Link>
         </div>
       </div>
 

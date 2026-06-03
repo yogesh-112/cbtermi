@@ -91,9 +91,12 @@ export default function PaymentsPage() {
           <h1 className="page-title">{t.payments.title}</h1>
           <p className="page-desc">{fmt(total)} {t.payments.received} · {payments.length} {t.payments.totalPayments}</p>
         </div>
-        <button className="btn btn-green" onClick={() => setModal(true)}>
-          <Plus size={15} /> {t.payments.recordPayment}
-        </button>
+        <div className="flex items-center gap-2">
+          <a href="/api/payments?format=csv" download className="btn btn-outline btn-sm">↓ CSV</a>
+          <button className="btn btn-green" onClick={() => setModal(true)}>
+            <Plus size={15} /> {t.payments.recordPayment}
+          </button>
+        </div>
       </div>
 
       {/* 4 stat cards */}

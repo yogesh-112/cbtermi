@@ -5,14 +5,31 @@ import { checkTrialAccess } from "@/lib/trial";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, paymentConfirmEmail } from "@/lib/email";
 import { triggerNotificationRule } from "@/lib/notification-rules";
+import { toCSV, csvResponse } from "@/lib/csv";
 
 export async function GET(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  const sp = request.nextUrl.searchParams;
-  const limit = Math.min(parseInt(sp.get("limit") ?? "50"), 100);
-  const offset = parseInt(sp.get("offset") ?? "0");
+  const sp     = request.nextUrl.searchParams;
+  const format = sp.get("format");
+  const limit  = format === "csv" ? 10000 : Math.min(parseInt(sp.get("limit") ?? "50"), 100);
+  const offset = format === "csv" ? 0 : parseInt(sp.get("offset") ?? "0");
+
   const { data, count } = await supabase.from("payments").select("*, contacts(full_name), invoices(invoice_number)", { count: "exact" }).eq("business_id", session.businessId).eq("is_reversed", false).order("created_at", { ascending: false }).range(offset, offset + limit - 1);
+
+  if (format === "csv") {
+    const rows = (data ?? []).map((p: any) => ({ ...p, contact_name: p.contacts?.full_name, invoice_number: p.invoices?.invoice_number }));
+    const csv = toCSV(rows, [
+      { key: "payment_date",    label: "Date" },
+      { key: "contact_name",   label: "Contact" },
+      { key: "invoice_number", label: "Invoice #" },
+      { key: "amount",         label: "Amount" },
+      { key: "payment_method", label: "Method" },
+      { key: "reference_number", label: "Reference" },
+    ]);
+    return csvResponse(csv, `payments-${new Date().toISOString().split("T")[0]}.csv`);
+  }
+
   return NextResponse.json({ payments: data ?? [], total: count ?? 0 });
 }
 

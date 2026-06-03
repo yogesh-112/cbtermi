@@ -9,7 +9,7 @@ import {
   Modal, ConfirmDialog, EmptyState, Spinner, toast, Tabs, FormField, SearchInput,
 } from "@/components/ui";
 import Link from "next/link";
-import { useT } from "@/lib/i18n";
+import { useT, useI18n } from "@/lib/i18n";
 
 const TICKET_CATEGORIES = ["Account/Login","Billing/Subscription","Bug","Feature Request","Quotes","Invoices","Projects","Payments","Team","Other"];
 const TICKET_PRIORITIES = ["low","medium","high","urgent"];
@@ -32,6 +32,7 @@ type Tutorial = { id: string; title: string; topic: string; duration: string | n
 
 export default function HelpPage() {
   const t = useT();
+  const { lang } = useI18n();
   const [tab, setTab] = useState<"faq"|"issues"|"tickets"|"tutorials">("faq");
   const [activeTutorial, setActiveTutorial] = useState<Tutorial | null>(null);
   const [tutorials, setTutorials] = useState<Tutorial[]>([]);
@@ -61,7 +62,7 @@ export default function HelpPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/help/faqs").then(r => r.json()),
+      fetch(`/api/help/faqs?lang=${lang}`).then(r => r.json()),
       fetch("/api/help/common-issues").then(r => r.json()),
       fetch("/api/support/tickets").then(r => r.json()),
     ]).then(([f, i, t]) => {

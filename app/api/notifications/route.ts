@@ -3,10 +3,16 @@ import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  const { data } = await supabase.from("notification_templates").select("*").eq("business_id", session.businessId).order("created_at", { ascending: false });
+  const lang = request.nextUrl.searchParams.get("lang") ?? "en";
+  const { data } = await supabase
+    .from("notification_templates")
+    .select("*")
+    .eq("business_id", session.businessId)
+    .in("language", lang !== "en" ? [lang, "en"] : ["en"])
+    .order("created_at", { ascending: false });
   return NextResponse.json({ templates: data ?? [] });
 }
 

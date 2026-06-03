@@ -165,9 +165,14 @@ export default function ContactsPage() {
           <h1 className="page-title">{t.contacts.title}</h1>
           <p className="page-desc">{total} {t.contacts.totalContacts}</p>
         </div>
-        <button className="btn btn-primary" onClick={openAdd}>
-          <Plus size={15} /> {t.contacts.addContact}
-        </button>
+        <div className="flex items-center gap-2">
+          <a href="/api/contacts?format=csv" download className="btn btn-outline btn-sm">
+            ↓ CSV
+          </a>
+          <button className="btn btn-primary" onClick={openAdd}>
+            <Plus size={15} /> {t.contacts.addContact}
+          </button>
+        </div>
       </div>
 
       {/* Mini stat cards */}

@@ -3,16 +3,18 @@ import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
 import { checkTrialAccess } from "@/lib/trial";
 import { logAudit } from "@/lib/audit";
+import { toCSV, csvResponse } from "@/lib/csv";
 
 export async function GET(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
   const sp = request.nextUrl.searchParams;
-  const limit  = Math.min(parseInt(sp.get("limit")  ?? "100"), 200);
-  const offset = parseInt(sp.get("offset") ?? "0");
-  const projectId  = sp.get("project_id");
-  const category   = sp.get("category");
+  const format    = sp.get("format");
+  const limit     = format === "csv" ? 10000 : Math.min(parseInt(sp.get("limit") ?? "100"), 200);
+  const offset    = format === "csv" ? 0 : parseInt(sp.get("offset") ?? "0");
+  const projectId = sp.get("project_id");
+  const category  = sp.get("category");
 
   let q = supabase
     .from("expenses")
@@ -27,6 +29,20 @@ export async function GET(request: NextRequest) {
   if (category)  q = q.eq("category", category);
 
   const { data, count } = await q;
+
+  if (format === "csv") {
+    const rows = (data ?? []).map((e: any) => ({ ...e, project_name: e.projects?.name }));
+    const csv = toCSV(rows, [
+      { key: "expense_date",  label: "Date" },
+      { key: "title",         label: "Title" },
+      { key: "category",      label: "Category" },
+      { key: "project_name",  label: "Project" },
+      { key: "amount",        label: "Amount" },
+      { key: "description",   label: "Description" },
+    ]);
+    return csvResponse(csv, `expenses-${new Date().toISOString().split("T")[0]}.csv`);
+  }
+
   return NextResponse.json({ expenses: data ?? [], total: count ?? 0 });
 }
 

@@ -30,14 +30,16 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
   const [trialDays, setTrialDays] = useState({ used: 0, total: 14 });
 
   const PRIMARY_NAV = [
-    { href: "/dashboard",         icon: LayoutDashboard,      label: t.nav.dashboard,      countKey: null },
-    { href: "/contacts",          icon: Users,                label: t.nav.contacts,       countKey: "contacts" as const },
+    { href: "/dashboard",         icon: LayoutDashboard,      label: t.nav.dashboard,       countKey: null },
+    { href: "/contacts",          icon: Users,                label: t.nav.contacts,        countKey: "contacts" as const },
     { href: "/opportunities",     icon: Target,               label: t.opportunities.title, countKey: null },
-    { href: "/projects",          icon: Briefcase,            label: t.nav.projects,       countKey: null },
-    { href: "/quotes",            icon: FileText,             label: t.nav.quotes,         countKey: null },
-    { href: "/change-orders",     icon: GitPullRequestDraft,  label: t.nav.changeOrders,   countKey: null },
-    { href: "/invoices",          icon: Receipt,              label: t.nav.invoices,       countKey: null },
-    { href: "/payments",          icon: CreditCard,           label: t.nav.payments,       countKey: null },
+    { href: "/projects",          icon: Briefcase,            label: t.nav.projects,        countKey: null },
+    { href: "/quotes",            icon: FileText,             label: t.nav.quotes,          countKey: null },
+    { href: "/change-orders",     icon: GitPullRequestDraft,  label: t.nav.changeOrders,    countKey: null },
+    { href: "/scheduling",        icon: Calendar,             label: t.scheduling.title,    countKey: null },
+    { href: "/expenses",          icon: Wallet,               label: t.expenses.title,      countKey: null },
+    { href: "/invoices",          icon: Receipt,              label: t.nav.invoices,        countKey: null },
+    { href: "/payments",          icon: CreditCard,           label: t.nav.payments,        countKey: null },
   ];
 
   const CONTACTS_SUB = [
@@ -46,8 +48,6 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
   ];
 
   const SECONDARY_NAV = [
-    { href: "/scheduling",        icon: Calendar,       label: "Scheduling",           countKey: null },
-    { href: "/expenses",          icon: Wallet,         label: t.expenses.title,       countKey: null },
     { href: "/templates",         icon: LayoutTemplate, label: "Templates",            countKey: null },
     { href: "/notifications",     icon: Bell,           label: t.nav.notifications,    countKey: null },
     { href: "/communications",    icon: MessagesSquare, label: t.nav.communications,   countKey: null },

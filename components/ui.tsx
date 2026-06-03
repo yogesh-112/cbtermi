@@ -221,7 +221,7 @@ export function Tabs({ tabs, active, onChange }: {
 
 // ─── FORM FIELD ───────────────────────────────────────────────────────────────
 export function FormField({ label, error, children, required, hint }: {
-  label: string; error?: string; children: ReactNode; required?: boolean; hint?: string;
+  label: string | ReactNode; error?: string; children: ReactNode; required?: boolean; hint?: string;
 }) {
   return (
     <div>

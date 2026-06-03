@@ -116,9 +116,12 @@ export default function ExpensesPage() {
             {fmt(grandTotal)} {t.expenses.totalSpent} · {total} {t.expenses.totalExpenses}
           </p>
         </div>
-        <button className="btn btn-green" onClick={openCreate}>
-          <Plus size={15} /> {t.expenses.addExpense}
-        </button>
+        <div className="flex items-center gap-2">
+          <a href="/api/expenses?format=csv" download className="btn btn-outline btn-sm">↓ CSV</a>
+          <button className="btn btn-green" onClick={openCreate}>
+            <Plus size={15} /> {t.expenses.addExpense}
+          </button>
+        </div>
       </div>
 
       {/* Stats row */}

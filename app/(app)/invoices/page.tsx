@@ -129,6 +129,8 @@ export default function InvoicesPage() {
               placeholder={t.invoices.searchPlaceholder} className="field" />
           </div>
           <button className="btn btn-outline btn-sm gap-1.5"><SlidersHorizontal size={13} /> Filters</button>
+          <a href="/api/invoices?format=csv" download className="btn btn-outline btn-sm">↓ CSV</a>
+          <Link href="/invoices/new" className="btn btn-primary btn-sm"><Plus size={13} /> {t.invoices.newInvoice}</Link>
         </div>
       </div>
 

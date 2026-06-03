@@ -2,20 +2,37 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
 import { checkTrialAccess } from "@/lib/trial";
+import { toCSV, csvResponse } from "@/lib/csv";
 
 export async function GET(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  const sp = request.nextUrl.searchParams;
+  const sp     = request.nextUrl.searchParams;
   const status = sp.get("status");
-  const limit = Math.min(parseInt(sp.get("limit") ?? "50"), 100);
-  const offset = parseInt(sp.get("offset") ?? "0");
+  const format = sp.get("format");
+  const limit  = format === "csv" ? 10000 : Math.min(parseInt(sp.get("limit") ?? "50"), 100);
+  const offset = format === "csv" ? 0 : parseInt(sp.get("offset") ?? "0");
+
   let q = supabase.from("quotes").select("*, contacts(full_name), projects(name)", { count: "exact" }).eq("business_id", session.businessId);
   if (status && status !== "all") {
     if (status === "sent") q = q.in("status", ["sent", "viewed"]);
     else q = q.eq("status", status);
   }
   const { data, count } = await q.order("created_at", { ascending: false }).range(offset, offset + limit - 1);
+
+  if (format === "csv") {
+    const rows = (data ?? []).map((q: any) => ({ ...q, contact_name: q.contacts?.full_name, project_name: q.projects?.name }));
+    const csv = toCSV(rows, [
+      { key: "quote_number",  label: "Quote #" },
+      { key: "contact_name",  label: "Customer" },
+      { key: "project_name",  label: "Project" },
+      { key: "status",        label: "Status" },
+      { key: "total",         label: "Total" },
+      { key: "valid_until",   label: "Valid Until" },
+      { key: "created_at",    label: "Created" },
+    ]);
+    return csvResponse(csv, `quotes-${new Date().toISOString().split("T")[0]}.csv`);
+  }
   // Fetch status-only rows for accurate tab counts regardless of filter
   const { data: allStatuses } = await supabase.from("quotes").select("status, total").eq("business_id", session.businessId);
   const counts = {

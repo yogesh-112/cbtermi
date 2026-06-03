@@ -5,7 +5,7 @@ import {
   Copy, Check, ChevronRight, Clock, MapPin, ExternalLink,
   Mail, MessageSquare, Phone,
 } from "lucide-react";
-import { Modal, ConfirmDialog, EmptyState, Spinner, toast, Tabs, FormField } from "@/components/ui";
+import { Modal, ConfirmDialog, EmptyState, Spinner, toast, Tabs, FormField, InfoTooltip } from "@/components/ui";
 import { useT } from "@/lib/i18n";
 
 const MEETING_TYPES = ["Consultation","Site Visit","Estimate Meeting","Project Discussion","Final Walkthrough","Follow-up Call","Other"];
@@ -331,12 +331,12 @@ export default function SchedulingPage() {
               <input className="field" placeholder="e.g. Kitchen estimate" value={slotForm.purpose} onChange={e => setSlotForm(p=>({...p, purpose:e.target.value}))} />
             </FormField>
           </div>
-          <FormField label={t.scheduling.location}>
+          <FormField label={<span className="flex items-center gap-1">{t.scheduling.location}<InfoTooltip text="Tell the customer where the meeting will take place. Examples: 'On-site at project address', 'Zoom — link sent on confirmation', 'Phone call'." side="right" /></span>}>
             <input className="field" placeholder="e.g. On-site, Zoom, Phone call" value={slotForm.location} onChange={e => setSlotForm(p=>({...p, location:e.target.value}))} />
           </FormField>
           {!editSlot && (
             <div className="form-row">
-              <FormField label={t.scheduling.repeat}>
+              <FormField label={<span className="flex items-center gap-1">{t.scheduling.repeat}<InfoTooltip text="Creates multiple identical slots on consecutive days/weeks/months. Useful for recurring availability windows." side="right" /></span>}>
                 <select className="field" value={slotForm.repeat_option} onChange={e => setSlotForm(p=>({...p, repeat_option:e.target.value}))}>
                   {REPEAT_OPTIONS_KEYS.map(k => (
                     <option key={k} value={k}>{t.scheduling[k === "none" ? "noRepeat" : k === "daily" ? "daily" : k === "weekly" ? "weekly" : "monthly"]}</option>

@@ -4,17 +4,36 @@ import { requireSession } from "@/lib/auth";
 import { checkTrialAccess } from "@/lib/trial";
 import { logAudit } from "@/lib/audit";
 import { sendEmail, invoiceEmail } from "@/lib/email";
+import { toCSV, csvResponse } from "@/lib/csv";
 
 export async function GET(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   const sp = request.nextUrl.searchParams;
   const status = sp.get("status");
-  const limit = Math.min(parseInt(sp.get("limit") ?? "50"), 100);
-  const offset = parseInt(sp.get("offset") ?? "0");
+  const format = sp.get("format");
+  const limit  = format === "csv" ? 10000 : Math.min(parseInt(sp.get("limit") ?? "50"), 100);
+  const offset = format === "csv" ? 0 : parseInt(sp.get("offset") ?? "0");
+
   let q = supabase.from("invoices").select("*, contacts(full_name), projects(name)", { count: "exact" }).eq("business_id", session.businessId);
   if (status && status !== "all") q = q.eq("status", status);
   const { data, count } = await q.order("created_at", { ascending: false }).range(offset, offset + limit - 1);
+
+  if (format === "csv") {
+    const rows = (data ?? []).map((i: any) => ({ ...i, contact_name: i.contacts?.full_name, project_name: i.projects?.name }));
+    const csv = toCSV(rows, [
+      { key: "invoice_number", label: "Invoice #" },
+      { key: "contact_name",   label: "Customer" },
+      { key: "project_name",   label: "Project" },
+      { key: "status",         label: "Status" },
+      { key: "total",          label: "Total" },
+      { key: "amount_paid",    label: "Amount Paid" },
+      { key: "amount_due",     label: "Amount Due" },
+      { key: "issue_date",     label: "Issue Date" },
+      { key: "due_date",       label: "Due Date" },
+    ]);
+    return csvResponse(csv, `invoices-${new Date().toISOString().split("T")[0]}.csv`);
+  }
   // Fetch summary fields for accurate stats regardless of pagination
   const { data: allInv } = await supabase.from("invoices").select("status, total, amount_due, due_date").eq("business_id", session.businessId);
   const now = new Date();

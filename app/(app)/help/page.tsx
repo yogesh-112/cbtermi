@@ -27,25 +27,21 @@ const PRIORITY_COLORS: Record<string, string> = {
   urgent: "bg-red-100 text-red-700",
 };
 
-const TUTORIALS = [
-  { id: "1", title: "Getting Started with Clear Build", topic: "Onboarding", duration: "3:45", youtubeId: "dQw4w9WgXcQ" },
-  { id: "2", title: "Creating and Sending Quotes",      topic: "Quotes",    duration: "5:20", youtubeId: "dQw4w9WgXcQ" },
-  { id: "3", title: "Managing Projects and Milestones", topic: "Projects",  duration: "4:10", youtubeId: "dQw4w9WgXcQ" },
-  { id: "4", title: "Recording Payments and Invoices",  topic: "Billing",   duration: "3:55", youtubeId: "dQw4w9WgXcQ" },
-  { id: "5", title: "Using the Scheduling Module",      topic: "Scheduling",duration: "4:30", youtubeId: "dQw4w9WgXcQ" },
-  { id: "6", title: "Tracking Expenses on Projects",    topic: "Expenses",  duration: "2:50", youtubeId: "dQw4w9WgXcQ" },
-];
+
+type Tutorial = { id: string; title: string; topic: string; duration: string | null; youtube_id: string };
 
 export default function HelpPage() {
   const t = useT();
   const [tab, setTab] = useState<"faq"|"issues"|"tickets"|"tutorials">("faq");
-  const [activeTutorial, setActiveTutorial] = useState<typeof TUTORIALS[0] | null>(null);
+  const [activeTutorial, setActiveTutorial] = useState<Tutorial | null>(null);
+  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
   const [calendlyUrl, setCalendlyUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/settings").then(r => r.json()).then(d => {
       if (d.settings?.calendly_url) setCalendlyUrl(d.settings.calendly_url);
     }).catch(() => {});
+    fetch("/api/tutorials").then(r => r.json()).then(d => setTutorials(d.tutorials ?? [])).catch(() => {});
   }, []);
   const [faqs, setFaqs] = useState<any[]>([]);
   const [issues, setIssues] = useState<any[]>([]);
@@ -231,7 +227,7 @@ export default function HelpPage() {
               <div className="card overflow-hidden mb-4">
                 <div className="aspect-video w-full bg-[#000]">
                   <iframe
-                    src={`https://www.youtube.com/embed/${activeTutorial.youtubeId}?autoplay=1`}
+                    src={`https://www.youtube.com/embed/${activeTutorial.youtube_id}?autoplay=1`}
                     title={activeTutorial.title}
                     className="w-full h-full"
                     allowFullScreen
@@ -240,20 +236,47 @@ export default function HelpPage() {
                 </div>
                 <div className="p-4">
                   <h3 className="font-bold text-[16px] text-[#0c1226]">{activeTutorial.title}</h3>
-                  <p className="text-[12px] text-[#8a8fa3] mt-1">{activeTutorial.topic} · {activeTutorial.duration}</p>
+                  <p className="text-[12px] text-[#8a8fa3] mt-1">
+                    {activeTutorial.topic}{activeTutorial.duration ? ` · ${activeTutorial.duration}` : ""}
+                  </p>
                 </div>
               </div>
             </div>
+          ) : tutorials.length === 0 ? (
+            <div className="text-center py-16 text-[#8a8fa3]">
+              <PlayCircle size={40} className="mx-auto mb-3 opacity-30" />
+              <p className="text-[14px] font-medium">No tutorials available yet.</p>
+              <p className="text-[12px] mt-1">Check back soon — videos are being added.</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {TUTORIALS.map(tut => (
-                <button key={tut.id} onClick={() => setActiveTutorial(tut)}
-                  className="card p-0 overflow-hidden text-left hover:shadow-md transition-shadow group">
-                  <div className="aspect-video bg-gradient-to-br from-brand-navy to-[#2453E4] flex items-center justify-center relative">
-                    <PlayCircle size={40} className="text-white/80 group-hover:text-white group-hover:scale-110 transition-all" />
-                    <span className="absolute bottom-2 right-2 bg-black/60 text-white text-[11px] px-1.5 py-0.5 rounded">
-                      {tut.duration}
-                    </span>
+              {tutorials.map(tut => (
+                <button key={tut.id}
+                  onClick={() => tut.youtube_id ? setActiveTutorial(tut) : undefined}
+                  disabled={!tut.youtube_id}
+                  className={`card p-0 overflow-hidden text-left transition-shadow ${tut.youtube_id ? "hover:shadow-md group cursor-pointer" : "opacity-60 cursor-default"}`}>
+                  <div className="aspect-video bg-gradient-to-br from-brand-navy to-[#2453E4] flex items-center justify-center relative overflow-hidden">
+                    {tut.youtube_id ? (
+                      <>
+                        <img
+                          src={`https://img.youtube.com/vi/${tut.youtube_id}/mqdefault.jpg`}
+                          alt={tut.title}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                        <PlayCircle size={40} className="relative text-white/80 group-hover:text-white group-hover:scale-110 transition-all" />
+                        {tut.duration && (
+                          <span className="absolute bottom-2 right-2 bg-black/70 text-white text-[11px] px-1.5 py-0.5 rounded">
+                            {tut.duration}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center gap-1">
+                        <PlayCircle size={36} className="text-white/30" />
+                        <span className="text-white/50 text-[11px]">Coming soon</span>
+                      </div>
+                    )}
                   </div>
                   <div className="p-3.5">
                     <span className="text-[10px] font-semibold text-brand-navy bg-brand-navy/10 px-2 py-0.5 rounded-full uppercase tracking-wide">

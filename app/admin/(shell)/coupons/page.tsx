@@ -13,7 +13,7 @@ export default function AdminCouponsPage() {
   const [saving, setSaving]   = useState(false);
   const [confirmDel, setConfirmDel] = useState<any>(null);
   const [form, setForm] = useState({
-    code: "", description: "", discount_percent: "20", max_uses: "", expires_at: "",
+    code: "", description: "", discount_percent: "20", max_uses: "", expires_at: "", stripe_coupon_id: "",
   });
 
   const load = () => {
@@ -30,7 +30,7 @@ export default function AdminCouponsPage() {
       body: JSON.stringify(form),
     });
     setSaving(false);
-    if (res.ok) { setModal(false); setForm({ code: "", description: "", discount_percent: "20", max_uses: "", expires_at: "" }); load(); }
+    if (res.ok) { setModal(false); setForm({ code: "", description: "", discount_percent: "20", max_uses: "", expires_at: "", stripe_coupon_id: "" }); load(); }
     else { const d = await res.json(); alert(d.message); }
   };
 
@@ -123,6 +123,14 @@ export default function AdminCouponsPage() {
               <AdminLabel>Expires</AdminLabel>
               <AdminInput type="date" value={form.expires_at} onChange={e => setForm(f => ({ ...f, expires_at: e.target.value }))} />
             </div>
+          </div>
+          <div>
+            <AdminLabel>Stripe Promotion Code ID (optional)</AdminLabel>
+            <AdminInput value={form.stripe_coupon_id} onChange={e => setForm(f => ({ ...f, stripe_coupon_id: e.target.value.trim() }))} placeholder="promo_xxxx — from Stripe Dashboard > Coupons" />
+            <p className="text-[11px] text-[#9399a8] mt-1">
+              Link this coupon to a Stripe promotion code so the discount auto-applies at checkout.
+              Get the ID from <strong>Stripe Dashboard → Billing → Coupons → Promotion codes</strong>.
+            </p>
           </div>
           <div className="flex gap-2 justify-end pt-2">
             <AdminBtn onClick={() => setModal(false)} variant="ghost">Cancel</AdminBtn>

@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
       max_uses:         max_uses ? parseInt(max_uses) : null,
       expires_at:       expires_at || null,
       is_active:        true,
+      stripe_coupon_id: body.stripe_coupon_id?.trim() || null,
       created_by:       session.id,
     })
     .select()

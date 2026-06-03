@@ -10,8 +10,11 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
   const { id } = await params;
   const { data: quote } = await supabase.from("quotes").select("*, contacts(*), projects(name)").eq("id", id).eq("business_id", session.businessId).single();
   if (!quote) return NextResponse.json({ message: "Not found" }, { status: 404 });
-  const { data: items } = await supabase.from("quote_items").select("*").eq("quote_id", id).order("sort_order");
-  return NextResponse.json({ quote, items: items ?? [] });
+  const [{ data: items }, { data: approvalRecords }] = await Promise.all([
+    supabase.from("quote_items").select("*").eq("quote_id", id).order("sort_order"),
+    supabase.from("approvals").select("*").eq("object_id", id).eq("object_type", "quote").order("approved_at", { ascending: false }),
+  ]);
+  return NextResponse.json({ quote, items: items ?? [], approvals: approvalRecords ?? [] });
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

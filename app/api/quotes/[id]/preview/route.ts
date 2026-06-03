@@ -47,6 +47,20 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
 
+  // Write formal approval record
+  if (body.status === "approved" && quote) {
+    const items = (quote.quote_items as any[]) ?? [];
+    const total = items.reduce((s: number, i: any) => s + (i.total ?? 0), 0);
+    await supabase.from("approvals").insert({
+      business_id:       quote.business_id,
+      object_type:       "quote",
+      object_id:         id,
+      approver_name:     body.approved_by ?? null,
+      total_at_approval: total,
+      ip_address:        request.headers.get("x-forwarded-for") ?? null,
+    });
+  }
+
   // Fire approval notification emails
   if (body.status === "approved" && quote) {
     const biz = quote.businesses as any;

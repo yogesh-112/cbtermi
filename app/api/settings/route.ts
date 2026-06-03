@@ -15,7 +15,9 @@ const ALLOWED_SETTINGS_FIELDS = [
   "logo_url", "business_type", "timezone", "currency", "tax_rate",
   "quote_prefix", "invoice_prefix", "project_prefix",
   "website", "about", "facebook", "instagram", "twitter", "whatsapp",
-  "default_payment_terms", "default_notes",
+  "default_payment_terms", "default_notes", "calendly_url",
+  "legal_name", "service_area", "trade_license", "payment_terms", "date_format", "language",
+  "n_payment", "n_quote", "n_invoice", "n_message", "n_review",
 ];
 
 export async function PATCH(request: NextRequest) {

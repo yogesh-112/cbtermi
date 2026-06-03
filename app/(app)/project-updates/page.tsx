@@ -1,8 +1,9 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from "react";
 import { Plus, MessageSquare } from "lucide-react";
 import { Modal, toast, EmptyState } from "@/components/ui";
 import { fmtDate } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 const TYPE_COLORS: Record<string, string> = {
   progress:  "bg-blue-50 text-blue-700",
@@ -12,6 +13,7 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 export default function ProjectUpdatesPage() {
+  const t = useT();
   const [updates, setUpdates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
@@ -32,7 +34,7 @@ export default function ProjectUpdatesPage() {
   useEffect(() => { load(); }, []);
 
   const save = async () => {
-    if (!form.project_id || !form.message) { toast("Project and message required", "error"); return; }
+    if (!form.project_id || !form.message) { toast(t.common.required, "error"); return; }
     setSaving(true);
     const res = await fetch("/api/project-updates", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -40,7 +42,7 @@ export default function ProjectUpdatesPage() {
     });
     setSaving(false);
     if (res.ok) {
-      toast("Update posted"); setModal(false);
+      toast(t.projectUpdates.posted); setModal(false);
       setForm({ project_id: "", update_type: "progress", message: "", is_client_visible: true });
       load();
     } else {
@@ -48,14 +50,21 @@ export default function ProjectUpdatesPage() {
     }
   };
 
+  const TYPE_LABELS: Record<string, string> = {
+    progress:  t.projectUpdates.progress,
+    milestone: t.projectUpdates.milestone,
+    issue:     t.projectUpdates.issue,
+    note:      t.projectUpdates.note,
+  };
+
   return (
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Project Updates</h1>
-          <p className="page-desc">{updates.length} updates</p>
+          <h1 className="page-title">{t.projectUpdates.title}</h1>
+          <p className="page-desc">{updates.length} {t.projectUpdates.title.toLowerCase()}</p>
         </div>
-        <button className="btn btn-green" onClick={() => setModal(true)}><Plus size={15} /> Post Update</button>
+        <button className="btn btn-green" onClick={() => setModal(true)}><Plus size={15} /> {t.projectUpdates.postUpdate}</button>
       </div>
 
       {loading ? (
@@ -63,9 +72,9 @@ export default function ProjectUpdatesPage() {
           {[...Array(3)].map((_, i) => <div key={i} className="card h-20 animate-pulse skeleton" />)}
         </div>
       ) : updates.length === 0 ? (
-        <EmptyState icon={<MessageSquare size={36} />} title="No project updates yet"
-          description="Post updates to track progress and communicate with clients."
-          action={<button className="btn btn-green btn-sm" onClick={() => setModal(true)}><Plus size={14} /> Post Update</button>} />
+        <EmptyState icon={<MessageSquare size={36} />} title={t.projectUpdates.noUpdates}
+          description={t.projectUpdates.noUpdatesDesc}
+          action={<button className="btn btn-green btn-sm" onClick={() => setModal(true)}><Plus size={14} /> {t.projectUpdates.postUpdate}</button>} />
       ) : (
         <div className="space-y-3">
           {updates.map((u: any) => (
@@ -74,13 +83,13 @@ export default function ProjectUpdatesPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <span className={`badge capitalize ${TYPE_COLORS[u.update_type] ?? "bg-[#f0efea] text-[#4a5168]"}`}>
-                      {u.update_type}
+                      {TYPE_LABELS[u.update_type] ?? u.update_type}
                     </span>
                     {u.projects?.name && (
                       <span className="text-sm font-medium text-[#4a5168]">{u.projects.name}</span>
                     )}
                     {u.is_client_visible && (
-                      <span className="badge bg-brand-green-light text-brand-green text-xs">Client visible</span>
+                      <span className="badge bg-brand-green-light text-brand-green text-xs">{t.projectUpdates.clientVisibleBadge}</span>
                     )}
                   </div>
                   <p className="text-[#4a5168] leading-relaxed">{u.message}</p>
@@ -92,38 +101,40 @@ export default function ProjectUpdatesPage() {
         </div>
       )}
 
-      <Modal open={modal} onClose={() => setModal(false)} title="Post Project Update" size="md">
+      <Modal open={modal} onClose={() => setModal(false)} title={t.projectUpdates.postTitle} size="md">
         <div className="space-y-4">
           <div>
-            <label className="label">Project <span className="text-red-500">*</span></label>
+            <label className="label">{t.projectUpdates.projectLabel}</label>
             <select value={form.project_id} onChange={e => setForm({ ...form, project_id: e.target.value })} className="field">
-              <option value="">Select project…</option>
+              <option value="">{t.projectUpdates.selectProject}</option>
               {projects.map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </div>
           <div>
-            <label className="label">Update type</label>
+            <label className="label">{t.projectUpdates.updateType}</label>
             <select value={form.update_type} onChange={e => setForm({ ...form, update_type: e.target.value })} className="field">
-              <option value="progress">Progress</option>
-              <option value="milestone">Milestone</option>
-              <option value="issue">Issue</option>
-              <option value="note">Note</option>
+              <option value="progress">{t.projectUpdates.progress}</option>
+              <option value="milestone">{t.projectUpdates.milestone}</option>
+              <option value="issue">{t.projectUpdates.issue}</option>
+              <option value="note">{t.projectUpdates.note}</option>
             </select>
           </div>
           <div>
-            <label className="label">Message <span className="text-red-500">*</span></label>
+            <label className="label">{t.projectUpdates.messageLabel}</label>
             <textarea value={form.message} onChange={e => setForm({ ...form, message: e.target.value })}
-              className="field min-h-[100px] resize-y" placeholder="Describe the update…" />
+              className="field min-h-[100px] resize-y" placeholder={t.projectUpdates.messagePlaceholder} />
           </div>
           <div className="flex items-center gap-2">
             <input type="checkbox" id="client_visible" checked={form.is_client_visible}
               onChange={e => setForm({ ...form, is_client_visible: e.target.checked })}
               className="rounded border-[#d8d6cf]" />
-            <label htmlFor="client_visible" className="text-sm text-[#4a5168] cursor-pointer">Visible to client</label>
+            <label htmlFor="client_visible" className="text-sm text-[#4a5168] cursor-pointer">{t.projectUpdates.clientVisible}</label>
           </div>
           <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
-            <button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button>
-            <button className="btn btn-green" onClick={save} disabled={saving}>{saving ? "Posting…" : "Post Update"}</button>
+            <button className="btn btn-outline" onClick={() => setModal(false)}>{t.projectUpdates.cancelBtn}</button>
+            <button className="btn btn-green" onClick={save} disabled={saving}>
+              {saving ? t.projectUpdates.posting : t.projectUpdates.postBtn}
+            </button>
           </div>
         </div>
       </Modal>

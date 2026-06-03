@@ -612,6 +612,33 @@ export default function SettingsPage() {
                   )}
                 </div>
               ))}
+
+              {/* Calendly scheduling link */}
+              <div className="card p-5 flex items-start gap-4">
+                <div className="text-[28px] w-10 flex-shrink-0 text-center">📆</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="font-semibold text-[14px] text-[#0c1226]">Calendly</p>
+                    <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${settings.calendly_url ? "bg-brand-green/10 text-brand-green" : "bg-[#f0efea] text-[#8a8fa3]"}`}>
+                      {settings.calendly_url ? "Configured" : "Not configured"}
+                    </span>
+                  </div>
+                  <p className="text-[13px] text-[#8a8fa3] mb-3">
+                    Add your Calendly link to let customers book demo or support calls directly from the Help page.
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      value={settings.calendly_url ?? ""}
+                      onChange={set("calendly_url")}
+                      placeholder="https://calendly.com/your-link"
+                      className="field text-[13px] flex-1"
+                    />
+                    <button onClick={save} disabled={saving} className="btn btn-outline btn-sm flex-shrink-0">
+                      {saving ? "Saving…" : "Save"}
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 

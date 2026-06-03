@@ -40,6 +40,13 @@ export default function HelpPage() {
   const t = useT();
   const [tab, setTab] = useState<"faq"|"issues"|"tickets"|"tutorials">("faq");
   const [activeTutorial, setActiveTutorial] = useState<typeof TUTORIALS[0] | null>(null);
+  const [calendlyUrl, setCalendlyUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/settings").then(r => r.json()).then(d => {
+      if (d.settings?.calendly_url) setCalendlyUrl(d.settings.calendly_url);
+    }).catch(() => {});
+  }, []);
   const [faqs, setFaqs] = useState<any[]>([]);
   const [issues, setIssues] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
@@ -136,9 +143,16 @@ export default function HelpPage() {
           <h1 className="page-title">{t.help.title}</h1>
           <p className="page-desc">{t.help.subtitle}</p>
         </div>
-        <button onClick={() => setTicketModal(true)} className="btn btn-primary">
-          <Ticket size={15} /> {t.help.raiseTicket}
-        </button>
+        <div className="flex items-center gap-2">
+          {calendlyUrl && (
+            <a href={calendlyUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+              📆 Book a Demo
+            </a>
+          )}
+          <button onClick={() => setTicketModal(true)} className="btn btn-primary">
+            <Ticket size={15} /> {t.help.raiseTicket}
+          </button>
+        </div>
       </div>
 
       <Tabs

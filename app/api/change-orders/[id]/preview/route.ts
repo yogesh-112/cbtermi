@@ -43,6 +43,18 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     .single();
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
 
+  // Write formal approval record
+  if (body.status === "approved" && co) {
+    await supabase.from("approvals").insert({
+      business_id:       co.business_id,
+      object_type:       "change_order",
+      object_id:         id,
+      approver_name:     body.approved_by ?? null,
+      total_at_approval: co.total ?? null,
+      ip_address:        request.headers.get("x-forwarded-for") ?? null,
+    });
+  }
+
   // Notify business when approved
   if (body.status === "approved" && co) {
     const biz = co.businesses as any;

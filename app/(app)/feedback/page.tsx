@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from "react";
 import { Plus, Star, ThumbsUp, ThumbsDown, Minus } from "lucide-react";
 import { Modal, toast, EmptyState } from "@/components/ui";
@@ -30,7 +30,7 @@ export default function FeedbackPage() {
   useEffect(() => { load(); }, []);
 
   const save = async () => {
-    if (!form.message) { toast("Message required", "error"); return; }
+    if (!form.message) { toast(t.common.required, "error"); return; }
     setSaving(true);
     const res = await fetch("/api/feedback", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -38,7 +38,7 @@ export default function FeedbackPage() {
     });
     setSaving(false);
     if (res.ok) {
-      toast("Feedback recorded"); setModal(false);
+      toast(t.feedback.saved); setModal(false);
       setForm({ project_id: "", contact_id: "", rating: 5, category: "general", message: "", is_public: false });
       load();
     } else {
@@ -58,33 +58,41 @@ export default function FeedbackPage() {
 
   const avg = feedback.length ? (feedback.reduce((s, f) => s + (f.rating ?? 0), 0) / feedback.length).toFixed(1) : null;
 
+  const CATEGORIES = [
+    { value: "general",       label: t.feedback.catGeneral },
+    { value: "quality",       label: t.feedback.catQuality },
+    { value: "communication", label: t.feedback.catCommunication },
+    { value: "timeliness",    label: t.feedback.catTimeliness },
+    { value: "pricing",       label: t.feedback.catPricing },
+  ];
+
   return (
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Feedback</h1>
-          <p className="page-desc">Client satisfaction tracking</p>
+          <h1 className="page-title">{t.feedback.title}</h1>
+          <p className="page-desc">{t.feedback.subtitle}</p>
         </div>
-        <button className="btn btn-green" onClick={() => setModal(true)}><Plus size={15} /> Record Feedback</button>
+        <button className="btn btn-green" onClick={() => setModal(true)}><Plus size={15} /> {t.feedback.recordFeedback}</button>
       </div>
 
       {feedback.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
           <div className="mini-stat mini-stat-amber">
-            <span className="mini-stat-label">Avg Rating</span>
+            <span className="mini-stat-label">{t.feedback.avgRating}</span>
             <span className="mini-stat-value">{avg ?? "—"}</span>
-            <span className="mini-stat-sub">out of 5 stars</span>
+            <span className="mini-stat-sub">{t.feedback.outOf5}</span>
           </div>
           <div className="mini-stat mini-stat-navy">
-            <span className="mini-stat-label">Total Feedback</span>
+            <span className="mini-stat-label">{t.feedback.totalFeedback}</span>
             <span className="mini-stat-value">{feedback.length}</span>
           </div>
           <div className="mini-stat mini-stat-green">
-            <span className="mini-stat-label">Positive (4–5★)</span>
+            <span className="mini-stat-label">{t.feedback.positive}</span>
             <span className="mini-stat-value">{feedback.filter(f => f.rating >= 4).length}</span>
           </div>
           <div className="mini-stat mini-stat-rose">
-            <span className="mini-stat-label">Needs Attention</span>
+            <span className="mini-stat-label">{t.feedback.needsAttention}</span>
             <span className="mini-stat-value">{feedback.filter(f => f.rating <= 2).length}</span>
           </div>
         </div>
@@ -95,12 +103,11 @@ export default function FeedbackPage() {
           {[...Array(3)].map((_, i) => <div key={i} className="card h-24 animate-pulse skeleton" />)}
         </div>
       ) : feedback.length === 0 ? (
-        <EmptyState icon={<Star size={36} />} title="No feedback yet"
-          description="Record client feedback to track satisfaction and improve your services."
-          action={<button className="btn btn-green btn-sm" onClick={() => setModal(true)}><Plus size={14} /> Record Feedback</button>} />
+        <EmptyState icon={<Star size={36} />} title={t.feedback.noFeedback}
+          description={t.feedback.noFeedbackDesc}
+          action={<button className="btn btn-green btn-sm" onClick={() => setModal(true)}><Plus size={14} /> {t.feedback.recordFeedback}</button>} />
       ) : (
         <>
-          {/* Mobile cards */}
           <div className="lg:hidden space-y-3">
             {feedback.map((f: any) => (
               <div key={f.id} className="mobile-card">
@@ -120,17 +127,16 @@ export default function FeedbackPage() {
             ))}
           </div>
 
-          {/* Desktop table */}
           <div className="hidden lg:block table-wrapper">
             <table className="table-base">
               <thead>
                 <tr>
-                  <th>Contact</th>
-                  <th>Project</th>
-                  <th>Rating</th>
-                  <th>Category</th>
-                  <th>Message</th>
-                  <th>Date</th>
+                  <th>{t.feedback.contactCol}</th>
+                  <th>{t.feedback.projectCol}</th>
+                  <th>{t.feedback.ratingCol}</th>
+                  <th>{t.feedback.categoryCol}</th>
+                  <th>{t.feedback.messageCol}</th>
+                  <th>{t.feedback.dateCol}</th>
                 </tr>
               </thead>
               <tbody>
@@ -155,56 +161,54 @@ export default function FeedbackPage() {
         </>
       )}
 
-      <Modal open={modal} onClose={() => setModal(false)} title="Record Feedback" size="md">
+      <Modal open={modal} onClose={() => setModal(false)} title={t.feedback.recordTitle} size="md">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">Contact</label>
+              <label className="label">{t.feedback.contactLabel}</label>
               <select value={form.contact_id} onChange={e => setForm({ ...form, contact_id: e.target.value })} className="field">
-                <option value="">— None —</option>
+                <option value="">— {t.common.none} —</option>
                 {contacts.map((c: any) => <option key={c.id} value={c.id}>{c.full_name}</option>)}
               </select>
             </div>
             <div>
-              <label className="label">Project</label>
+              <label className="label">{t.feedback.projectLabel}</label>
               <select value={form.project_id} onChange={e => setForm({ ...form, project_id: e.target.value })} className="field">
-                <option value="">— None —</option>
+                <option value="">— {t.common.none} —</option>
                 {projects.map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">Rating (1–5)</label>
+              <label className="label">{t.feedback.ratingLabel}</label>
               <select value={form.rating} onChange={e => setForm({ ...form, rating: Number(e.target.value) })} className="field">
-                {[5, 4, 3, 2, 1].map(r => <option key={r} value={r}>{r} star{r !== 1 ? "s" : ""}</option>)}
+                {[5, 4, 3, 2, 1].map(r => <option key={r} value={r}>{r} ★</option>)}
               </select>
             </div>
             <div>
-              <label className="label">Category</label>
+              <label className="label">{t.feedback.categoryLabel}</label>
               <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="field">
-                <option value="general">General</option>
-                <option value="quality">Quality</option>
-                <option value="communication">Communication</option>
-                <option value="timeliness">Timeliness</option>
-                <option value="pricing">Pricing</option>
+                {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
             </div>
           </div>
           <div>
-            <label className="label">Message <span className="text-red-500">*</span></label>
+            <label className="label">{t.feedback.messageRequired}</label>
             <textarea value={form.message} onChange={e => setForm({ ...form, message: e.target.value })}
-              className="field min-h-[100px] resize-y" placeholder="What did the client say?" />
+              className="field min-h-[100px] resize-y" placeholder={t.feedback.messagePlaceholder} />
           </div>
           <div className="flex items-center gap-2">
             <input type="checkbox" id="is_public" checked={form.is_public}
               onChange={e => setForm({ ...form, is_public: e.target.checked })}
               className="rounded border-[#d8d6cf]" />
-            <label htmlFor="is_public" className="text-sm text-[#4a5168] cursor-pointer">Mark as public testimonial</label>
+            <label htmlFor="is_public" className="text-sm text-[#4a5168] cursor-pointer">{t.feedback.publicTestimonial}</label>
           </div>
           <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
-            <button className="btn btn-outline" onClick={() => setModal(false)}>Cancel</button>
-            <button className="btn btn-green" onClick={save} disabled={saving}>{saving ? "Saving…" : "Record Feedback"}</button>
+            <button className="btn btn-outline" onClick={() => setModal(false)}>{t.feedback.cancelBtn}</button>
+            <button className="btn btn-green" onClick={save} disabled={saving}>
+              {saving ? t.feedback.saving : t.feedback.recordBtn}
+            </button>
           </div>
         </div>
       </Modal>

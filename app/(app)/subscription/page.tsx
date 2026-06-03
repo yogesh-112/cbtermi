@@ -52,6 +52,9 @@ export default function SubscriptionPage() {
   const [loading, setLoading] = useState(true);
   const [upgrading, setUpgrading] = useState<string | null>(null);
   const [portaling, setPortaling] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -64,11 +67,28 @@ export default function SubscriptionPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const applyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setApplyingCoupon(true);
+    const res = await fetch("/api/billing/apply-coupon", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: couponCode.trim().toUpperCase() }),
+    });
+    const data = await res.json();
+    setApplyingCoupon(false);
+    if (res.ok && data.coupon) {
+      setAppliedCoupon(data.coupon);
+      toast(`Coupon applied! ${data.coupon.discount_percent}% discount`, "success");
+    } else {
+      toast(data.message ?? "Invalid or expired coupon code.", "error");
+    }
+  };
+
   const upgrade = async (planId: string) => {
     setUpgrading(planId);
     const res = await fetch("/api/billing/checkout", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ planId }),
+      body: JSON.stringify({ planId, couponCode: appliedCoupon?.code ?? null }),
     });
     const data = await res.json();
     setUpgrading(null);
@@ -140,6 +160,32 @@ export default function SubscriptionPage() {
           <p className="text-[13px] text-red-600">You can view existing data but cannot create or send new records. Upgrade to restore full access.</p>
         </div>
       )}
+
+      {/* Coupon code input */}
+      <div className="card p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div className="flex-1">
+          <p className="text-[13px] font-semibold text-[#0c1226]">Have a coupon code?</p>
+          {appliedCoupon ? (
+            <p className="text-[12px] text-brand-green mt-0.5">✓ {appliedCoupon.code} — {appliedCoupon.discount_percent}% off applied</p>
+          ) : (
+            <p className="text-[12px] text-[#8a8fa3] mt-0.5">Enter a coupon code to get a discount on your plan.</p>
+          )}
+        </div>
+        {!appliedCoupon ? (
+          <div className="flex gap-2 w-full sm:w-auto">
+            <input value={couponCode} onChange={e => setCouponCode(e.target.value.toUpperCase())}
+              placeholder="Enter code" className="field text-[13px] w-40 flex-shrink-0" />
+            <button onClick={applyCoupon} disabled={applyingCoupon || !couponCode}
+              className="btn btn-outline btn-sm flex-shrink-0">
+              {applyingCoupon ? "Checking…" : "Apply"}
+            </button>
+          </div>
+        ) : (
+          <button onClick={() => { setAppliedCoupon(null); setCouponCode(""); }} className="btn btn-ghost btn-sm text-[#8a8fa3]">
+            Remove
+          </button>
+        )}
+      </div>
 
       {/* Plan cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

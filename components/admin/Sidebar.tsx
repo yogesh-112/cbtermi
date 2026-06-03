@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Building2, Users, CreditCard, Receipt,
   ClipboardList, Shield, Settings, LogOut,
-  Activity, Layers, BarChart2, Megaphone,
+  Activity, Layers, BarChart2, Megaphone, Tag,
 } from "lucide-react";
 
 const NAV = [
@@ -21,6 +21,7 @@ const NAV = [
     { href: "/admin/subscriptions", icon: Layers,       label: "Subscriptions" },
     { href: "/admin/payments",   icon: Receipt,         label: "Payments" },
     { href: "/admin/plans",      icon: CreditCard,      label: "Plans" },
+    { href: "/admin/coupons",    icon: Tag,             label: "Coupons" },
   ]},
   { section: "Tools", items: [
     { href: "/admin/broadcasts", icon: Megaphone,       label: "Broadcasts" },

@@ -24,10 +24,11 @@ export default function QuoteDetailPage() {
   const [sendSMS, setSendSMS]           = useState(false);
 
   const [versions, setVersions]     = useState<any[]>([]);
+  const [approvals, setApprovals]   = useState<any[]>([]);
   const [savingVer, setSavingVer]   = useState(false);
   const [versionNote, setVersionNote] = useState("");
 
-  const load = () => fetch(`/api/quotes/${id}`).then(r => r.json()).then(setData);
+  const load = () => fetch(`/api/quotes/${id}`).then(r => r.json()).then(d => { setData(d); setApprovals(d.approvals ?? []); });
   const loadVersions = () => fetch(`/api/quotes/${id}/versions`).then(r => r.json()).then(d => setVersions(d.versions ?? []));
   useEffect(() => { load(); loadVersions(); }, [id]);
 
@@ -325,6 +326,26 @@ export default function QuoteDetailPage() {
                 );
               })}
             </div>
+
+            {/* Formal approval record */}
+            {approvals.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-[#f0efea]">
+                <p className="text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide mb-2">Approval record</p>
+                {approvals.map((ap: any) => (
+                  <div key={ap.id} className="flex items-start gap-2 bg-brand-green/5 rounded-xl px-3 py-2.5 mb-1.5">
+                    <CheckCircle size={13} className="text-brand-green mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-[12px] font-semibold text-brand-green">
+                        Approved{ap.approver_name ? ` by ${ap.approver_name}` : ""}
+                      </p>
+                      <p className="text-[11px] text-[#8a8fa3]">
+                        {fmtDate(ap.approved_at)}{ap.total_at_approval ? ` · $${ap.total_at_approval.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Customer */}

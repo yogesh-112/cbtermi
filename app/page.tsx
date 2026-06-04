@@ -1,291 +1,199 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  Check, ChevronDown, Menu, X, FileText, Receipt,
-  Briefcase, Users, Bell, Calendar, CreditCard,
-  BarChart3, Zap, Shield, ArrowRight, Star,
-  Clock, TrendingUp, CheckCircle,
-} from "lucide-react";
+import "./landing.css";
 
-/* ─── Brand tokens ────────────────────────────────────────────────── */
-const N900 = "#0D1836";   // very dark navy
-const N700 = "#1B2D5E";   // primary navy
-const GREEN = "#3FA66B";  // accent green
-const GBG   = "#F0FBF4";  // green tint bg
+/* ── Icons ─────────────────────────────────────────────────────────── */
+const ICONS: Record<string, string> = {
+  check:        "M4 12.5l5 5L20 6.5",
+  arrow:        "M5 12h14M13 6l6 6-6 6",
+  arrowUpRight: "M7 17L17 7M9 7h8v8",
+  quote:        "M7 4h7l4 4v12H7zM14 4v4h4M9.5 12h5M9.5 15.5h5",
+  invoice:      "M6 3h12v18l-2.2-1.6L13.5 21l-2.3-1.6L9 21l-2.3-1.6L6 21zM9.5 8.5h5M9.5 12h5",
+  link:         "M9.5 14.5l5-5M8 12l-2 2a3.5 3.5 0 105 5l2-2M16 12l2-2a3.5 3.5 0 10-5-5l-2 2",
+  shield:       "M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z M8.5 12l2.3 2.3L15.5 9.7",
+  pipeline:     "M5 7h9M5 7a2 2 0 11-.001-.001M14 7a3 3 0 003 3h2M19 10a2 2 0 11.001.001M19 17h-9M19 17a2 2 0 10.001-.001M10 17a3 3 0 00-3-3H5M5 14a2 2 0 10-.001.001",
+  calendar:     "M5 6h14v14H5zM5 10h14M8 3v4M16 3v4M8.5 14h2M14 14h1.5",
+  bell:         "M7 9a5 5 0 0110 0c0 5 2 6 2 6H5s2-1 2-6M10 19a2 2 0 004 0",
+  bolt:         "M13 3L5 13h6l-1 8 8-10h-6z",
+  lock:         "M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 117 0v3M12 15v2",
+  chart:        "M5 19V5M5 19h14M9 19v-6M13 19v-9M17 19v-4",
+  plus:         "M12 5v14M5 12h14",
+  chevron:      "M6 9l6 6 6-6",
+  spark:        "M12 4l1.6 4.8L18 10l-4.4 1.2L12 16l-1.6-4.8L6 10l4.4-1.2z",
+  globe:        "M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18",
+  phone:        "M6 4h3l1.5 4-2 1.5a11 11 0 005 5l1.5-2 4 1.5v3a2 2 0 01-2 2A14 14 0 014 6a2 2 0 012-2z",
+  menu:         "M4 7h16M4 12h16M4 17h16",
+  close:        "M6 6l12 12M18 6L6 18",
+  users:        "M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM3 20a6 6 0 0112 0M16 11a3 3 0 100-6M15 14.5c3 .4 5 2.4 5 5.5",
+  card:         "M3 7h18v11H3zM3 10h18M6.5 14.5h3",
+  doc:          "M7 3h7l4 4v14H7zM14 3v4h4M9.5 12h5M9.5 15.5h3",
+  refresh:      "M5 7a8 8 0 0113-1M19 5v4h-4M19 17a8 8 0 01-13 1M5 19v-4h4",
+  eye:          "M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zM12 9a3 3 0 100 6 3 3 0 000-6z",
+  star:         "M12 4l2.4 5 5.6.8-4 3.9 1 5.6L12 16.6 6.9 19.3l1-5.6-4-3.9 5.6-.8z",
+  layers:       "M12 3l9 5-9 5-9-5zM3 13l9 5 9-5",
+};
 
-/* ─── Content ─────────────────────────────────────────────────────── */
-const FEATURES = [
-  { icon: FileText,   title: "Quotes & Change Orders",   desc: "Build professional quotes with line items, taxes, and optional add-ons. Clients approve and e-sign online — no printing, no PDFs." },
-  { icon: Receipt,    title: "Invoices & Online Payment", desc: "Send invoices and collect card payments via a secure link. Track paid, outstanding, and overdue at a glance." },
-  { icon: Briefcase,  title: "Project Tracking",          desc: "Link quotes, invoices, and progress updates to a project. Track budget vs actual cost in real time." },
-  { icon: Users,      title: "Contacts & Lead Pipeline",  desc: "Manage every lead and customer in one place. Track status from first call through to closed deal." },
-  { icon: Bell,       title: "Notifications & Comms",     desc: "Send email, SMS, and WhatsApp from inside the app using saved templates. Never chase a client manually again." },
-  { icon: Calendar,   title: "Scheduling & Booking",      desc: "Share a booking link — clients pick a slot that works. Confirmation emails sent to both sides automatically." },
-];
-
-const STEPS = [
-  {
-    step: "01", title: "Add contacts & leads",
-    desc: "Import or add contacts in seconds. Track every lead from first touch through to signed contract — no spreadsheet needed.",
-    mock: <LeadMock />,
-  },
-  {
-    step: "02", title: "Create & send quotes",
-    desc: "Build itemized quotes in minutes. Send a review link — clients approve and sign online. You get notified instantly.",
-    mock: <QuoteMock />,
-  },
-  {
-    step: "03", title: "Invoice & collect payment",
-    desc: "Convert approved quotes into invoices. Clients pay by card online. Funds land in your account automatically.",
-    mock: <InvoiceMock />,
-  },
-];
-
-const CALLOUTS = [
-  {
-    label: "QUOTES",
-    title: "Win more jobs with quotes that look the part",
-    points: [
-      "Line-item breakdowns clients actually understand",
-      "Optional add-ons so clients can upgrade themselves",
-      "E-signature — approved in one click, no PDF required",
-      "Change orders linked directly to the original quote",
-    ],
-    mock: <QuoteMock large />,
-    flip: false,
-  },
-  {
-    label: "INVOICES",
-    title: "Get paid faster. Stop chasing payments manually",
-    points: [
-      "One-click invoice from an approved quote",
-      "Clients pay by card via a secure payment link",
-      "Partial payments and running balance tracked",
-      "Overdue reminders sent automatically",
-    ],
-    mock: <InvoiceMock large />,
-    flip: true,
-  },
-  {
-    label: "PROJECTS",
-    title: "Keep every job organized from start to finish",
-    points: [
-      "Link quotes, invoices, and payments to a project",
-      "Budget vs actual cost tracked in real time",
-      "Team updates and notes in one timeline",
-      "Change orders don't fall through the cracks",
-    ],
-    mock: <ProjectMock />,
-    flip: false,
-  },
-];
-
-const COMPARISON = [
-  { feature: "Professional quotes & e-signatures",  cb: true,  sheets: false, software: true },
-  { feature: "Online payment collection",           cb: true,  sheets: false, software: "Limited" },
-  { feature: "Change order tracking",               cb: true,  sheets: false, software: "Add-on" },
-  { feature: "Client booking links",                cb: true,  sheets: false, software: false },
-  { feature: "Mobile-friendly UI",                  cb: true,  sheets: false, software: false },
-  { feature: "Set up in under 15 minutes",          cb: true,  sheets: true,  software: false },
-  { feature: "Built for remodelers specifically",   cb: true,  sheets: false, software: false },
-  { feature: "No per-user pricing",                 cb: true,  sheets: false, software: false },
-];
-
-const FIT_FOR = [
-  "Owner-operators running $500K – $5M revenue businesses",
-  "Remodelers tired of losing track of quotes and invoices",
-  "Contractors who want to look more professional to clients",
-  "Teams of 1–15 who don't need enterprise complexity",
-  "Businesses moving off spreadsheets or generic software",
-];
-
-const PLANS = [
-  {
-    name: "Free Trial",
-    price: "Free",
-    period: "15 days, no card needed",
-    desc: "Full access to everything — see if it fits before you commit.",
-    features: [
-      "All Pro features included",
-      "Unlimited contacts",
-      "Quotes, invoices & projects",
-      "Online payment collection",
-      "Team up to 3 members",
-      "Scheduling & booking links",
-    ],
-    cta: "Start Free Trial",
-    href: "/register",
-    highlight: false,
-    badge: "",
-  },
-  {
-    name: "Pro Monthly",
-    price: "$49",
-    period: "/ month",
-    desc: "Everything you need to run a professional remodeling business.",
-    features: [
-      "Unlimited contacts",
-      "Unlimited quotes & invoices",
-      "Unlimited projects",
-      "Online payment collection",
-      "Team up to 15 members",
-      "Scheduling & booking links",
-      "Priority support",
-    ],
-    cta: "Get Started",
-    href: "/register",
-    highlight: true,
-    badge: "Most Popular",
-  },
-  {
-    name: "Pro Yearly",
-    price: "$490",
-    period: "/ year",
-    desc: "Two months free when you commit annually. Best value.",
-    features: [
-      "Everything in Pro Monthly",
-      "Save $98 per year",
-      "~$40.83 per month",
-      "Unlimited contacts",
-      "Unlimited quotes & invoices",
-      "Priority support",
-    ],
-    cta: "Get Started Yearly",
-    href: "/register",
-    highlight: false,
-    badge: "Best Value",
-  },
-];
-
-const FAQS = [
-  { q: "Is there really a free trial with no credit card?", a: "Yes — 15 days of full access, nothing required upfront. We want you to see the value before you commit." },
-  { q: "What happens when my trial ends?", a: "Your account is paused. Your data is kept safe. Upgrade to Monthly ($49/mo) or Yearly ($490/yr) to continue. We'll remind you before it expires." },
-  { q: "How does online payment collection work?", a: "Each invoice gets a unique payment link. Clients pay by card via Stripe. Funds are transferred directly to your bank account, typically within 2 business days." },
-  { q: "Can I invite my team?", a: "Yes — invite team members with role-based access: Owner, Manager, Staff, or Crew. Each role has the right level of permissions for field vs. office work." },
-  { q: "Is it mobile-friendly?", a: "Yes — Clear Build works on any device browser. A native mobile app for iOS and Android is on the roadmap." },
-  { q: "Can I import my existing contacts and data?", a: "You can add contacts manually or use our import tool. CSV import is available for contacts. If you need help migrating from another tool, reach out and we'll assist." },
-];
-
-/* ─── Small mock UI components ────────────────────────────────────── */
-function LeadMock() {
+function Icon({ name, className, style }: { name: string; className?: string; style?: React.CSSProperties }) {
+  const d = ICONS[name] ?? ICONS.check;
   return (
-    <div className="bg-white rounded-xl border border-[#e5e7eb] shadow-lg overflow-hidden w-full max-w-[340px]">
-      <div className="bg-[#f9fafb] border-b border-[#e5e7eb] px-4 py-2.5 flex items-center justify-between">
-        <span className="text-[11px] font-semibold text-[#374151]">Contacts</span>
-        <span className="text-[10px] text-[#3FA66B] font-medium bg-[#F0FBF4] px-2 py-0.5 rounded-full">+ Add Lead</span>
-      </div>
-      <div className="divide-y divide-[#f3f4f6]">
-        {[
-          { name: "Marcus Webb", status: "Quoted", color: "#3FA66B" },
-          { name: "Diane Torres", status: "In Conversation", color: "#f59e0b" },
-          { name: "Ray Foster", status: "New Lead", color: "#6b7280" },
-        ].map(c => (
-          <div key={c.name} className="flex items-center justify-between px-4 py-2.5">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-[#EEF2FF] flex items-center justify-center text-[10px] font-bold text-[#1B2D5E]">{c.name[0]}</div>
-              <span className="text-[12px] font-medium text-[#1f2937]">{c.name}</span>
-            </div>
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ color: c.color, background: c.color + "18" }}>{c.status}</span>
-          </div>
-        ))}
-      </div>
-    </div>
+    <svg viewBox="0 0 24 24" fill="none" className={className} style={style}
+      stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"
+      width="1em" height="1em" aria-hidden="true">
+      {d.split("M").filter(Boolean).map((seg, i) => <path key={i} d={"M" + seg} />)}
+    </svg>
   );
 }
 
-function QuoteMock({ large }: { large?: boolean }) {
-  return (
-    <div className={`bg-white rounded-xl border border-[#e5e7eb] shadow-lg overflow-hidden ${large ? "w-full max-w-[400px]" : "w-full max-w-[340px]"}`}>
-      <div className="bg-[#1B2D5E] px-4 py-3">
-        <div className="flex items-center justify-between">
-          <span className="text-white font-bold text-[13px]">Quote #Q-0024</span>
-          <span className="text-[10px] bg-[#3FA66B] text-white px-2 py-0.5 rounded-full font-medium">Approved ✓</span>
-        </div>
-        <span className="text-[#90b4d8] text-[11px]">Marcus Webb · Kitchen Remodel</span>
-      </div>
-      <div className="p-4 space-y-2">
-        {[
-          { item: "Demo & Prep",     price: "$1,200" },
-          { item: "Cabinetry",       price: "$8,400" },
-          { item: "Countertops",     price: "$3,200" },
-          { item: "Labour (48 hrs)", price: "$5,760" },
-        ].map(r => (
-          <div key={r.item} className="flex justify-between text-[11px]">
-            <span className="text-[#6b7280]">{r.item}</span>
-            <span className="font-medium text-[#1f2937]">{r.price}</span>
-          </div>
-        ))}
-        <div className="border-t border-[#e5e7eb] pt-2 mt-2 flex justify-between">
-          <span className="text-[12px] font-bold text-[#1f2937]">Total</span>
-          <span className="text-[12px] font-bold text-[#3FA66B]">$18,560</span>
-        </div>
-      </div>
-    </div>
-  );
+function Pill({ kind, children }: { kind: string; children: React.ReactNode }) {
+  return <span className={`s-pill s-${kind}`}><span className="d" />{children}</span>;
 }
 
-function InvoiceMock({ large }: { large?: boolean }) {
+function Logo({ variant = "color", height = 32 }: { variant?: "color" | "white"; height?: number }) {
+  const src = variant === "white" ? "/logo-white.png" : "/logo-transparent.png";
+  return <img src={src} alt="Clear Build USA" style={{ height: height + "px", width: "auto", display: "block" }} />;
+}
+
+function Btn({ href, variant = "primary", size, className = "", onClick, children }: {
+  href?: string; variant?: string; size?: string; className?: string;
+  onClick?: () => void; children: React.ReactNode;
+}) {
+  const cls = `btn btn-${variant}${size ? ` btn-${size}` : ""}${className ? ` ${className}` : ""}`.trim();
+  if (href?.startsWith("/")) return <Link href={href} className={cls}>{children}</Link>;
+  if (href) return <a href={href} className={cls}>{children}</a>;
+  return <button type="button" className={cls} onClick={onClick}>{children}</button>;
+}
+
+/* ── Reveal hook ────────────────────────────────────────────────────── */
+function useReveal() {
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll(".lp .reveal"));
+    if (!("IntersectionObserver" in window)) { els.forEach(e => e.classList.add("in")); return; }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } });
+    }, { threshold: 0.14, rootMargin: "0px 0px -8% 0px" });
+    els.forEach(e => io.observe(e));
+    return () => io.disconnect();
+  });
+}
+
+/* ── Nav ────────────────────────────────────────────────────────────── */
+function Nav() {
+  const [solid, setSolid] = useState(false);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const fn = () => setSolid(window.scrollY > 24);
+    window.addEventListener("scroll", fn, { passive: true });
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
+  const links: [string, string][] = [["Features", "#features"], ["How it works", "#how"], ["Pricing", "#pricing"], ["FAQ", "#faq"]];
   return (
-    <div className={`bg-white rounded-xl border border-[#e5e7eb] shadow-lg overflow-hidden ${large ? "w-full max-w-[400px]" : "w-full max-w-[340px]"}`}>
-      <div className="px-4 py-3 border-b border-[#e5e7eb] flex items-center justify-between">
-        <div>
-          <p className="text-[12px] font-bold text-[#1f2937]">Invoice #INV-0031</p>
-          <p className="text-[10px] text-[#9ca3af]">Due May 30, 2026</p>
+    <header className={`nav${solid ? " nav--solid" : ""}`}>
+      <div className="wrap nav-inner">
+        <a href="#top" className="nav-brand"><Logo height={34} /></a>
+        <nav className="nav-links">
+          {links.map(([t, h]) => <a key={t} href={h}>{t}</a>)}
+        </nav>
+        <div className="nav-cta">
+          <Link href="/login" className="nav-signin">Sign In</Link>
+          <Link href="/login" className="btn btn-soft btn-sm">Book Demo</Link>
+          <Link href="/register" className="btn btn-primary btn-sm">Start Free Trial</Link>
         </div>
-        <span className="text-[10px] bg-[#fef3c7] text-[#d97706] px-2 py-0.5 rounded-full font-semibold">Due</span>
-      </div>
-      <div className="p-4">
-        <div className="space-y-1.5 mb-3">
-          {[
-            { label: "Invoice total", val: "$18,560" },
-            { label: "Paid (deposit)", val: "$5,000" },
-            { label: "Balance due",   val: "$13,560", bold: true },
-          ].map(r => (
-            <div key={r.label} className="flex justify-between text-[11px]">
-              <span className="text-[#6b7280]">{r.label}</span>
-              <span className={r.bold ? "font-bold text-[#1B2D5E]" : "text-[#1f2937]"}>{r.val}</span>
-            </div>
-          ))}
-        </div>
-        <button className="w-full py-2 rounded-lg text-[11px] font-semibold text-white" style={{ background: GREEN }}>
-          Pay $13,560 Online →
+        <button type="button" className="nav-burger" onClick={() => setOpen(o => !o)} aria-label="Menu">
+          <Icon name={open ? "close" : "menu"} />
         </button>
       </div>
+      {open && (
+        <div className="nav-mobile">
+          {links.map(([t, h]) => <a key={t} href={h} onClick={() => setOpen(false)}>{t}</a>)}
+          <Link href="/login" onClick={() => setOpen(false)}>Sign In</Link>
+          <Link href="/login" onClick={() => setOpen(false)} className="btn btn-soft">Book Demo</Link>
+          <Link href="/register" onClick={() => setOpen(false)} className="btn btn-primary">Start Free Trial</Link>
+        </div>
+      )}
+    </header>
+  );
+}
+
+/* ── Hero ───────────────────────────────────────────────────────────── */
+function HeroChain() {
+  const steps = [
+    { n: "Q", color: "var(--blue)",  name: "Quote #1042",          meta: "Kitchen remodel · Maple St.",    pill: ["sent",     "Sent"]     as [string,string] | null, amt: null },
+    { n: "✓", color: "var(--green)", name: "Approval captured",    meta: "Signed by client · Mar 14",      pill: ["approved", "Approved"] as [string,string] | null, amt: null },
+    { n: "+", color: "var(--navy)",  name: "Change order #2",      meta: "Tile upgrade · +$2,400",          pill: ["approved", "Approved"] as [string,string] | null, amt: null },
+    { n: "$", color: "var(--blue)",  name: "Invoice #1042",        meta: "From approved work",             pill: null, amt: "$18,400" },
+    { n: "✓", color: "var(--green)", name: "Payment received",     meta: "Card · linked to job",           pill: ["paid",     "Paid"]     as [string,string] | null, amt: null },
+  ];
+  return (
+    <div className="chain">
+      <div className="chain-head">
+        <span className="chain-head-title"><span className="d" />One job, one connected record</span>
+        <span className="chain-head-id mono">JOB&nbsp;#1042</span>
+      </div>
+      <div className="chain-rail" />
+      {steps.map((s, i) => (
+        <div className="chain-step" key={i} style={{ animationDelay: (0.5 + i * 0.14) + "s" }}>
+          <div className="chain-node" style={{ background: s.color }}>{s.n}</div>
+          <div className="chain-card">
+            <div className="chain-card-top">
+              <span className="chain-name">{s.name}</span>
+              {s.pill ? <Pill kind={s.pill[0]}>{s.pill[1]}</Pill> : <span className="chain-amt archivo">{s.amt}</span>}
+            </div>
+            <div className="chain-meta">{s.meta}</div>
+          </div>
+        </div>
+      ))}
+      <div className="chain-badge"><Icon name="link" /> Everything linked</div>
     </div>
   );
 }
 
-function ProjectMock() {
+function Hero() {
   return (
-    <div className="bg-white rounded-xl border border-[#e5e7eb] shadow-lg overflow-hidden w-full max-w-[380px]">
-      <div className="px-4 py-3 border-b border-[#e5e7eb] flex items-center justify-between">
-        <div>
-          <p className="text-[12px] font-bold text-[#1f2937]">PRJ-0018 · Kitchen Remodel</p>
-          <p className="text-[10px] text-[#9ca3af]">Marcus Webb · Started May 3</p>
+    <section className="hero" id="top">
+      <div className="hero-glow" />
+      <div className="wrap hero-inner">
+        <div className="hero-copy">
+          <span className="eyebrow hero-eyebrow reveal">FIELD SERVICE &amp; COMMERCIAL CONTROL</span>
+          <h1 className="display hero-h1 reveal" data-d="1">
+            Keep approved work, billing &amp; payment <span className="hl">in&nbsp;sync.</span>
+          </h1>
+          <p className="hero-sub reveal" data-d="2">
+            Clear Build connects quotes, approvals, change orders, invoices, and payments to every job — so owner-led remodelers stop losing money between approved work and collected payment.
+          </p>
+          <div className="hero-cta reveal" data-d="3">
+            <Btn href="/register" variant="primary" size="lg">Start Free Trial <Icon name="arrow" /></Btn>
+            <Btn href="/login" variant="soft" size="lg">Book a Demo</Btn>
+          </div>
+          <div className="hero-trust reveal" data-d="4">
+            {["No credit card required", "Set up fast", "No per-user pricing"].map(t => (
+              <span key={t} className="hero-trust-item">
+                <span className="tick"><Icon name="check" /></span>{t}
+              </span>
+            ))}
+          </div>
         </div>
-        <span className="text-[10px] bg-[#dcfce7] text-[#16a34a] px-2 py-0.5 rounded-full font-semibold">Active</span>
+        <div className="hero-visual reveal" data-d="2">
+          <HeroChain />
+        </div>
       </div>
-      <div className="p-4 space-y-3">
-        <div>
-          <div className="flex justify-between text-[11px] mb-1">
-            <span className="text-[#6b7280]">Budget progress</span>
-            <span className="font-medium text-[#1B2D5E]">$13,200 / $18,560</span>
-          </div>
-          <div className="h-2 bg-[#f3f4f6] rounded-full overflow-hidden">
-            <div className="h-full rounded-full" style={{ width: "71%", background: GREEN }} />
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { label: "Quotes",   val: "1 approved" },
-            { label: "Invoices", val: "2 sent" },
-            { label: "Payments", val: "$5,000" },
-          ].map(s => (
-            <div key={s.label} className="bg-[#f9fafb] rounded-lg p-2 text-center border border-[#f3f4f6]">
-              <p className="text-[9px] text-[#9ca3af]">{s.label}</p>
-              <p className="text-[10px] font-semibold text-[#1f2937] mt-0.5">{s.val}</p>
-            </div>
+    </section>
+  );
+}
+
+/* ── Pipeline Strip ─────────────────────────────────────────────────── */
+function PipelineStrip() {
+  const steps = ["Lead", "Quote", "Approval", "Change order", "Invoice", "Payment"];
+  return (
+    <div className="pipestrip">
+      <div className="wrap pipestrip-inner">
+        <span className="pipestrip-label mono">THE CONNECTED CHAIN</span>
+        <div className="pipestrip-flow">
+          {steps.map((s, i) => (
+            <span key={s}>
+              <span className="pipestrip-node">{s}</span>
+              {i < steps.length - 1 && <Icon name="arrow" className="pipestrip-arrow" />}
+            </span>
           ))}
         </div>
       </div>
@@ -293,478 +201,693 @@ function ProjectMock() {
   );
 }
 
-function DashboardMock() {
+/* ── Features ───────────────────────────────────────────────────────── */
+function Features() {
+  const primary = [
+    { ic: "quote",  col: "blue",  t: "Quotes & Change Orders",          d: "Create professional quotes, capture approval, and keep change orders formally linked to the original job." },
+    { ic: "card",   col: "green", t: "Invoices & Online Payments",       d: "Send invoices, collect payments online, and track paid, due, and overdue amounts clearly." },
+    { ic: "link",   col: "navy",  t: "Project-Linked Financial Control", d: "Keep quotes, invoices, payments, and updates tied to the same job so nothing gets lost." },
+    { ic: "shield", col: "blue",  t: "Approval Proof",                   d: "Capture quote and change-order approvals digitally so billing disputes are easier to prevent." },
+  ];
+  const secondary = [
+    { ic: "pipeline", t: "Leads & Client Pipeline",      d: "Track prospects and customers from first contact through signed work without spreadsheet chaos." },
+    { ic: "calendar", t: "Scheduling & Team Coordination", d: "Assign work, track upcoming jobs, and keep the team aligned without bloated dispatch software." },
+  ];
   return (
-    <div className="relative w-full max-w-[600px] mx-auto lg:mx-0">
-      <div className="absolute -inset-4 rounded-3xl opacity-20 blur-3xl -z-10" style={{ background: `radial-gradient(circle, ${GREEN}, ${N700})` }} />
-      <div className="bg-white rounded-2xl shadow-2xl border border-[#e5e7eb] overflow-hidden">
-        {/* Browser bar */}
-        <div className="bg-[#f9fafb] border-b border-[#e5e7eb] px-4 py-2 flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#fca5a5]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[#fde68a]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[#6ee7b7]" />
-          <div className="ml-3 flex-1 bg-white border border-[#e5e7eb] rounded-md px-3 py-0.5">
-            <span className="text-[10px] text-[#9ca3af]">clearbuildusa.com/dashboard</span>
-          </div>
+    <section className="section" id="features">
+      <div className="wrap">
+        <div className="section-head center reveal">
+          <span className="kicker eyebrow"><span className="dot" />FEATURES</span>
+          <h2 className="section-title">Everything you need to keep approved work,<br />billing &amp; payment in sync</h2>
+          <p className="section-sub">The first four are the wedge — formal commercial control most contractor tools blur over. The rest keep the day-to-day moving.</p>
         </div>
-        <div className="flex" style={{ height: 360 }}>
-          {/* Sidebar */}
-          <div className="w-[130px] flex-shrink-0 flex flex-col p-3 gap-0.5" style={{ background: N900 }}>
-            <div className="flex items-center gap-1.5 px-2 py-2 mb-2">
-              <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0" style={{ background: GREEN }}>
-                <span className="text-white text-[8px] font-black">CB</span>
-              </div>
-              <span className="text-white text-[10px] font-bold">Clear Build</span>
-            </div>
-            {[
-              { label: "Dashboard", active: true },
-              { label: "Contacts", active: false },
-              { label: "Quotes", active: false },
-              { label: "Invoices", active: false },
-              { label: "Projects", active: false },
-              { label: "Payments", active: false },
-            ].map(({ label, active }) => (
-              <div key={label} className={`px-2 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${active ? "text-white" : "text-[#7a95b8]"}`}
-                style={active ? { background: "rgba(255,255,255,0.12)" } : {}}>
-                {label}
-              </div>
+        <div className="feat-primary">
+          {primary.map((f, i) => (
+            <article className="feat-card reveal" data-d={String(i + 1)} key={f.t}>
+              <div className={`ico ico-${f.col} feat-ico`}><Icon name={f.ic} /></div>
+              <h3 className="feat-title">{f.t}</h3>
+              <p className="feat-desc">{f.d}</p>
+              <span className="feat-rank mono">0{i + 1}</span>
+            </article>
+          ))}
+        </div>
+        <div className="feat-secondary reveal">
+          <span className="feat-also mono">ALSO INCLUDED</span>
+          <div className="feat-secondary-grid">
+            {secondary.map(f => (
+              <article className="feat-card-2" key={f.t}>
+                <div className="ico ico-navy feat-ico-2"><Icon name={f.ic} /></div>
+                <div>
+                  <h3 className="feat-title-2">{f.t}</h3>
+                  <p className="feat-desc-2">{f.d}</p>
+                </div>
+              </article>
             ))}
           </div>
-          {/* Content */}
-          <div className="flex-1 p-4 overflow-hidden" style={{ background: "#F8F9FC" }}>
-            <p className="text-[11px] font-bold text-[#374151] mb-3">Dashboard Overview</p>
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              {[
-                { label: "Total Revenue",  val: "$48,200", color: GREEN,    bg: GBG },
-                { label: "Active Projects",val: "8",       color: N700,    bg: "#EEF2FF" },
-                { label: "Pending Quotes", val: "12",      color: "#d97706", bg: "#fef3c7" },
-                { label: "Amount Due",     val: "$9,400",  color: "#dc2626", bg: "#fef2f2" },
-              ].map(s => (
-                <div key={s.label} className="bg-white rounded-xl p-2.5 border border-[#e5e7eb]">
-                  <p className="text-[9px] text-[#9ca3af] mb-0.5">{s.label}</p>
-                  <p className="text-[13px] font-bold" style={{ color: s.color }}>{s.val}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── How It Works ───────────────────────────────────────────────────── */
+function HowItWorks() {
+  const steps = [
+    { ic: "pipeline", t: "Add leads and client details",             d: "Capture leads manually or import them, and keep every opportunity in one place." },
+    { ic: "quote",    t: "Create and send professional quotes",       d: "Build itemized quotes quickly and send them for digital approval." },
+    { ic: "shield",   t: "Capture approval and manage change orders", d: "Keep proof of what was approved and handle changes formally before they affect billing." },
+    { ic: "invoice",  t: "Turn approved work into invoices",          d: "Create invoices from approved work so commercial details stay connected." },
+    { ic: "chart",    t: "Track projects, payments & next actions",   d: "See what's active, what's paid, and what still needs attention across every job." },
+  ];
+  const [active, setActive] = useState(0);
+  return (
+    <section className="section bg-cool" id="how">
+      <div className="wrap">
+        <div className="section-head center reveal">
+          <span className="kicker eyebrow"><span className="dot" />HOW IT WORKS</span>
+          <h2 className="section-title">Built for how remodelers actually work</h2>
+          <p className="section-sub">Five connected steps — the approval and change-order bridge most tools skip is right in the middle.</p>
+        </div>
+        <div className="how-grid reveal">
+          <ol className="how-steps">
+            {steps.map((s, i) => (
+              <li key={i} className={`how-step${i === active ? " is-active" : ""}`}
+                onMouseEnter={() => setActive(i)} onClick={() => setActive(i)}>
+                <span className="how-num archivo">{i + 1}</span>
+                <div className="how-step-body">
+                  <h3 className="how-step-title">{s.t}</h3>
+                  <p className="how-step-desc">{s.d}</p>
                 </div>
-              ))}
-            </div>
-            {/* Bar chart */}
-            <div className="bg-white rounded-xl p-3 border border-[#e5e7eb]">
-              <p className="text-[9px] text-[#9ca3af] mb-2">Monthly Revenue</p>
-              <div className="flex items-end gap-1" style={{ height: 72 }}>
-                {[28, 45, 38, 62, 55, 72, 66, 80, 70, 85, 78, 95].map((h, i) => (
-                  <div key={i} className="flex-1 rounded-t-sm"
-                    style={{ height: `${h}%`, background: i === 11 ? GREEN : N700, opacity: i === 11 ? 1 : 0.12 + i * 0.06 }} />
-                ))}
+                <span className="how-line" aria-hidden="true" />
+              </li>
+            ))}
+          </ol>
+          <div className="how-visual">
+            <div className="how-visual-card" key={active}>
+              <div className="how-visual-ico ico ico-blue"><Icon name={steps[active].ic} /></div>
+              <span className="how-visual-step mono">STEP {active + 1} / 5</span>
+              <h3 className="how-visual-title">{steps[active].t}</h3>
+              <p className="how-visual-desc">{steps[active].d}</p>
+              <div className="how-visual-chain">
+                {steps.map((_, i) => <span key={i} className={`hv-dot${i <= active ? " on" : ""}`} />)}
               </div>
-              <div className="flex justify-between mt-1">
-                {["J","F","M","A","M","J","J","A","S","O","N","D"].map(m => (
-                  <span key={m} className="flex-1 text-center text-[8px] text-[#d1d5db]">{m}</span>
-                ))}
-              </div>
+              <div className="how-visual-tag"><Icon name="link" /> Stays linked to the same job</div>
             </div>
           </div>
         </div>
       </div>
+    </section>
+  );
+}
+
+/* ── Product Demo ───────────────────────────────────────────────────── */
+function AppShell({ active, children }: { active: string; children: React.ReactNode }) {
+  const nav: [string, string][] = [["Dashboard", "chart"], ["Leads", "pipeline"], ["Quotes", "quote"], ["Projects", "layers"], ["Invoices", "card"], ["Schedule", "calendar"]];
+  return (
+    <div className="appshell">
+      <aside className="app-side">
+        <div className="app-side-brand"><img src="/logo-white.png" alt="" style={{ height: "26px" }} /></div>
+        {nav.map(([t, ic]) => (
+          <div key={t} className={`app-nav-item${t === active ? " on" : ""}`}><Icon name={ic} /> <span>{t}</span></div>
+        ))}
+        <div className="app-side-foot">
+          <span className="app-avatar">JR</span>
+          <div><div className="app-u">Jordan Reyes</div><div className="app-r">Owner</div></div>
+        </div>
+      </aside>
+      <div className="app-main">{children}</div>
     </div>
   );
 }
 
-/* ─── Small helpers ───────────────────────────────────────────────── */
-function ChipVal({ val }: { val: boolean | string }) {
-  if (val === true)  return <div className="w-6 h-6 rounded-full flex items-center justify-center mx-auto" style={{ background: GBG }}><Check size={13} color={GREEN} strokeWidth={2.5} /></div>;
-  if (val === false) return <span className="block text-center text-[#d1d5db] text-lg">—</span>;
-  return <span className="block text-center text-[11px] text-[#6b7280] font-medium">{val}</span>;
-}
-
-function FaqItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
+function ScreenQuote() {
+  const items = [
+    ["Demolition & site protection", "1",    "$2,400", "$2,400"],
+    ["Cabinetry — shaker, painted",  "1",    "$8,600", "$8,600"],
+    ["Quartz countertop & install",  "42 sf","$78",    "$3,276"],
+    ["Tile backsplash",              "1",    "$1,520", "$1,520"],
+  ];
   return (
-    <div className="border-b border-[#e5e7eb] last:border-0">
-      <button onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between gap-4 py-5 text-left">
-        <span className="text-[15px] font-semibold text-[#1f2937]">{q}</span>
-        <ChevronDown size={18} className="flex-shrink-0 text-[#6b7280] transition-transform" style={{ transform: open ? "rotate(180deg)" : "" }} />
-      </button>
-      {open && <p className="pb-5 text-[14px] text-[#6b7280] leading-relaxed -mt-1">{a}</p>}
-    </div>
-  );
-}
-
-/* ─── Main page ───────────────────────────────────────────────────── */
-export default function LandingPage() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  return (
-    <div className="min-h-screen bg-white text-[#111827]" style={{ fontFamily: "var(--font-geist-sans, 'Inter', ui-sans-serif, system-ui, sans-serif)" }}>
-
-      {/* ── Navbar ─────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-[#e5e7eb]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: N700 }}>
-              <span className="text-white text-[11px] font-black">CB</span>
-            </div>
-            <span className="font-bold text-[16px]" style={{ color: N700 }}>Clear Build <span style={{ color: GREEN }}>USA</span></span>
+    <AppShell active="Quotes">
+      <div className="scr-head">
+        <div>
+          <span className="scr-eyebrow mono">QUOTE #1042 · DRAFT</span>
+          <h3 className="scr-title">Maple St. Kitchen Remodel</h3>
+          <p className="scr-meta">Client: Dana &amp; Marc Whitfield · 128 Maple St.</p>
+        </div>
+        <div className="scr-actions">
+          <button type="button" className="scr-btn ghost">Save draft</button>
+          <button type="button" className="scr-btn primary"><Icon name="arrow" /> Send for approval</button>
+        </div>
+      </div>
+      <div className="qtable">
+        <div className="qrow qhead"><span>Line item</span><span>Qty</span><span>Rate</span><span className="r">Amount</span></div>
+        {items.map((it, i) => (
+          <div className="qrow" key={i}>
+            <span className="qname">{it[0]}</span><span>{it[1]}</span><span>{it[2]}</span><span className="r archivo">{it[3]}</span>
           </div>
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-6">
-            {["Features", "How it works", "Pricing", "FAQ"].map(l => (
-              <a key={l} href={`#${l.toLowerCase().replace(/ /g, "-")}`}
-                className="text-[14px] text-[#4b5563] hover:text-[#111827] font-medium transition-colors">{l}</a>
+        ))}
+        <div className="qrow qadd"><Icon name="plus" /> Add line item</div>
+      </div>
+      <div className="qtotals">
+        <div className="qtot-row"><span>Subtotal</span><span className="archivo">$15,796</span></div>
+        <div className="qtot-row"><span>Tax (estimated)</span><span className="archivo">$1,204</span></div>
+        <div className="qtot-row qtot-grand"><span>Total</span><span className="archivo">$16,000</span></div>
+      </div>
+    </AppShell>
+  );
+}
+
+function ScreenApprove() {
+  return (
+    <AppShell active="Quotes">
+      <div className="approve-wrap">
+        <div className="approve-doc">
+          <div className="approve-doc-top">
+            <img src="/logo-transparent.png" alt="" style={{ height: "24px" }} />
+            <span className="mono" style={{ fontSize: "11px", color: "var(--muted-2)" }}>QUOTE #1042</span>
+          </div>
+          <h3 className="approve-h">Kitchen Remodel — $16,000</h3>
+          <p className="approve-sub">Sent by Clear Build Co. · Valid 30 days</p>
+          <div className="approve-lines">
+            {[["Cabinetry & install", "$8,600"], ["Countertop & backsplash", "$4,796"], ["Demolition & prep", "$2,400"]].map((l, i) => (
+              <div className="approve-line" key={i}><span>{l[0]}</span><span className="archivo">{l[1]}</span></div>
             ))}
-          </nav>
-          <div className="hidden md:flex items-center gap-3">
-            <Link href="/login" className="text-[14px] font-semibold px-4 py-2 rounded-lg border border-[#e5e7eb] hover:bg-[#f9fafb] transition-colors" style={{ color: N700 }}>Sign In</Link>
-            <Link href="/register" className="text-[14px] font-semibold px-4 py-2 rounded-lg text-white transition-colors hover:opacity-90" style={{ background: GREEN }}>Start Free Trial</Link>
           </div>
-          {/* Mobile burger */}
-          <button className="md:hidden p-2 rounded-lg hover:bg-[#f3f4f6]" onClick={() => setMobileOpen(o => !o)}>
-            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+        </div>
+        <div className="approve-side">
+          <div className="approve-status">
+            <span className="approve-check"><Icon name="check" /></span>
+            <div>
+              <div className="approve-status-t">Approved by client</div>
+              <div className="approve-status-m">Dana Whitfield · Mar 14, 9:21 AM</div>
+            </div>
+          </div>
+          <div className="approve-proof">
+            <span className="mono approve-proof-l">APPROVAL PROOF ON FILE</span>
+            <div className="approve-proof-row"><Icon name="eye" /> Viewed Mar 14, 9:18 AM</div>
+            <div className="approve-proof-row"><Icon name="check" /> Approved Mar 14, 9:21 AM</div>
+            <div className="approve-proof-row"><Icon name="lock" /> IP &amp; timestamp recorded</div>
+          </div>
+          <div className="approve-note"><Icon name="shield" /> Disputes are easier to prevent when approval is captured digitally.</div>
+        </div>
+      </div>
+    </AppShell>
+  );
+}
+
+function ScreenInvoice() {
+  return (
+    <AppShell active="Invoices">
+      <div className="scr-head">
+        <div>
+          <span className="scr-eyebrow mono">INVOICE #1042</span>
+          <h3 className="scr-title">$18,400 <Pill kind="due">Partially paid</Pill></h3>
+          <p className="scr-meta">From approved work + change order #2 · Due Apr 2</p>
+        </div>
+      </div>
+      <div className="inv-grid">
+        <div className="inv-bars">
+          <div className="inv-bar-row"><span>Invoiced</span><span className="archivo">$18,400</span></div>
+          <div className="inv-track"><div className="inv-fill" style={{ width: "100%", background: "var(--blue)" }} /></div>
+          <div className="inv-bar-row"><span>Collected</span><span className="archivo">$10,000</span></div>
+          <div className="inv-track"><div className="inv-fill" style={{ width: "54%", background: "var(--green)" }} /></div>
+          <div className="inv-bar-row"><span>Outstanding</span><span className="archivo" style={{ color: "var(--amber)" }}>$8,400</span></div>
+          <div className="inv-track"><div className="inv-fill" style={{ width: "46%", background: "var(--amber)" }} /></div>
+        </div>
+        <div className="inv-pay">
+          <span className="mono" style={{ fontSize: "11px", color: "var(--muted-2)" }}>CLIENT PAYMENT</span>
+          <div className="inv-methods">
+            <div className="inv-method on"><Icon name="card" /> Card •••• 4242</div>
+            <div className="inv-method"><Icon name="invoice" /> Bank transfer</div>
+          </div>
+          <button type="button" className="scr-btn primary full"><Icon name="check" /> Record payment</button>
+          <div className="inv-reminders"><Icon name="bell" /> Overdue reminder scheduled for Apr 3</div>
+        </div>
+      </div>
+    </AppShell>
+  );
+}
+
+function ScreenProject() {
+  const kpis: [string, string, string][] = [["Budget", "$16,000", ""], ["Change orders", "+$2,400", "blue"], ["Invoiced", "$18,400", ""], ["Collected", "$10,000", "green"]];
+  const events: [string, string, string, string][] = [
+    ["quote",    "Quote approved",           "Mar 14", "approved"],
+    ["shield",   "Change order #2 approved", "Mar 22", "approved"],
+    ["card",     "Deposit collected",         "Mar 24", "paid"],
+    ["calendar", "Install scheduled",         "Apr 1",  "sent"],
+  ];
+  const stages = ["Demolition", "Rough-in", "Installation", "Finishing", "Final walk-through"];
+  return (
+    <AppShell active="Projects">
+      <div className="scr-head">
+        <div>
+          <span className="scr-eyebrow mono">PROJECT · ACTIVE</span>
+          <h3 className="scr-title">Maple St. Kitchen Remodel</h3>
+          <p className="scr-meta">Stage 3 of 5 · Installation</p>
+        </div>
+        <div className="scr-actions">
+          <button type="button" className="scr-btn ghost">Schedule</button>
+          <button type="button" className="scr-btn primary">Update stage</button>
+        </div>
+      </div>
+      <div className="proj-kpis">
+        {kpis.map((k, i) => (
+          <div className="proj-kpi" key={i}>
+            <span className="proj-kpi-l">{k[0]}</span>
+            <span className={`proj-kpi-v archivo${k[2] ? " " + k[2] : ""}`}>{k[1]}</span>
+          </div>
+        ))}
+      </div>
+      <div className="proj-cols">
+        <div className="proj-timeline">
+          <span className="mono proj-col-l">LINKED TIMELINE</span>
+          {events.map((e, i) => (
+            <div className="proj-event" key={i}>
+              <span className="proj-event-ic"><Icon name={e[0]} /></span>
+              <div className="proj-event-body"><div className="proj-event-t">{e[1]}</div><div className="proj-event-m">{e[2]}</div></div>
+              <Pill kind={e[3]}>{e[3] === "sent" ? "Scheduled" : e[3][0].toUpperCase() + e[3].slice(1)}</Pill>
+            </div>
+          ))}
+        </div>
+        <div className="proj-stages">
+          <span className="mono proj-col-l">STAGES</span>
+          {stages.map((s, i) => (
+            <div className={`proj-stage${i < 2 ? " done" : i === 2 ? " now" : ""}`} key={i}>
+              <span className="proj-stage-dot" />{s}
+            </div>
+          ))}
+        </div>
+      </div>
+    </AppShell>
+  );
+}
+
+function ProductDemo() {
+  const tabs: [string, string, string][] = [
+    ["quote",   "Quote builder",  "quote"],
+    ["approve", "Approval proof", "shield"],
+    ["invoice", "Invoice & pay",  "card"],
+    ["project", "Project view",   "layers"],
+  ];
+  const [tab, setTab] = useState("quote");
+  const url = tab === "approve" ? "app.clearbuildusa.com/q/1042/approve" : `app.clearbuildusa.com/${tab}`;
+  return (
+    <section className="section demo">
+      <div className="demo-glow" />
+      <div className="wrap">
+        <div className="section-head center reveal">
+          <span className="kicker eyebrow" style={{ color: "var(--green-bright)" }}><span className="dot" />SEE IT IN ACTION</span>
+          <h2 className="section-title" style={{ color: "#fff" }}>One connected workspace,<br />from quote to collected payment</h2>
+          <p className="section-sub" style={{ color: "#a7b4ce" }}>Click through the real screens owner-led teams use every day.</p>
+        </div>
+        <div className="demo-tabs reveal">
+          {tabs.map(([k, label, ic]) => (
+            <button type="button" key={k} className={`demo-tab${tab === k ? " is-active" : ""}`} onClick={() => setTab(k)}>
+              <Icon name={ic} /> {label}
+            </button>
+          ))}
+        </div>
+        <div className="browser reveal">
+          <div className="browser-bar">
+            <span className="bd bd-r" /><span className="bd bd-y" /><span className="bd bd-g" />
+            <span className="browser-url mono"><Icon name="lock" /> {url}</span>
+          </div>
+          <div className="browser-body" key={tab}>
+            {tab === "quote"   && <ScreenQuote />}
+            {tab === "approve" && <ScreenApprove />}
+            {tab === "invoice" && <ScreenInvoice />}
+            {tab === "project" && <ScreenProject />}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Invoice Section ────────────────────────────────────────────────── */
+function InvoiceCardMock() {
+  return (
+    <div className="invmock">
+      <div className="invmock-head">
+        <div><div className="invmock-id mono">INVOICE #1042</div><div className="invmock-amt archivo">$18,400</div></div>
+        <Pill kind="due">$8,400 due</Pill>
+      </div>
+      <div className="invmock-from"><Icon name="link" /> From approved quote + change order #2</div>
+      <div className="invmock-track"><div style={{ width: "54%" }} /></div>
+      <div className="invmock-track-l"><span>$10,000 collected</span><span>54%</span></div>
+      <button type="button" className="invmock-pay"><Icon name="card" /> Pay invoice</button>
+      <div className="invmock-methods"><span>Visa •••• 4242</span><span className="mono" style={{ color: "var(--green)", fontWeight: 600, letterSpacing: ".08em" }}>SECURE</span></div>
+    </div>
+  );
+}
+
+function InvoiceSection() {
+  const bullets = [
+    ["card",    "Create invoices directly from approved work", "No re-keying — billing inherits the approved scope and change orders."],
+    ["globe",   "Clients pay online by card",                  "A pay link on every invoice, so money moves faster."],
+    ["refresh", "Accept partial payments",                      "Take a deposit now, collect the balance on completion."],
+    ["bell",    "Automatic overdue reminders",                  "Stop chasing payments manually — Clear Build nudges for you."],
+  ];
+  return (
+    <section className="section" id="invoicing">
+      <div className="wrap split">
+        <div className="split-copy reveal">
+          <span className="kicker eyebrow"><span className="dot" />GET PAID FASTER</span>
+          <h2 className="section-title">Get paid faster without losing<br />track of approved work</h2>
+          <p className="section-sub">Payment speed tied to the actual wedge: every invoice traces back to what the client approved.</p>
+          <ul className="bullet-list">
+            {bullets.map((b, i) => (
+              <li className="bullet" key={i}>
+                <span className="bullet-ico ico ico-green"><Icon name={b[0]} /></span>
+                <div><span className="bullet-t">{b[1]}</span><span className="bullet-d">{b[2]}</span></div>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="split-visual reveal" data-d="1"><InvoiceCardMock /></div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Projects Section ───────────────────────────────────────────────── */
+function ProjectMiniMock() {
+  const bars: [string, string, number, string][] = [
+    ["Budget",    "$16,000", 100, "var(--navy)"],
+    ["Invoiced",  "$18,400", 100, "var(--blue)"],
+    ["Collected", "$10,000",  54, "var(--green)"],
+  ];
+  return (
+    <div className="pmini">
+      <div className="pmini-head"><span className="pmini-name">Maple St. Kitchen</span><Pill kind="approved">On track</Pill></div>
+      <div className="pmini-bars">
+        {bars.map((b, i) => (
+          <div key={i}>
+            <div className="pmini-bar-top"><span>{b[0]}</span><span className="archivo">{b[1]}</span></div>
+            <div className="pmini-track"><div style={{ width: b[2] + "%", background: b[3] }} /></div>
+          </div>
+        ))}
+      </div>
+      <div className="pmini-links mono">QUOTE · CHANGE ORDER · INVOICE · PAYMENT — all linked</div>
+    </div>
+  );
+}
+
+function ProjectsSection() {
+  const bullets = [
+    "Link quotes, change orders, invoices, and payments to one job",
+    "Track budget vs invoiced and collected amounts in real time",
+    "Keep team updates and project history in one timeline",
+    "Stop approved work from slipping through the cracks",
+  ];
+  return (
+    <section className="section bg-cool" id="projects">
+      <div className="wrap split reverse">
+        <div className="split-visual reveal"><ProjectMiniMock /></div>
+        <div className="split-copy reveal" data-d="1">
+          <span className="kicker eyebrow"><span className="dot" />PROJECTS</span>
+          <h2 className="section-title">Keep every job, invoice<br />&amp; payment connected</h2>
+          <p className="section-sub">Not generic "project organization." Every dollar and decision stays tied to the work it belongs to.</p>
+          <ul className="check-list">
+            {bullets.map((b, i) => <li key={i}><span className="cl-tick"><Icon name="check" /></span>{b}</li>)}
+          </ul>
+          <Btn href="/register" variant="dark" className="mt">Track your first job free <Icon name="arrow" /></Btn>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Comparison ─────────────────────────────────────────────────────── */
+function Comparison() {
+  const rows: [string, boolean | "part", boolean | "part", boolean | "part"][] = [
+    ["Professional quotes & e-signatures", false, true,   true],
+    ["Online payment collection",          false, true,   true],
+    ["Change order tracking",              false, true,   true],
+    ["Approval proof",                     false, "part", true],
+    ["Mobile-friendly UI",                 false, true,   true],
+    ["Set up in under 15 minutes",         "part",false,  true],
+    ["Built for remodelers specifically",  false, false,  true],
+    ["No per-user pricing",                true,  false,  true],
+  ];
+  function Cell({ v }: { v: boolean | "part" }) {
+    if (v === true)   return <span className="cmp-mark cmp-yes"><Icon name="check" /></span>;
+    if (v === "part") return <span className="cmp-mark cmp-part">~</span>;
+    return <span className="cmp-mark cmp-no"><Icon name="close" /></span>;
+  }
+  return (
+    <section className="section">
+      <div className="wrap">
+        <div className="section-head center reveal">
+          <span className="kicker eyebrow"><span className="dot" />WHY CLEAR BUILD</span>
+          <h2 className="section-title">Better than spreadsheets.<br />Simpler than bloated contractor software.</h2>
+        </div>
+        <div className="cmp reveal">
+          <div className="cmp-row cmp-headrow">
+            <span className="cmp-feat" />
+            <span className="cmp-col">Spreadsheets</span>
+            <span className="cmp-col">Bloated FSM software</span>
+            <span className="cmp-col cmp-col-us"><Logo height={22} /></span>
+          </div>
+          {rows.map((r, i) => (
+            <div className="cmp-row" key={i}>
+              <span className="cmp-feat">{r[0]}</span>
+              <span className="cmp-col"><Cell v={r[1]} /></span>
+              <span className="cmp-col"><Cell v={r[2]} /></span>
+              <span className="cmp-col cmp-col-us"><Cell v={r[3]} /></span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Best Fit ───────────────────────────────────────────────────────── */
+function BestFit() {
+  const bullets = [
+    "Owner-operators running $500K–$5M remodeling businesses",
+    "Remodelers tired of losing track of approved quotes, changes, and invoices",
+    "Contractors who want to look more professional to clients",
+    "Teams of 1–15 who don't need bloated enterprise software",
+    "Businesses moving off spreadsheets, email chains, and generic tools",
+  ];
+  const metrics: [string, string, string][] = [
+    ["bolt",  "Fast setup",              "Be quoting in an afternoon, not a quarter."],
+    ["lock",  "Private business workspace", "Your jobs, clients, and money — kept to your team."],
+    ["globe", "EN · ES · PT",            "Client-facing quotes, invoices & approvals."],
+    ["users", "No per-user pricing",     "Add the whole crew without the penalty."],
+  ];
+  return (
+    <section className="section bg-cool" id="bestfit">
+      <div className="wrap bestfit">
+        <div className="bestfit-copy reveal">
+          <span className="kicker eyebrow"><span className="dot" />BEST FIT</span>
+          <h2 className="section-title">Built for owner-led<br />remodeling businesses</h2>
+          <ul className="check-list lg">
+            {bullets.map((b, i) => <li key={i}><span className="cl-tick"><Icon name="check" /></span>{b}</li>)}
+          </ul>
+        </div>
+        <div className="bestfit-metrics reveal" data-d="1">
+          {metrics.map((m, i) => (
+            <div className="metric-card" key={i}>
+              <span className="metric-ico"><Icon name={m[0]} /></span>
+              <h3 className="metric-t">{m[1]}</h3>
+              <p className="metric-d">{m[2]}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Pricing ────────────────────────────────────────────────────────── */
+function Pricing() {
+  const [yearly, setYearly] = useState(true);
+  const plans = [
+    { name: "Solo", tag: "Owner-operators", m: 49, pop: false,
+      blurb: "Everything to quote, get approval, and get paid.",
+      feats: ["Digital quote approval", "Change orders", "Online payments", "Project-linked billing", "Up to 2 team members"] },
+    { name: "Crew", tag: "Growing teams", m: 99, pop: true,
+      blurb: "The full commercial-control chain for a working crew.",
+      feats: ["Everything in Solo", "Approval proof & history", "Scheduling & coordination", "Budget vs collected tracking", "Up to 8 team members", "Priority support"] },
+    { name: "Business", tag: "Established remodelers", m: 179, pop: false,
+      blurb: "Structure and visibility for a bigger book of work.",
+      feats: ["Everything in Crew", "Advanced project stages", "Multi-language client surfaces", "Custom templates", "Up to 15 team members"] },
+  ];
+  const price = (m: number) => yearly ? Math.round(m * 10 / 12 * 10) / 10 : m;
+  return (
+    <section className="section" id="pricing">
+      <div className="wrap">
+        <div className="section-head center reveal">
+          <span className="kicker eyebrow"><span className="dot" />PRICING</span>
+          <h2 className="section-title">Simple pricing. No surprises.</h2>
+          <p className="section-sub">No per-user pricing. Start free for 14 days — no credit card required.</p>
+        </div>
+        <div className="price-toggle reveal">
+          <button type="button" className={!yearly ? "on" : ""} onClick={() => setYearly(false)}>Monthly</button>
+          <button type="button" className={yearly ? "on" : ""} onClick={() => setYearly(true)}>
+            Yearly <span className="price-save">2 months free</span>
           </button>
         </div>
-        {/* Mobile menu */}
-        {mobileOpen && (
-          <div className="md:hidden border-t border-[#e5e7eb] bg-white px-4 py-4 space-y-1">
-            {["Features", "How it works", "Pricing", "FAQ"].map(l => (
-              <a key={l} href={`#${l.toLowerCase().replace(/ /g, "-")}`}
-                onClick={() => setMobileOpen(false)}
-                className="block py-2.5 px-3 rounded-lg text-[14px] font-medium text-[#4b5563] hover:bg-[#f9fafb]">{l}</a>
-            ))}
-            <div className="pt-3 flex flex-col gap-2">
-              <Link href="/login" onClick={() => setMobileOpen(false)}
-                className="block py-2.5 text-center rounded-lg border border-[#e5e7eb] text-[14px] font-semibold" style={{ color: N700 }}>Sign In</Link>
-              <Link href="/register" onClick={() => setMobileOpen(false)}
-                className="block py-2.5 text-center rounded-lg text-white text-[14px] font-semibold" style={{ background: GREEN }}>Start Free Trial</Link>
-            </div>
-          </div>
-        )}
-      </header>
-
-      {/* ── Hero ───────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-16 pb-20 lg:pt-24 lg:pb-28" style={{ background: `linear-gradient(160deg, #f8f9ff 0%, #ffffff 50%, #f0fbf4 100%)` }}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-          <div className="flex-1 text-center lg:text-left">
-            <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wider px-3 py-1.5 rounded-full mb-5" style={{ color: GREEN, background: GBG }}>
-              <Zap size={12} /> Construction Business Platform
-            </span>
-            <h1 className="text-[36px] sm:text-[44px] lg:text-[52px] font-extrabold leading-[1.1] tracking-tight mb-5" style={{ color: N900 }}>
-              Keep every quote,<br className="hidden sm:block" /> change order, invoice,<br className="hidden sm:block" /> and payment{" "}
-              <span style={{ color: GREEN }}>in sync.</span>
-            </h1>
-            <p className="text-[17px] text-[#4b5563] leading-relaxed mb-8 max-w-[480px] mx-auto lg:mx-0">
-              One connected platform built for remodeling contractors. From first contact to final payment — no more juggling spreadsheets, texts, and PDFs.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-              <Link href="/register"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-white font-bold text-[15px] shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl"
-                style={{ background: GREEN }}>
-                Start Free Trial <ArrowRight size={16} />
-              </Link>
-              <Link href="/login"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-[15px] border-2 border-[#e5e7eb] hover:border-[#d1d5db] hover:bg-[#f9fafb] transition-all"
-                style={{ color: N700 }}>
-                Sign In
-              </Link>
-            </div>
-            <p className="text-[13px] text-[#9ca3af] mt-4">15 days free · No credit card required · Cancel any time</p>
-          </div>
-          <div className="flex-1 w-full lg:max-w-[580px]">
-            <DashboardMock />
-          </div>
-        </div>
-      </section>
-
-      {/* ── Pain point band ────────────────────────────────────── */}
-      <section className="py-14" style={{ background: N900 }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
-          <p className="text-[22px] sm:text-[28px] font-bold text-white leading-snug max-w-2xl mx-auto mb-10">
-            Remodelers don't lose money because they forgot to work.<br />
-            <span style={{ color: GREEN }}>They lose it because nothing is connected.</span>
-          </p>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { icon: FileText,  label: "Quotes sent,",       sub: "never followed up" },
-              { icon: Receipt,   label: "Invoices unpaid",    sub: "no reminder sent" },
-              { icon: Briefcase, label: "Change orders",      sub: "lost in text threads" },
-              { icon: CreditCard,label: "Payments delayed",   sub: "no online option" },
-            ].map(({ icon: Icon, label, sub }) => (
-              <div key={label} className="rounded-xl p-4 border border-white/10 text-center" style={{ background: "rgba(255,255,255,0.05)" }}>
-                <Icon size={22} color={GREEN} className="mx-auto mb-2" />
-                <p className="text-white font-semibold text-[13px]">{label}</p>
-                <p className="text-[#7a95b8] text-[12px]">{sub}</p>
+        <div className="price-grid reveal">
+          {plans.map((p, i) => (
+            <div className={`price-card${p.pop ? " pop" : ""}`} key={i}>
+              {p.pop && <span className="price-badge mono">MOST POPULAR</span>}
+              <span className="price-name archivo">{p.name}</span>
+              <span className="price-tag">{p.tag}</span>
+              <div className="price-amt">
+                <span className="price-cur">$</span>
+                <span className="price-num archivo">{price(p.m)}</span>
+                <span className="price-per">/mo</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Value prop band ────────────────────────────────────── */}
-      <section className="py-14 border-b border-[#e5e7eb]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
-          <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: GREEN }}>One control layer</span>
-          <h2 className="text-[28px] sm:text-[36px] font-extrabold mt-2 mb-4 tracking-tight" style={{ color: N900 }}>
-            From approved work to collected payment
-          </h2>
-          <p className="text-[16px] text-[#6b7280] max-w-xl mx-auto mb-10">
-            Clear Build connects your contacts, quotes, projects, invoices, and payments into one workflow — so nothing falls through the cracks.
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {[
-              { icon: Users,      label: "Contacts" },
-              { icon: FileText,   label: "Quotes" },
-              { icon: Briefcase,  label: "Projects" },
-              { icon: Receipt,    label: "Invoices" },
-              { icon: CreditCard, label: "Payments" },
-              { icon: BarChart3,  label: "Reports" },
-            ].map(({ icon: Icon, label }, i) => (
-              <div key={label} className="flex flex-col items-center gap-2 p-4 rounded-xl border border-[#e5e7eb] bg-white hover:border-[#c7d2fe] transition-colors">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: i % 2 === 0 ? "#EEF2FF" : GBG }}>
-                  <Icon size={18} color={i % 2 === 0 ? N700 : GREEN} />
-                </div>
-                <span className="text-[12px] font-semibold text-[#374151]">{label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Features grid ──────────────────────────────────────── */}
-      <section id="features" className="py-20" style={{ background: "#F8F9FC" }}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: GREEN }}>Features</span>
-            <h2 className="text-[28px] sm:text-[36px] font-extrabold mt-2 tracking-tight" style={{ color: N900 }}>
-              Everything you need to protect margin<br className="hidden sm:block" /> and keep jobs organized
-            </h2>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FEATURES.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="bg-white rounded-2xl p-6 border border-[#e5e7eb] hover:shadow-md hover:border-[#c7d2fe] transition-all">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: "#EEF2FF" }}>
-                  <Icon size={20} color={N700} />
-                </div>
-                <h3 className="font-bold text-[15px] mb-2" style={{ color: N900 }}>{title}</h3>
-                <p className="text-[13px] text-[#6b7280] leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── How it works ───────────────────────────────────────── */}
-      <section id="how-it-works" className="py-20 border-t border-[#e5e7eb]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: GREEN }}>How it works</span>
-            <h2 className="text-[28px] sm:text-[36px] font-extrabold mt-2 tracking-tight" style={{ color: N900 }}>
-              Built for how remodelers actually work
-            </h2>
-          </div>
-          <div className="space-y-20">
-            {STEPS.map(({ step, title, desc, mock }, i) => (
-              <div key={step} className={`flex flex-col ${i % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"} items-center gap-10 lg:gap-16`}>
-                <div className="flex-1 text-center lg:text-left">
-                  <span className="text-[48px] font-black leading-none" style={{ color: N700, opacity: 0.12 }}>{step}</span>
-                  <h3 className="text-[22px] sm:text-[26px] font-extrabold mt-1 mb-3 tracking-tight" style={{ color: N900 }}>{title}</h3>
-                  <p className="text-[15px] text-[#6b7280] leading-relaxed max-w-md mx-auto lg:mx-0">{desc}</p>
-                </div>
-                <div className="flex-1 flex justify-center">
-                  {mock}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Feature callouts ───────────────────────────────────── */}
-      {CALLOUTS.map(({ label, title, points, mock, flip }) => (
-        <section key={label} className="py-16 border-t border-[#e5e7eb]" style={{ background: flip ? "#F8F9FC" : "white" }}>
-          <div className={`max-w-6xl mx-auto px-4 sm:px-6 flex flex-col ${flip ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-12 lg:gap-16`}>
-            <div className="flex-1 text-center lg:text-left">
-              <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: GREEN }}>{label}</span>
-              <h2 className="text-[24px] sm:text-[30px] font-extrabold mt-2 mb-5 tracking-tight" style={{ color: N900 }}>{title}</h2>
-              <ul className="space-y-3">
-                {points.map(p => (
-                  <li key={p} className="flex items-start gap-3 text-[14px] text-[#4b5563]">
-                    <CheckCircle size={17} color={GREEN} className="flex-shrink-0 mt-0.5" />
-                    {p}
-                  </li>
+              <span className="price-bill mono">{yearly ? "billed yearly" : "billed monthly"}</span>
+              <p className="price-blurb">{p.blurb}</p>
+              <Btn href="/register" variant={p.pop ? "primary" : "soft"} className="price-cta">Start Free Trial</Btn>
+              <ul className="price-feats">
+                {p.feats.map((f, j) => (
+                  <li key={j}><span className="pf-tick"><Icon name="check" /></span>{f}</li>
                 ))}
               </ul>
             </div>
-            <div className="flex-1 flex justify-center">
-              {mock}
-            </div>
-          </div>
-        </section>
-      ))}
+          ))}
+        </div>
+        <p className="price-note reveal"><Icon name="shield" /> All plans are built for small remodeling teams that want clarity without enterprise complexity.</p>
+      </div>
+    </section>
+  );
+}
 
-      {/* ── Comparison ─────────────────────────────────────────── */}
-      <section className="py-20 border-t border-[#e5e7eb]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-[28px] sm:text-[36px] font-extrabold tracking-tight" style={{ color: N900 }}>
-              Better than spreadsheets.<br className="hidden sm:block" /> Simpler than bloated contractor software.
-            </h2>
-          </div>
-          <div className="bg-white rounded-2xl border border-[#e5e7eb] overflow-hidden shadow-sm">
-            <div className="grid grid-cols-4">
-              <div className="p-4 border-b border-[#e5e7eb] bg-[#f9fafb]" />
-              {["Clear Build", "Spreadsheets", "Other Software"].map((h, i) => (
-                <div key={h} className={`p-4 border-b border-[#e5e7eb] text-center ${i === 0 ? "text-white font-bold text-[13px]" : "text-[#6b7280] text-[13px] font-medium"}`}
-                  style={i === 0 ? { background: N700 } : { background: "#f9fafb" }}>{h}</div>
-              ))}
-            </div>
-            {COMPARISON.map((row, i) => (
-              <div key={row.feature} className={`grid grid-cols-4 ${i % 2 === 1 ? "bg-[#fafafa]" : ""}`}>
-                <div className="p-3.5 border-b border-[#f3f4f6] text-[13px] font-medium text-[#374151] flex items-center">{row.feature}</div>
-                <div className="p-3.5 border-b border-[#f3f4f6] flex items-center justify-center" style={{ background: i % 2 === 1 ? "#f8fffe" : "#f0fbf4" }}>
-                  <ChipVal val={row.cb} />
-                </div>
-                <div className="p-3.5 border-b border-[#f3f4f6] flex items-center justify-center"><ChipVal val={row.sheets} /></div>
-                <div className="p-3.5 border-b border-[#f3f4f6] flex items-center justify-center"><ChipVal val={row.software} /></div>
+/* ── FAQ ────────────────────────────────────────────────────────────── */
+function FAQ() {
+  const qa = [
+    ["Is there really a free trial with no credit card?", "Yes. Start a 14-day free trial with full access — no card required. You only add billing if you decide to keep going."],
+    ["Can customers approve quotes and change orders online?", "Yes. Clients review and approve quotes and change orders from a link, and every approval is captured digitally with a timestamp so you keep proof on file."],
+    ["How is Clear Build different from spreadsheets or generic contractor software?", "Clear Build keeps quotes, approvals, change orders, invoices, and payments connected to the same job. Spreadsheets lose the thread; bloated enterprise tools add complexity you don't need."],
+    ["Can I track invoices and payments by project?", "Yes. Every invoice and payment links back to its job, so you can see budget vs invoiced vs collected for each project in real time."],
+    ["How does online payment collection work?", "Send an invoice with a pay link. Clients pay by card, you can accept partial payments, and overdue reminders go out automatically."],
+    ["Can I invite my team?", "Yes. Add your crew with no per-user pricing — plans include set team sizes, and the whole team sees the work they need to."],
+    ["Is it mobile-friendly?", "Yes. Clear Build works in the field on a phone or tablet, so quoting, approvals, and updates happen on site."],
+    ["Can I import my existing contacts and data?", "Yes. Bring leads and client details in by import, or add them manually, and keep everything in one place from day one."],
+  ];
+  const [open, setOpen] = useState(1);
+  return (
+    <section className="section bg-cool" id="faq">
+      <div className="wrap faq-wrap">
+        <div className="faq-head reveal">
+          <span className="kicker eyebrow"><span className="dot" />FAQ</span>
+          <h2 className="section-title">Questions, answered</h2>
+          <p className="section-sub">The things owner-led teams ask before switching.</p>
+          <div className="faq-help"><Icon name="phone" /> Still deciding? <a href="/login">Book a demo →</a></div>
+        </div>
+        <div className="faq-list reveal" data-d="1">
+          {qa.map((x, i) => (
+            <div className={`faq-item${open === i ? " is-open" : ""}`} key={i}>
+              <div className="faq-q-wrap">
+                <button type="button" className="faq-q" onClick={() => setOpen(open === i ? -1 : i)}>
+                  <span>{x[0]}</span>
+                  <span className="faq-chev" style={{ transform: open === i ? "rotate(180deg)" : "rotate(0deg)" }}>
+                    <Icon name="chevron" />
+                  </span>
+                </button>
+                {open === i && <div className="faq-a-wrap"><div className="faq-a">{x[1]}</div></div>}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Best fit ───────────────────────────────────────────── */}
-      <section className="py-20 border-t border-[#e5e7eb]" style={{ background: "#F8F9FC" }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="flex-1 text-center lg:text-left">
-              <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: GREEN }}>Best fit</span>
-              <h2 className="text-[28px] sm:text-[36px] font-extrabold mt-2 mb-6 tracking-tight" style={{ color: N900 }}>
-                Built for owner-led<br /> remodeling businesses
-              </h2>
-              <ul className="space-y-3.5">
-                {FIT_FOR.map(f => (
-                  <li key={f} className="flex items-start gap-3 text-[14px] text-[#4b5563]">
-                    <Check size={17} color={GREEN} className="flex-shrink-0 mt-0.5" strokeWidth={2.5} />
-                    {f}
-                  </li>
-                ))}
-              </ul>
             </div>
-            <div className="flex-1 grid grid-cols-2 gap-4">
-              {[
-                { icon: Clock,      val: "< 15 min",   label: "Average setup time" },
-                { icon: TrendingUp, val: "Zero",        label: "Spreadsheets needed" },
-                { icon: Star,       val: "1–15",        label: "Team members supported" },
-                { icon: Shield,     val: "100%",        label: "Data secure & private" },
-              ].map(({ icon: Icon, val, label }) => (
-                <div key={label} className="bg-white rounded-2xl p-5 border border-[#e5e7eb] text-center shadow-sm">
-                  <Icon size={22} color={GREEN} className="mx-auto mb-2" />
-                  <p className="text-[22px] font-extrabold" style={{ color: N700 }}>{val}</p>
-                  <p className="text-[11px] text-[#6b7280] mt-0.5">{label}</p>
-                </div>
-              ))}
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Final CTA ──────────────────────────────────────────────────────── */
+function FinalCTA() {
+  return (
+    <section className="section finalcta" id="demo">
+      <div className="finalcta-tex" />
+      <div className="wrap finalcta-inner reveal">
+        <span className="eyebrow" style={{ color: "var(--green-bright)" }}>STOP THE LEAKAGE</span>
+        <h2 className="display finalcta-h">Stop losing money between approved<br />work and collected payment.</h2>
+        <p className="finalcta-sub">Use Clear Build to keep quotes, approvals, change orders, invoices, and payments connected across every job.</p>
+        <div className="finalcta-cta">
+          <Btn href="/register" variant="green" size="lg">Start Free Trial <Icon name="arrow" /></Btn>
+          <Btn href="/login" variant="outline-light" size="lg">Book a Demo</Btn>
+        </div>
+        <div className="finalcta-trust">
+          {["No credit card", "Set up fast", "Cancel anytime"].map(t => (
+            <span key={t}><Icon name="check" /> {t}</span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────── */
+function Footer() {
+  const cols: [string, string[]][] = [
+    ["Product",   ["Features", "How it works", "Pricing", "Product tour", "Mobile app"]],
+    ["Company",   ["About", "Careers", "Contact", "Book a demo"]],
+    ["Resources", ["Help center", "Video tutorials", "Importing data", "Status"]],
+    ["Legal",     ["Privacy", "Terms", "Security"]],
+  ];
+  return (
+    <footer className="footer">
+      <div className="wrap footer-top">
+        <div className="footer-brand">
+          <Logo variant="white" height={36} />
+          <p className="footer-tag">Field service &amp; commercial control for owner-led remodelers. Keep approved work, billing, and payment in sync.</p>
+          <div className="footer-langs">
+            <span className="mono">CLIENT-FACING IN</span>
+            <span className="footer-lang">English</span>
+            <span className="footer-lang">Español</span>
+            <span className="footer-lang">Português</span>
+          </div>
+        </div>
+        <div className="footer-cols">
+          {cols.map(([h, items]) => (
+            <div className="footer-col" key={h}>
+              <span className="footer-col-h">{h}</span>
+              {items.map(it => <a key={it} href="#">{it}</a>)}
             </div>
-          </div>
+          ))}
         </div>
-      </section>
-
-      {/* ── Pricing ────────────────────────────────────────────── */}
-      <section id="pricing" className="py-20 border-t border-[#e5e7eb]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: GREEN }}>Pricing</span>
-            <h2 className="text-[28px] sm:text-[36px] font-extrabold mt-2 tracking-tight" style={{ color: N900 }}>Simple pricing. No surprises.</h2>
-            <p className="text-[16px] text-[#6b7280] mt-3">Start free for 15 days. No credit card required.</p>
-          </div>
-          <div className="grid sm:grid-cols-3 gap-6 items-start">
-            {PLANS.map(plan => (
-              <div key={plan.name} className={`relative rounded-2xl border overflow-hidden flex flex-col ${plan.highlight ? "shadow-2xl border-[#1B2D5E] scale-[1.03]" : "border-[#e5e7eb] shadow-sm"}`}>
-                {plan.badge && (
-                  <div className="absolute top-0 left-0 right-0 text-center py-1.5 text-[11px] font-bold text-white"
-                    style={{ background: plan.highlight ? N700 : GREEN }}>{plan.badge}</div>
-                )}
-                <div className={`p-6 ${plan.badge ? "pt-9" : ""}`} style={{ background: plan.highlight ? N700 : "white" }}>
-                  <h3 className={`font-bold text-[16px] mb-1 ${plan.highlight ? "text-white" : ""}`} style={{ color: plan.highlight ? "white" : N900 }}>{plan.name}</h3>
-                  <div className="flex items-end gap-1 my-3">
-                    <span className="text-[36px] font-extrabold leading-none" style={{ color: plan.highlight ? "white" : N900 }}>{plan.price}</span>
-                    <span className="text-[13px] mb-1" style={{ color: plan.highlight ? "#90b4d8" : "#6b7280" }}>{plan.period}</span>
-                  </div>
-                  <p className="text-[13px]" style={{ color: plan.highlight ? "#90b4d8" : "#6b7280" }}>{plan.desc}</p>
-                </div>
-                <div className="p-6 flex-1 flex flex-col" style={{ background: plan.highlight ? "#162548" : "#fafafa" }}>
-                  <ul className="space-y-2.5 flex-1 mb-6">
-                    {plan.features.map(f => (
-                      <li key={f} className="flex items-start gap-2.5 text-[13px]" style={{ color: plan.highlight ? "#c4d9ef" : "#4b5563" }}>
-                        <Check size={14} color={GREEN} strokeWidth={2.5} className="flex-shrink-0 mt-0.5" />{f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href={plan.href}
-                    className="block text-center py-3 rounded-xl font-bold text-[14px] transition-all hover:opacity-90"
-                    style={plan.highlight
-                      ? { background: GREEN, color: "white" }
-                      : { background: N700, color: "white" }}>
-                    {plan.cta}
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-[13px] text-[#9ca3af] mt-8">All plans include the same features. Pay monthly or save 2 months by going yearly.</p>
+      </div>
+      <div className="wrap footer-bot">
+        <span>© 2026 Clear Build USA. Made for American remodelers. 🇺🇸</span>
+        <div className="footer-bot-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <Link href="/login">Sign In</Link>
         </div>
-      </section>
+      </div>
+    </footer>
+  );
+}
 
-      {/* ── FAQ ────────────────────────────────────────────────── */}
-      <section id="faq" className="py-20 border-t border-[#e5e7eb]" style={{ background: "#F8F9FC" }}>
-        <div className="max-w-2xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: GREEN }}>FAQ</span>
-            <h2 className="text-[28px] sm:text-[34px] font-extrabold mt-2 tracking-tight" style={{ color: N900 }}>Common questions. Answered.</h2>
-          </div>
-          <div className="bg-white rounded-2xl border border-[#e5e7eb] px-6 shadow-sm">
-            {FAQS.map(({ q, a }) => <FaqItem key={q} q={q} a={a} />)}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA band ───────────────────────────────────────────── */}
-      <section className="py-20" style={{ background: N900 }}>
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-[28px] sm:text-[38px] font-extrabold text-white leading-tight mb-4 tracking-tight">
-            Stop losing money between<br className="hidden sm:block" /> approved work and collected payment.
-          </h2>
-          <p className="text-[16px] mb-8" style={{ color: "#90b4d8" }}>Join remodelers who use Clear Build to run tighter, more profitable businesses.</p>
-          <Link href="/register"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-[15px] text-white shadow-xl transition-all hover:scale-[1.03] hover:shadow-2xl"
-            style={{ background: GREEN }}>
-            Start Your Free Trial <ArrowRight size={17} />
-          </Link>
-          <p className="text-[12px] mt-4" style={{ color: "#4a6a8a" }}>15 days free · No credit card · Cancel any time</p>
-        </div>
-      </section>
-
-      {/* ── Footer ─────────────────────────────────────────────── */}
-      <footer className="border-t border-[#1e3a5f] py-10" style={{ background: N900 }}>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: GREEN }}>
-              <span className="text-white text-[10px] font-black">CB</span>
-            </div>
-            <span className="font-bold text-white text-[14px]">Clear Build USA</span>
-          </div>
-          <div className="flex items-center gap-6">
-            {[
-              { label: "Sign In", href: "/login" },
-              { label: "Register", href: "/register" },
-              { label: "Features", href: "#features" },
-              { label: "Pricing", href: "#pricing" },
-            ].map(l => (
-              <Link key={l.label} href={l.href} className="text-[13px] transition-colors hover:text-white" style={{ color: "#4a6a8a" }}>{l.label}</Link>
-            ))}
-          </div>
-          <p className="text-[12px]" style={{ color: "#4a6a8a" }}>© {new Date().getFullYear()} Clear Build USA</p>
-        </div>
-      </footer>
-
+/* ── App ────────────────────────────────────────────────────────────── */
+export default function LandingPage() {
+  useReveal();
+  return (
+    <div className="lp">
+      <Nav />
+      <main>
+        <Hero />
+        <PipelineStrip />
+        <Features />
+        <HowItWorks />
+        <ProductDemo />
+        <InvoiceSection />
+        <ProjectsSection />
+        <Comparison />
+        <BestFit />
+        <Pricing />
+        <FAQ />
+        <FinalCTA />
+      </main>
+      <Footer />
     </div>
   );
 }

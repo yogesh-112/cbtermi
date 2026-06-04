@@ -4,7 +4,9 @@ import { verifyAdminToken, ADMIN_COOKIE } from "@/lib/admin-auth";
 
 const PUBLIC_PATHS = [
   "/login", "/register", "/verify-email", "/forgot-password",
-  "/reset-password", "/api/auth", "/api/invite"
+  "/reset-password", "/api/auth", "/api/invite",
+  "/feedback/respond",      // public feedback response page (email link for customers)
+  "/api/feedback/respond",  // public feedback response API
 ];
 
 const APP_PATHS = [
@@ -53,7 +55,8 @@ export async function middleware(request: NextRequest) {
   const isApp    = APP_PATHS.some((p) => pathname.startsWith(p));
   const isBusinessSetup = pathname === "/business-setup";
 
-  if (isApp || isBusinessSetup) {
+  // Public paths always win over app-path guards
+  if ((isApp || isBusinessSetup) && !isPublic) {
     if (!token) return NextResponse.redirect(new URL("/login", request.url));
     const payload = await verifyToken(token);
     if (!payload) {

@@ -133,8 +133,18 @@ export default function InvoiceDetailPage() {
           <p className="text-[13px] text-[#8a8fa3]">{invoice.contacts?.full_name}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          {(invoice.status === "draft" || invoice.status === "sent") && invoice.contacts?.email && (
+            <button onClick={async () => {
+              const res = await fetch(`/api/invoices/${id}/send`, { method: "POST" });
+              const d = await res.json().catch(() => ({}));
+              if (res.ok) { toast("Invoice emailed to " + invoice.contacts.email, "success"); setData((v: any) => v ? { ...v, invoice: { ...v.invoice, status: "sent", sent_at: new Date().toISOString() } } : v); }
+              else toast(d.message || "Failed to send", "error");
+            }} className="btn btn-primary btn-sm gap-1.5">
+              <Send size={13} /> {invoice.sent_at ? "Resend" : "Send Invoice"}
+            </button>
+          )}
           {invoice.status === "draft" && (
-            <button onClick={markSent} className="btn btn-outline btn-sm"><Send size={13} /> Mark sent</button>
+            <button onClick={markSent} className="btn btn-outline btn-sm"><Send size={13} /> Mark as sent</button>
           )}
           <button onClick={() => window.print()} className="btn btn-outline btn-sm"><Download size={13} /> Download PDF</button>
           {!["paid","voided"].includes(invoice.status) && (
@@ -345,6 +355,28 @@ export default function InvoiceDetailPage() {
               })}
             </div>
           </div>
+
+          {/* Email tracking */}
+          {invoice.sent_at && (
+            <div className="card p-4 text-[13px] space-y-2">
+              <h3 className="section-title mb-2">Email status</h3>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0" />
+                <span className="text-[#4a5168]">Sent {fmtDate(invoice.sent_at)}</span>
+              </div>
+              {invoice.email_opened_at ? (
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-brand-green flex-shrink-0" />
+                  <span className="text-brand-green font-medium">Opened {fmtDate(invoice.email_opened_at)}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#d1d5db] flex-shrink-0" />
+                  <span className="text-[#8a8fa3]">Not opened yet</span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Customer */}
           {invoice.contacts && (

@@ -1,0 +1,51 @@
+2026-05-26 13:51:32 - [32minfo[39m: Reading configs from E:\cbv1\browserstack.yml
+2026-05-26 13:51:33 - [32minfo[39m: Log Directory has been set to E:\cbv1\log
+2026-05-26 13:51:33 - [32minfo[39m: Running SDK with args E:\cla\node.exe E:\cbv1\node_modules\browserstack-node-sdk\src\bin\runner.js playwright test --config=playwright.config.browserstack.ts
+2026-05-26 13:51:33 - [33mwarn[39m: SDK-GEN-001: [ClientTroubleShootingService] The SDK is unable to access the .browserstack folder in your home directory. Please ensure that the folder exists and has the correct permissions.
+2026-05-26 13:51:33 - [32minfo[39m: SDK run started with id: c3a36034-04ea-4341-ad93-ba665d95edf9
+2026-05-26 13:51:33 - [32minfo[39m: Project and debug logs are captured by default. To disable, set disableAutoCaptureLogs: true in config.
+2026-05-26 13:51:33 - [32minfo[39m: [BrowserstackCLI] startMain: Starting main process
+2026-05-26 13:51:33 - [33mwarn[39m: [CLIUtils] Unable to set required permissions to C:\Users\HP\.browserstack
+2026-05-26 13:51:33 - [32minfo[39m: [CLIUtils] Current CLI Path Found: 
+2026-05-26 13:51:34 - [31merror[39m: [BrowserstackCLI] CLIUtils.setupCliPath returned null
+2026-05-26 13:51:34 - [31merror[39m: [BrowserstackCLI] bootstrap: failed to bootstrap=Error: Failed to get CLI binary path. CLI setup failed.
+    at BrowserstackCLI.start (E:\cbv1\node_modules\browserstack-node-sdk\src\bin\v2\browserstackCLI.js:1:14791)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async BrowserstackCLI.startMain (E:\cbv1\node_modules\browserstack-node-sdk\src\bin\v2\browserstackCLI.js:1:9084)
+    at async BrowserstackCLI.bootstrap (E:\cbv1\node_modules\browserstack-node-sdk\src\bin\v2\browserstackCLI.js:1:8518)
+    at async E:\cbv1\node_modules\browserstack-node-sdk\src\bin\playwright\command.js:2:13521
+2026-05-26 13:51:34 - [32minfo[39m: [BrowserstackCLI] stop: CLI is not running, skipping stop
+2026-05-26 13:51:34 - [31merror[39m: Error: playwright/lib/common/configLoader.js doesn't exist.
+    at exports.<computed> (E:\cbv1\node_modules\browserstack-node-sdk\src\helpers\helper.js:1:91429)
+    at getUserPlaywrightConfig (E:\cbv1\node_modules\browserstack-node-sdk\src\bin\playwright\command.js:2:6951)
+    at Object.CJzLK (E:\cbv1\node_modules\browserstack-node-sdk\src\bin\playwright\command.js:2:10269)
+    at E:\cbv1\node_modules\browserstack-node-sdk\src\bin\playwright\command.js:2:15609
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+2026-05-26 13:51:35 - [33mwarn[39m: 
+2026-05-26 13:51:35 - [32minfo[39m: [BrowserstackCLI] stop: CLI is not running, skipping stop
+2026-05-26 13:51:35 - [32minfo[39m: key-metrics.json file not found, skipping processing for event for cli.
+2026-05-26 13:55:34 - [32minfo[39m: Reading configs from E:\cbv1\browserstack.yml
+2026-05-26 13:55:34 - [32minfo[39m: Log Directory has been set to E:\cbv1\log
+2026-05-26 13:55:34 - [32minfo[39m: Running SDK with args E:\cla\node.exe E:\cbv1\node_modules\browserstack-node-sdk\src\bin\runner.js playwright test --config=playwright.config.browserstack.ts
+2026-05-26 13:55:34 - [32minfo[39m: SDK run started with id: fb9dc1c4-9026-497a-8d13-2fe2fa52ad5e
+2026-05-26 13:55:34 - [32minfo[39m: Project and debug logs are captured by default. To disable, set disableAutoCaptureLogs: true in config.
+2026-05-26 13:55:34 - [32minfo[39m: [BrowserstackCLI] startMain: Starting main process
+2026-05-26 13:55:34 - [32minfo[39m: [CLIUtils] Current CLI Path Found: 
+2026-05-26 13:55:38 - [32minfo[39m: [BrowserstackCLI] spawning command='C:\Users\HP\.browserstack\cli\binary-win-x64.exe,sdk'
+2026-05-26 13:55:44 - [32minfo[39m: [BrowserstackCLI] CLI params loaded: {"id":"3bf3818e-5a7b-4229-8cae-1b717838cd66","listen":"127.0.0.1:5400","port":"5400"}
+2026-05-26 13:55:44 - [32minfo[39m: [GrpcClient] Connected to gRPC server at 127.0.0.1:5400
+2026-05-26 13:55:44 - [32minfo[39m: [GrpcClient] Initialized gRPC client with bin session id: 3bf3818e-5a7b-4229-8cae-1b717838cd66 and listen address: 127.0.0.1:5400
+2026-05-26 13:55:44 - [32minfo[39m: [GrpcClient] startBinSession: Calling startBinSession
+2026-05-26 13:55:44 - [32minfo[39m: [GrpcClient] setCliArgs: cliArgs=["playwright","test","--config=playwright.config.browserstack.ts"], parsedConfig=[]
+2026-05-26 13:55:46 - [32minfo[39m: [GrpcClient] StartBinSession successful
+2026-05-26 13:55:47 - [32minfo[39m: [BrowserstackCLI] loadModules: Loading modules
+2026-05-26 13:55:47 - [32minfo[39m: [BrowserstackCLI] loadModules: binSessionId=3bf3818e-5a7b-4229-8cae-1b717838cd66
+2026-05-26 13:55:47 - [32minfo[39m: [BrowserstackCLI] loading Modules.
+2026-05-26 13:55:47 - [32minfo[39m: [BrowserstackCLI] setCliArgs: cliArgs=["playwright","test","--config=playwright.config.browserstack.ts"]
+2026-05-26 13:55:47 - [32minfo[39m: [BrowserstackCLI] Accessibility success=false
+2026-05-26 13:55:47 - [31merror[39m: Error: playwright/lib/common/configLoader.js doesn't exist.
+    at exports.<computed> (E:\cbv1\node_modules\browserstack-node-sdk\src\helpers\helper.js:1:91429)
+    at getUserPlaywrightConfig (E:\cbv1\node_modules\browserstack-node-sdk\src\bin\playwright\command.js:2:6951)
+    at Object.CJzLK (E:\cbv1\node_modules\browserstack-node-sdk\src\bin\playwright\command.js:2:10269)
+    at E:\cbv1\node_modules\browserstack-node-sdk\src\bin\playwright\command.js:2:15609
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)

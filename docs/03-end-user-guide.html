@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Clear Build USA - User Guide</title>
+<style>
+  :root {
+    --navy:   #16265a;
+    --blue:   #2453E4;
+    --green:  #3FA66B;
+    --amber:  #D97706;
+    --red:    #DC2626;
+    --bg:     #f6f6f3;
+    --border: #e7e6e1;
+    --text:   #1F2937;
+    --muted:  #6B7280;
+    --white:  #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px; line-height: 1.7; color: var(--text); background: var(--white);
+  }
+
+  /* COVER */
+  .cover {
+    background: linear-gradient(160deg, #0d1a3e 0%, var(--navy) 50%, #1a4a2e 100%);
+    color: white; min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center; padding: 60px 40px; page-break-after: always;
+  }
+  .cover-logo { width: 80px; height: 80px; background: var(--green); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; color: white; margin: 0 auto 28px; }
+  .cover h1 { font-size: 40px; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 10px; }
+  .cover .subtitle { font-size: 18px; color: rgba(255,255,255,0.75); margin-bottom: 8px; }
+  .cover .edition { font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 40px; }
+  .cover-divider { width: 60px; height: 3px; background: var(--green); margin: 24px auto; border-radius: 2px; }
+  .cover-welcome { font-size: 15px; color: rgba(255,255,255,0.7); max-width: 480px; margin: 0 auto; line-height: 1.8; }
+  .cover-badge { display: inline-block; background: var(--green); color: white; font-size: 12px; font-weight: 700; padding: 6px 20px; border-radius: 100px; margin-bottom: 20px; }
+
+  /* LAYOUT */
+  .page { max-width: 900px; margin: 0 auto; padding: 40px 48px; }
+  .section-break { page-break-before: always; }
+
+  /* TOC */
+  .toc h2 { font-size: 22px; font-weight: 800; color: var(--navy); margin-bottom: 20px; }
+  .toc-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted var(--border); font-size: 13px; }
+  .toc-item a { color: var(--text); text-decoration: none; display: flex; gap: 8px; flex: 1; }
+  .toc-item .num { font-weight: 700; color: var(--navy); min-width: 24px; }
+  .toc-item .pg { color: var(--muted); font-size: 11px; }
+  .toc-group { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 16px 0 4px; }
+
+  /* SECTION HEADINGS */
+  h2.section-title { font-size: 22px; font-weight: 800; color: var(--navy); letter-spacing: -0.5px; border-bottom: 3px solid var(--green); padding-bottom: 10px; margin-bottom: 20px; }
+  h2.section-title .sec-num { display: inline-block; background: var(--navy); color: white; font-size: 12px; padding: 2px 8px; border-radius: 4px; margin-right: 10px; font-weight: 700; }
+  h3 { font-size: 15px; font-weight: 700; color: var(--navy); margin: 24px 0 10px; }
+  h4 { font-size: 13px; font-weight: 700; color: var(--text); margin: 16px 0 6px; }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { margin-bottom: 5px; }
+  strong { color: var(--navy); }
+
+  /* CALLOUTS */
+  .callout { border-radius: 8px; padding: 14px 18px; margin: 14px 0; border-left: 4px solid; font-size: 13px; }
+  .callout-tip    { background: #edf7f2; border-color: var(--green); }
+  .callout-note   { background: #eef1f9; border-color: var(--navy); }
+  .callout-warn   { background: #fef9ee; border-color: var(--amber); }
+  .callout strong { display: block; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 800; }
+
+  /* STEP CARDS */
+  .steps { counter-reset: step-counter; margin: 16px 0; }
+  .step { display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start; }
+  .step-num { width: 28px; height: 28px; background: var(--navy); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+  .step-content h4 { margin: 0 0 4px; font-size: 13px; color: var(--navy); }
+  .step-content p { margin: 0; font-size: 12.5px; color: var(--text); }
+
+  /* FEATURE SECTION */
+  .feature-section { border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin: 16px 0; }
+  .feature-section .fs-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .feature-section .fs-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .feature-section h3 { margin: 0; font-size: 15px; color: var(--navy); }
+  .feature-section .fs-desc { font-size: 12.5px; color: var(--muted); margin: 0; margin-bottom: 10px; }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 12.5px; }
+  th { background: var(--navy); color: white; padding: 9px 12px; text-align: left; font-size: 11.5px; font-weight: 600; }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf8; }
+
+  /* BADGES */
+  .badge { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 100px; }
+  .badge-green  { background: #edf7f2; color: #1a7a4a; }
+  .badge-amber  { background: #fef9ee; color: var(--amber); }
+  .badge-navy   { background: #eef1f9; color: var(--navy); }
+  .badge-red    { background: #fef2f2; color: var(--red); }
+  .badge-blue   { background: #eff5ff; color: var(--blue); }
+  .badge-gray   { background: #f3f4f6; color: var(--muted); }
+
+  /* STATUS FLOW */
+  .status-flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+  .status-flow .arrow { color: var(--muted); }
+
+  /* MOCK SCREEN */
+  .mock-screen { background: var(--bg); border: 2px solid var(--border); border-radius: 10px; overflow: hidden; margin: 14px 0; font-size: 12px; }
+  .mock-topbar { background: var(--navy); color: white; padding: 8px 14px; font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
+  .mock-body { padding: 14px; }
+  .mock-stat-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .mock-stat { flex: 1; background: white; border: 1px solid var(--border); border-radius: 6px; padding: 10px; text-align: center; }
+  .mock-stat .ms-val { font-size: 18px; font-weight: 800; color: var(--navy); }
+  .mock-stat .ms-lbl { font-size: 10px; color: var(--muted); }
+  .mock-row { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+  .mock-row .mr-name { font-weight: 600; font-size: 12px; color: var(--navy); }
+  .mock-row .mr-sub { font-size: 10.5px; color: var(--muted); }
+  .mock-amount { font-size: 13px; font-weight: 700; color: var(--navy); }
+  .mock-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; }
+
+  /* FAQ */
+  .faq-item { border-bottom: 1px solid var(--border); padding: 14px 0; }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q { font-weight: 700; color: var(--navy); margin-bottom: 6px; display: flex; gap: 8px; align-items: flex-start; }
+  .faq-q::before { content: "Q"; background: var(--navy); color: white; font-size: 10px; padding: 1px 6px; border-radius: 4px; flex-shrink: 0; margin-top: 1px; }
+  .faq-a { color: var(--text); font-size: 13px; padding-left: 22px; }
+
+  /* KEYBOARD SHORTCUTS */
+  kbd { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-size: 11px; font-family: monospace; color: var(--text); }
+
+  /* ROLES TABLE */
+  .role-owner  { color: #7C3AED; font-weight: 700; }
+  .role-admin  { color: var(--blue); font-weight: 700; }
+  .role-staff  { color: var(--green); font-weight: 700; }
+  .role-crew   { color: var(--muted); font-weight: 700; }
+
+  /* SUPPORT SECTION */
+  .support-card { border: 2px solid var(--green); border-radius: 12px; padding: 24px; text-align: center; margin: 20px 0; }
+  .support-card h3 { color: var(--navy); margin-bottom: 8px; }
+  .support-card p { color: var(--muted); margin-bottom: 16px; }
+  .support-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .support-item { border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .support-item .si-icon { font-size: 24px; margin-bottom: 6px; }
+  .support-item h4 { font-size: 13px; color: var(--navy); margin-bottom: 4px; }
+  .support-item p { font-size: 11.5px; color: var(--muted); margin: 0; }
+
+  /* FOOTER */
+  .doc-footer { margin-top: 60px; padding-top: 20px; border-top: 2px solid var(--border); display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+
+  /* PRINT */
+  @media print {
+    body { font-size: 12px; }
+    .cover { min-height: 100vh; }
+    .section-break { page-break-before: always; }
+    a { color: inherit; text-decoration: none; }
+    @page { margin: 18mm 16mm; size: A4; }
+  }
+  @media screen {
+    body { background: #f0f0ee; }
+    .page { background: white; box-shadow: 0 2px 20px rgba(0,0,0,0.08); border-radius: 4px; margin: 32px auto; }
+    .cover { border-radius: 4px; margin: 32px auto; max-width: 900px; min-height: 80vh; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-logo">CB</div>
+  <div class="cover-badge">USER GUIDE</div>
+  <h1>Clear Build USA</h1>
+  <p class="subtitle">Complete User Guide</p>
+  <p class="edition">Everything you need to run your contracting business</p>
+  <div class="cover-divider"></div>
+  <p class="cover-welcome">
+    Welcome to Clear Build USA - your all-in-one business platform for US contractors.<br><br>
+    This guide walks you through every feature, every page, and every question you might have. Whether you're setting up for the first time or want to unlock a feature you haven't used yet, this is your reference.
+  </p>
+</div>
+
+<!-- TOC -->
+<div class="page toc-page" style="page-break-after:always;">
+  <div class="toc">
+    <h2>Table of Contents</h2>
+    <div class="toc-group">Getting Started</div>
+    <div class="toc-item"><a href="#s1"><span class="num">1</span>What is Clear Build USA?</a><span class="pg">3</span></div>
+    <div class="toc-item"><a href="#s2"><span class="num">2</span>Setting Up Your Account</a><span class="pg">3</span></div>
+    <div class="toc-item"><a href="#s3"><span class="num">3</span>Understanding the Layout</a><span class="pg">4</span></div>
+
+    <div class="toc-group">Core Features</div>
+    <div class="toc-item"><a href="#s4"><span class="num">4</span>Dashboard</a><span class="pg">5</span></div>
+    <div class="toc-item"><a href="#s5"><span class="num">5</span>Contacts, Leads &amp; Customers</a><span class="pg">5</span></div>
+    <div class="toc-item"><a href="#s6"><span class="num">6</span>Quotes</a><span class="pg">7</span></div>
+    <div class="toc-item"><a href="#s7"><span class="num">7</span>Invoices</a><span class="pg">8</span></div>
+    <div class="toc-item"><a href="#s8"><span class="num">8</span>Projects</a><span class="pg">10</span></div>
+    <div class="toc-item"><a href="#s9"><span class="num">9</span>Payments</a><span class="pg">11</span></div>
+    <div class="toc-item"><a href="#s10"><span class="num">10</span>Change Orders</a><span class="pg">12</span></div>
+
+    <div class="toc-group">Business Tools</div>
+    <div class="toc-item"><a href="#s11"><span class="num">11</span>Scheduling &amp; Booking Links</a><span class="pg">13</span></div>
+    <div class="toc-item"><a href="#s12"><span class="num">12</span>Communications</a><span class="pg">14</span></div>
+    <div class="toc-item"><a href="#s13"><span class="num">13</span>Team Management</a><span class="pg">14</span></div>
+    <div class="toc-item"><a href="#s14"><span class="num">14</span>Templates &amp; Notifications</a><span class="pg">15</span></div>
+    <div class="toc-item"><a href="#s15"><span class="num">15</span>AI Chatbot Assistant</a><span class="pg">15</span></div>
+
+    <div class="toc-group">Account &amp; Settings</div>
+    <div class="toc-item"><a href="#s16"><span class="num">16</span>Settings</a><span class="pg">16</span></div>
+    <div class="toc-item"><a href="#s17"><span class="num">17</span>Subscription &amp; Billing</a><span class="pg">17</span></div>
+    <div class="toc-item"><a href="#s18"><span class="num">18</span>Your Profile</a><span class="pg">17</span></div>
+
+    <div class="toc-group">Help</div>
+    <div class="toc-item"><a href="#s19"><span class="num">19</span>Frequently Asked Questions</a><span class="pg">18</span></div>
+    <div class="toc-item"><a href="#s20"><span class="num">20</span>Support &amp; Contact</a><span class="pg">20</span></div>
+  </div>
+</div>
+
+<!-- ════════ SECTION 1: WHAT IS CLEAR BUILD USA ════════ -->
+<div class="page" id="s1">
+  <h2 class="section-title"><span class="sec-num">1</span>What is Clear Build USA?</h2>
+
+  <p>Clear Build USA is a <strong>cloud-based business management platform built exclusively for US construction contractors.</strong> It puts everything you need to run your contracting business in one place:</p>
+
+  <ul>
+    <li><strong>Leads &amp; Contacts</strong> - track every potential customer and manage your pipeline</li>
+    <li><strong>Quotes</strong> - create professional estimates and get customer approval online</li>
+    <li><strong>Projects</strong> - manage every active job with budgets, tasks, and team assignments</li>
+    <li><strong>Invoices</strong> - send invoices and let customers pay online by card or bank transfer</li>
+    <li><strong>Payments</strong> - full payment history with reversal support</li>
+    <li><strong>Change Orders</strong> - document and get approval for any scope change</li>
+    <li><strong>Scheduling</strong> - manage your availability and let customers book meetings</li>
+    <li><strong>Communications</strong> - all customer messages in one inbox</li>
+    <li><strong>Team Management</strong> - invite your crew and assign roles</li>
+    <li><strong>AI Assistant</strong> - ask business questions, get instant answers</li>
+  </ul>
+
+  <div class="callout callout-tip">
+    <strong>The big picture</strong>
+    Clear Build USA replaces scattered spreadsheets, paper invoices, and multiple disconnected apps with one professional platform that makes your business look and run better.
+  </div>
+
+  <h3>Benefits at a Glance</h3>
+  <table>
+    <tr><th>Benefit</th><th>How Clear Build Delivers It</th></tr>
+    <tr><td>Get paid faster</td><td>Customers pay invoices online by card - no more waiting for checks</td></tr>
+    <tr><td>Look more professional</td><td>Branded quotes and invoices with your logo, delivered digitally</td></tr>
+    <tr><td>Save hours of admin time</td><td>Auto-numbered documents, email templates, one-click quote-to-invoice</td></tr>
+    <tr><td>Win more jobs</td><td>Lead pipeline with heat scores so you never miss a follow-up</td></tr>
+    <tr><td>Protect yourself legally</td><td>Digital change orders with customer approval create a written paper trail</td></tr>
+    <tr><td>Coordinate your team</td><td>Project tasks, crew assignments, and role-based access - all in one place</td></tr>
+  </table>
+</div>
+
+<!-- ════════ SECTION 2: ACCOUNT SETUP ════════ -->
+<div class="page" id="s2">
+  <h2 class="section-title"><span class="sec-num">2</span>Setting Up Your Account</h2>
+
+  <h3>Step 1: Register</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Go to clearbuildusa.com and click "Get Started Free"</h4>
+        <p>You'll land on the registration page. Enter your first name, last name, email address, and choose a password (minimum 8 characters).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Check your email and click the verification link</h4>
+        <p>We'll send a verification email to the address you registered with. Click the link inside to verify your account. <strong>You cannot log in until your email is verified.</strong> Check your spam folder if it doesn't arrive within 2 minutes.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Log in with your email and password</h4>
+        <p>Go to /login and enter your credentials. The app will remember you for 15 days before asking you to log in again.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Set up your business</h4>
+        <p>On first login, you'll be taken to Business Setup. Enter your business name and type (General Contractor, Plumber, Electrician, etc.). This creates your workspace - all your data is attached to this business.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>You're in - start with Settings</h4>
+        <p>Before creating your first quote, go to <strong>Settings → Business Profile</strong> and upload your logo and add your business address. This information appears on all your quotes and invoices.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Free Trial</h3>
+  <p>You get a <strong>15-day free trial</strong> with full access to every feature. No credit card required. After 15 days, upgrade to the Monthly ($49/month) or Yearly ($490/year) plan to continue. Your data is never deleted - if you upgrade later, everything is still there.</p>
+
+  <h3>Forgot Your Password?</h3>
+  <ol>
+    <li>Go to the login page and click <strong>"Forgot Password?"</strong></li>
+    <li>Enter your email address and click "Send Reset Link"</li>
+    <li>Check your inbox for a reset link (valid for 1 hour)</li>
+    <li>Click the link and enter your new password</li>
+  </ol>
+</div>
+
+<!-- ════════ SECTION 3: LAYOUT ════════ -->
+<div class="page" id="s3">
+  <h2 class="section-title"><span class="sec-num">3</span>Understanding the Layout</h2>
+
+  <h3>The Sidebar (Left Navigation)</h3>
+  <table>
+    <tr><th>Sidebar Section</th><th>What it Contains</th></tr>
+    <tr><td>🏠 Dashboard</td><td>Your business overview - stats, charts, recent activity</td></tr>
+    <tr><td>👥 Contacts</td><td>All your contacts (leads + customers + direct contacts)</td></tr>
+    <tr><td>&nbsp;&nbsp;&nbsp;↳ Leads</td><td>Potential customers you're working to convert (sub-menu)</td></tr>
+    <tr><td>&nbsp;&nbsp;&nbsp;↳ Customers</td><td>Won customers with past invoices (sub-menu)</td></tr>
+    <tr><td>📋 Quotes</td><td>All quotes you've created</td></tr>
+    <tr><td>📄 Invoices</td><td>All invoices you've sent</td></tr>
+    <tr><td>🏗️ Projects</td><td>All active and completed jobs</td></tr>
+    <tr><td>💰 Payments</td><td>Payment history across all invoices</td></tr>
+    <tr><td>📝 Change Orders</td><td>Scope change requests linked to projects</td></tr>
+    <tr><td>📅 Scheduling</td><td>Availability slots, booking links, meetings</td></tr>
+    <tr><td>💬 Communications</td><td>Message history with all contacts</td></tr>
+    <tr><td>🔔 Notifications</td><td>Alerts and reminders</td></tr>
+    <tr><td>👷 Team</td><td>Manage your crew and office staff</td></tr>
+    <tr><td>⚙️ Settings</td><td>Business settings, billing, integrations</td></tr>
+  </table>
+
+  <h3>The Top Bar</h3>
+  <ul>
+    <li><strong>Business name / switcher</strong> - click to switch between businesses (if you have more than one)</li>
+    <li><strong>Breadcrumb</strong> - shows where you are in the app (e.g. Projects / Kitchen Remodel)</li>
+    <li><strong>Search</strong> (🔍) - search contacts, quotes, invoices, and projects across your whole account</li>
+    <li><strong>Bell</strong> (🔔) - your notification count; click to see recent alerts</li>
+    <li><strong>New button</strong> - quick-create shortcut for the current section</li>
+    <li><strong>Avatar</strong> - click for Profile, Settings, and Logout</li>
+  </ul>
+
+  <div class="callout callout-tip">
+    <strong>Pro Tip - Use Global Search</strong>
+    Click the search icon (or press the search bar) to instantly find any contact, quote, invoice, or project by name, number, or keyword. No need to navigate to each section.
+  </div>
+</div>
+
+<!-- ════════ SECTION 4: DASHBOARD ════════ -->
+<div class="page" id="s4">
+  <h2 class="section-title"><span class="sec-num">4</span>Dashboard</h2>
+
+  <p>The Dashboard is the first screen you see after logging in. It gives you an instant health check of your business.</p>
+
+  <div class="mock-screen">
+    <div class="mock-topbar"><span>Clear Build USA · Dashboard</span><span>Good Morning, Mike 👋</span></div>
+    <div class="mock-body">
+      <div class="mock-stat-row">
+        <div class="mock-stat"><div class="ms-val" style="color:#DC2626;">$14,200</div><div class="ms-lbl">Outstanding Invoices</div></div>
+        <div class="mock-stat"><div class="ms-val" style="color:#2453E4;">7</div><div class="ms-lbl">Quotes Pending</div></div>
+        <div class="mock-stat"><div class="ms-val" style="color:#3FA66B;">4</div><div class="ms-lbl">Active Projects</div></div>
+        <div class="mock-stat"><div class="ms-val" style="color:#7C3AED;">$8,500</div><div class="ms-lbl">Received This Month</div></div>
+      </div>
+      <div class="mock-label">Recent Activity</div>
+      <div class="mock-row"><div><div class="mr-name">Johnson Kitchen Remodel - Invoice INV-0023</div><div class="mr-sub">Due in 7 days</div></div><div class="mock-amount">$4,800</div></div>
+      <div class="mock-row"><div><div class="mr-name">Smith Bathroom - Quote Q-0041</div><div class="mr-sub">Awaiting customer approval</div></div><div class="mock-amount">$12,500</div></div>
+    </div>
+  </div>
+
+  <h3>What Each Stat Card Shows</h3>
+  <table>
+    <tr><th>Card</th><th>What it shows</th></tr>
+    <tr><td><span style="color:#DC2626; font-weight:700;">Outstanding Invoices</span></td><td>Total dollar amount on invoices that haven't been fully paid yet</td></tr>
+    <tr><td><span style="color:#2453E4; font-weight:700;">Quotes Pending</span></td><td>Number of quotes in "Sent" status waiting for customer approval</td></tr>
+    <tr><td><span style="color:#3FA66B; font-weight:700;">Active Projects</span></td><td>Number of projects currently in "In Progress" status</td></tr>
+    <tr><td><span style="color:#7C3AED; font-weight:700;">Received This Month</span></td><td>Total payments recorded in the current calendar month</td></tr>
+  </table>
+
+  <h3>Quick Actions</h3>
+  <p>The four Quick Action buttons at the bottom of the dashboard create a new Contact, Quote, Invoice, or take you to Payments in one click - so you can jump straight to the most common tasks.</p>
+
+  <h3>Revenue Chart</h3>
+  <p>The bar chart shows 6 months of payment history so you can see trends in your revenue. Hover over any bar to see the exact amount for that month.</p>
+</div>
+
+<!-- ════════ SECTION 5: CONTACTS ════════ -->
+<div class="page section-break" id="s5">
+  <h2 class="section-title"><span class="sec-num">5</span>Contacts, Leads &amp; Customers</h2>
+
+  <p>Everyone you do business with lives in Contacts. The app automatically organises them into three categories:</p>
+
+  <table>
+    <tr><th>Type</th><th>Who it is</th><th>Where they appear</th></tr>
+    <tr><td><span class="badge badge-amber">Lead</span></td><td>A potential customer you're trying to win</td><td>Contacts list + dedicated Leads section</td></tr>
+    <tr><td><span class="badge badge-green">Customer</span></td><td>A won client who has invoices with you</td><td>Contacts list + dedicated Customers section</td></tr>
+    <tr><td><span class="badge badge-blue">Direct Contact</span></td><td>Someone you work with but don't invoice (supplier, partner)</td><td>Contacts list only</td></tr>
+  </table>
+
+  <h3>Adding a Contact</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Go to Contacts in the sidebar and click "New Contact" (top right)</h4>
+        <p>Or click the quick-action button on the Dashboard.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Fill in the contact's details</h4>
+        <p>Name and contact type are required. Email and phone are optional but recommended so you can send quotes and invoices directly from the app.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Choose the contact type and lead status</h4>
+        <p>If they're a new potential customer, choose "Lead" and set status to "New Lead". You can always update this as they progress through your pipeline.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>The Leads Section</h3>
+  <p>The dedicated Leads page is your sales pipeline view. It shows lead heat scores to help you prioritise your follow-ups:</p>
+  <table>
+    <tr><th>Heat Score</th><th>Status Stages</th><th>Action Needed</th></tr>
+    <tr><td>🔥 <span style="color:var(--red); font-weight:700;">Hot</span></td><td>New Lead, In Conversation</td><td>Follow up within 24 hours - highest close probability</td></tr>
+    <tr><td>🌡️ <span style="color:var(--amber); font-weight:700;">Warm</span></td><td>Meeting Scheduled, Site Visit, Proposal Sent, Negotiation</td><td>Keep momentum - don't let them go cold</td></tr>
+    <tr><td>❄️ <span style="color:var(--navy); font-weight:700;">Cold</span></td><td>Lost, Stalled</td><td>Consider a re-engagement attempt or archive them</td></tr>
+  </table>
+
+  <h3>Lead Status Pipeline</h3>
+  <div class="status-flow">
+    <span class="badge badge-red">New Lead</span><span class="arrow">→</span>
+    <span class="badge badge-amber">In Conversation</span><span class="arrow">→</span>
+    <span class="badge badge-amber">Meeting Scheduled</span><span class="arrow">→</span>
+    <span class="badge badge-amber">Site Visit</span><span class="arrow">→</span>
+    <span class="badge badge-blue">Proposal Sent</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Negotiation</span><span class="arrow">→</span>
+    <span class="badge badge-green">Won</span>
+  </div>
+
+  <h3>Converting a Lead to a Customer</h3>
+  <p>When you win the job, open the lead's contact page and click <strong>"Convert to Customer"</strong>. Their type changes to Customer and they appear in your Customers section. All their history (quotes, communications) stays intact.</p>
+
+  <h3>Contact Detail Page</h3>
+  <p>Click any contact to open their detail page. Here you'll find:</p>
+  <ul>
+    <li><strong>At-a-Glance sidebar</strong> - contact info, type, lifetime value (total invoiced)</li>
+    <li><strong>Activity timeline</strong> - every quote, invoice, communication, and note linked to this contact</li>
+    <li><strong>Quick actions</strong> - create a quote, send a message, schedule a meeting - all from the contact page</li>
+  </ul>
+
+  <h3>Customers Section</h3>
+  <p>The Customers page shows all your won clients in a card grid. Each card shows the customer's name, number of invoices, and lifetime value. Toggle between grid and list view using the icons in the top right.</p>
+</div>
+
+<!-- ════════ SECTION 6: QUOTES ════════ -->
+<div class="page section-break" id="s6">
+  <h2 class="section-title"><span class="sec-num">6</span>Quotes</h2>
+
+  <p>Quotes are professional job estimates you send to customers for approval. When a customer approves a quote, you can convert it to an invoice with one click.</p>
+
+  <h3>Quote Status Flow</h3>
+  <div class="status-flow">
+    <span class="badge badge-gray">Draft</span><span class="arrow">→</span>
+    <span class="badge badge-blue">Sent</span><span class="arrow">→</span>
+    <span class="badge badge-green">Approved</span>
+    <span class="arrow"> or </span>
+    <span class="badge badge-red">Rejected</span>
+  </div>
+
+  <h3>Creating a Quote</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Go to Quotes → New Quote</h4>
+        <p>The app auto-assigns the next quote number (e.g. Q-0001). You can customise the prefix in Settings → Tax &amp; Numbering.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Fill in the 3-column header</h4>
+        <p><strong>Customer</strong> - search and select from your contacts. <strong>Job Site</strong> - the address where the work will be done. <strong>Valid Through</strong> - the quote expiry date (defaults to 30 days from today).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Add your line items</h4>
+        <p>For each item/service: enter a description, quantity, unit price, discount (optional), and tax rate (optional). The total calculates automatically.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Choose how to send it</h4>
+        <p>Use the Send Channel toggles to select Email, SMS, or WhatsApp. Click "Send Quote" - the customer receives a link to view the professional quote preview.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>How the Customer Sees the Quote</h3>
+  <p>When you send a quote, the customer receives a link to a professional preview page (no login required). On that page they can:</p>
+  <ul>
+    <li><strong>Approve</strong> - marks the quote as Approved. You're notified and can convert it to an invoice.</li>
+    <li><strong>Request Changes</strong> - customer can leave a note. You'll see it in the quote's activity feed.</li>
+  </ul>
+
+  <div class="callout callout-tip">
+    <strong>Pro Tip - Convert to Invoice</strong>
+    Once a quote is Approved, open it and click "Convert to Invoice." All line items are copied over - no double entry. The linked quote and invoice are automatically cross-referenced.
+  </div>
+
+  <h3>Quote Activity Sidebar</h3>
+  <p>On the Quote detail page, the right sidebar shows the full activity history - when it was created, sent, viewed, and approved (or rejected). Use this to see exactly what happened and when.</p>
+
+  <h3>Quote List View</h3>
+  <p>The Quotes list shows 5 stat cards at the top (Total, Draft, Sent, Approved, Rejected) so you can see your pipeline at a glance. Filter by status using the tabs below the stat cards.</p>
+</div>
+
+<!-- ════════ SECTION 7: INVOICES ════════ -->
+<div class="page section-break" id="s7">
+  <h2 class="section-title"><span class="sec-num">7</span>Invoices</h2>
+
+  <p>Invoices are payment requests sent to customers. Customers can pay online by card or bank transfer, or you can record a manual payment (check, cash) when you receive it.</p>
+
+  <h3>Invoice Status Flow</h3>
+  <div class="status-flow">
+    <span class="badge badge-gray">Draft</span><span class="arrow">→</span>
+    <span class="badge badge-blue">Sent</span><span class="arrow">→</span>
+    <span class="badge badge-amber">Due</span><span class="arrow">→</span>
+    <span class="badge badge-red">Overdue</span><span class="arrow">→</span>
+    <span class="badge badge-green">Paid</span>
+    <span class="arrow"> or </span>
+    <span class="badge badge-navy">Partial</span>
+  </div>
+
+  <h3>Creating an Invoice</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Go to Invoices → New Invoice (or convert from an approved quote)</h4>
+        <p>Converting from a quote copies all line items automatically. Creating manually: the app auto-assigns the next invoice number (e.g. INV-0001).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Select the customer and link to a project (optional)</h4>
+        <p>If you don't link to an existing project, the app automatically creates one for you and links the invoice to it.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Add line items</h4>
+        <p>Same as a quote - description, quantity, unit price, discount, and tax. Totals calculate automatically.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Set payment options (right sidebar)</h4>
+        <p>Choose the due date, payment method, and whether to schedule automatic reminders (e.g. "Send reminder 3 days before due via email").</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>Add internal notes (optional)</h4>
+        <p>Notes are only visible to your team, never to the customer. Use this for internal job notes or payment terms reminders.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h4>Send the invoice</h4>
+        <p>Click "Send Invoice." The customer receives a link to view the invoice and pay online.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>How the Customer Pays Online</h3>
+  <p>The customer clicks the link in their email. They see a professional invoice page with your branding. At the bottom is a large <strong>"Pay $X"</strong> button. Clicking it takes them to a secure Stripe payment page where they can pay by:</p>
+  <ul>
+    <li>Credit or debit card (Visa, Mastercard, Amex, Discover)</li>
+    <li>ACH bank transfer (US bank accounts)</li>
+  </ul>
+  <p>When payment is complete, Stripe notifies Clear Build USA automatically. The invoice status updates to <strong>Paid</strong> and you receive an in-app notification.</p>
+
+  <h3>Recording a Manual Payment</h3>
+  <p>If the customer pays by check or cash, record it manually:</p>
+  <ol>
+    <li>Open the invoice</li>
+    <li>Click <strong>"Record Payment"</strong> in the Payment Summary sidebar</li>
+    <li>Choose the amount tab: Full / 50% / Deposit / Custom</li>
+    <li>Select the payment method: Card, Bank Transfer, Check, or Cash</li>
+    <li>Click "Record Payment" to save</li>
+  </ol>
+
+  <div class="callout callout-note">
+    <strong>Partial Payments</strong>
+    If a customer pays a deposit (e.g. 50% upfront), record the first payment. The invoice status changes to "Partial." Record the remaining payment when you receive it - the invoice moves to "Paid" when the balance reaches $0.
+  </div>
+
+  <h3>Invoice Detail Page</h3>
+  <p>The Invoice detail page shows:</p>
+  <ul>
+    <li><strong>Left panel:</strong> Invoice header, line items, totals, notes, activity timeline</li>
+    <li><strong>Right sidebar:</strong> Payment summary with progress bar (amount paid vs. total), and "Record Payment" / "Manage Billing" buttons</li>
+  </ul>
+</div>
+
+<!-- ════════ SECTION 8: PROJECTS ════════ -->
+<div class="page section-break" id="s8">
+  <h2 class="section-title"><span class="sec-num">8</span>Projects</h2>
+
+  <p>Projects are the jobs you're actively working on. Each project tracks budget, timeline, team, tasks, and linked financial documents (quotes, invoices, change orders).</p>
+
+  <h3>Project Statuses</h3>
+  <div class="status-flow">
+    <span class="badge badge-blue">Planning</span><span class="arrow">→</span>
+    <span class="badge badge-green">In Progress</span><span class="arrow">→</span>
+    <span class="badge badge-amber">On Hold</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Completed</span>
+    <span class="arrow"> or </span>
+    <span class="badge badge-red">Cancelled</span>
+  </div>
+
+  <h3>Creating a Project</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Go to Projects → New Project</h4>
+        <p>Auto-assigned project number (e.g. PRJ-0001). Customise the prefix in Settings → Tax &amp; Numbering.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Fill in project details</h4>
+        <p>Project name, select the customer, start date, end date, and budget amount. The app automatically calculates "Day X of Y" from your dates.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Set budget and deposit</h4>
+        <p>Enter the total project budget. Set a deposit percentage if you require an upfront payment (e.g. 30%). This helps track whether a deposit has been received.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Assign team members</h4>
+        <p>Use the Team panel to assign specific crew members from your team to this project. They'll see the project in their view.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>Set client visibility</h4>
+        <p>Toggle "Visible to client" if you want the customer to be able to see project progress. When enabled, the customer can view tasks and updates (future feature).</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Managing Tasks</h3>
+  <p>Inside a project, the Tasks tab lets you break the job down into individual steps:</p>
+  <ul>
+    <li>Click <strong>"Add Task"</strong> and enter a task name and due date</li>
+    <li>Assign the task to a specific team member</li>
+    <li>Mark tasks complete as work progresses - the project progress bar updates automatically</li>
+    <li>Tasks are visible to the whole team (based on their role)</li>
+  </ul>
+
+  <h3>Project List View</h3>
+  <p>The Projects list shows colour-coded cards for each project. Each card shows:</p>
+  <ul>
+    <li>Project name and customer</li>
+    <li>Progress bar (% of tasks complete)</li>
+    <li>"Day X of Y" timeline indicator</li>
+    <li>Status badge (In Progress, Planning, etc.)</li>
+    <li>Budget amount</li>
+  </ul>
+
+  <h3>Logging Project Updates</h3>
+  <p>Use <strong>Project Updates</strong> (sidebar → Project Updates) to log daily progress notes. These serve as a running diary of the job - useful for client reporting and dispute resolution if needed.</p>
+
+  <h3>Item Requirements</h3>
+  <p>The <strong>Item Requirements</strong> section (sidebar) lets you create material lists linked to projects. Track what materials are needed, quantities, estimated costs, and procurement status. This helps with job costing and ordering.</p>
+</div>
+
+<!-- ════════ SECTION 9: PAYMENTS ════════ -->
+<div class="page" id="s9">
+  <h2 class="section-title"><span class="sec-num">9</span>Payments</h2>
+
+  <p>The Payments section is your complete financial record of all money received across all invoices.</p>
+
+  <h3>What You'll See on the Payments Page</h3>
+  <ul>
+    <li><strong>4 method stat cards</strong> - total received by Card, Bank Transfer, Check, and Cash</li>
+    <li><strong>Mini bar chart</strong> - payments over the last 6 months at a glance</li>
+    <li><strong>Payment list</strong> - every payment with date, amount, invoice, and method</li>
+  </ul>
+
+  <h3>Payment Methods</h3>
+  <table>
+    <tr><th>Method</th><th>How it's recorded</th></tr>
+    <tr><td>💳 Card</td><td>Automatically when customer pays online via Stripe, or manually if you ran their card</td></tr>
+    <tr><td>🏦 Bank Transfer</td><td>Automatically via Stripe ACH, or manually when you receive a bank transfer</td></tr>
+    <tr><td>📝 Check</td><td>Always manual - record when you receive and deposit the check</td></tr>
+    <tr><td>💵 Cash</td><td>Always manual - record when customer hands over cash</td></tr>
+  </table>
+
+  <h3>Reversing a Payment</h3>
+  <p>If you recorded a payment by mistake (e.g. wrong amount, bounced check), you can reverse it:</p>
+  <ol>
+    <li>Find the payment in the Payments list</li>
+    <li>Click the three-dot menu (⋯) on the right</li>
+    <li>Select "Reverse Payment"</li>
+    <li>Confirm - the payment is removed and the invoice's outstanding balance is restored</li>
+  </ol>
+
+  <div class="callout callout-warn">
+    <strong>Reversal is Owner/Admin only</strong>
+    Only users with the Owner or Admin role can reverse payments. Staff and Crew members will not see the Reverse option.
+  </div>
+</div>
+
+<!-- ════════ SECTION 10: CHANGE ORDERS ════════ -->
+<div class="page" id="s10">
+  <h2 class="section-title"><span class="sec-num">10</span>Change Orders</h2>
+
+  <p>A Change Order is an official document for any work that was added or changed after the original quote was agreed. Instead of verbal agreements that lead to disputes, Change Orders give you a written, customer-approved paper trail.</p>
+
+  <h3>Change Order Status Flow</h3>
+  <div class="status-flow">
+    <span class="badge badge-gray">Draft</span><span class="arrow">→</span>
+    <span class="badge badge-blue">Sent</span><span class="arrow">→</span>
+    <span class="badge badge-green">Approved</span>
+    <span class="arrow"> or </span>
+    <span class="badge badge-red">Rejected</span>
+    <span class="arrow"> or </span>
+    <span class="badge badge-gray">Void</span>
+  </div>
+
+  <h3>Creating a Change Order</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Go to Change Orders → New Change Order</h4>
+        <p>Link it to the relevant project. Add a description explaining why the scope is changing.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Add line items for the new/changed work</h4>
+        <p>Include description, quantity, and unit price for each item being added. The total calculates automatically.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Send to the customer</h4>
+        <p>Click "Send Change Order." The customer receives a link to review and approve (or reject) the change.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Wait for approval - then proceed with the work</h4>
+        <p>Never start additional work until the change order is Approved. The approval is your written authorisation.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <strong>Best Practice</strong>
+    Get every scope change - even small ones - documented as a change order. "It'll only take an hour" disputes cost contractors thousands. A 2-minute change order prevents them.
+  </div>
+</div>
+
+<!-- ════════ SECTION 11: SCHEDULING ════════ -->
+<div class="page section-break" id="s11">
+  <h2 class="section-title"><span class="sec-num">11</span>Scheduling &amp; Booking Links</h2>
+
+  <p>The Scheduling section lets you manage your availability, create shareable booking links for customers, and track all your meetings in one place.</p>
+
+  <h3>The 4 Scheduling Tabs</h3>
+  <table>
+    <tr><th>Tab</th><th>What it does</th></tr>
+    <tr><td><strong>Slots</strong></td><td>Create individual availability time blocks with date, time, meeting type, and location</td></tr>
+    <tr><td><strong>Booking Links</strong></td><td>Generate shareable links that customers can open to pick a slot</td></tr>
+    <tr><td><strong>Meetings</strong></td><td>View and manage all confirmed meetings, update their status</td></tr>
+    <tr><td><strong>Settings</strong></td><td>Default meeting type and timezone preferences</td></tr>
+  </table>
+
+  <h3>How to Set Up a Customer Booking</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Create availability slots (Slots tab → "Add Slot")</h4>
+        <p>Choose date, start/end time, meeting type (Consultation, Site Visit, Estimate Meeting, etc.) and location. You can create recurring slots (daily/weekly/monthly).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Create a booking link (Booking Links tab → "New Link")</h4>
+        <p>Select which slots to include, add a message for the customer, set an expiry date, and optionally link to a specific contact. Click "Create Link."</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Copy and share the link</h4>
+        <p>Click the copy icon next to the booking link. Send it to your customer by text, email, or WhatsApp.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Customer selects a slot and confirms</h4>
+        <p>On the public booking page (no login required), the customer sees your available slots, picks one, and submits. The meeting appears in your Meetings tab with status "Scheduled."</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Meeting Statuses</h3>
+  <table>
+    <tr><th>Status</th><th>Meaning</th></tr>
+    <tr><td><span class="badge badge-blue">Scheduled</span></td><td>Booking confirmed, meeting is upcoming</td></tr>
+    <tr><td><span class="badge badge-navy">Confirmed</span></td><td>You've personally confirmed the appointment</td></tr>
+    <tr><td><span class="badge badge-green">Completed</span></td><td>Meeting took place as planned</td></tr>
+    <tr><td><span class="badge badge-red">Canceled</span></td><td>Meeting was cancelled by either party</td></tr>
+    <tr><td><span class="badge badge-gray">No Show</span></td><td>Customer didn't show up</td></tr>
+    <tr><td><span class="badge badge-amber">Rescheduled</span></td><td>Meeting time was changed</td></tr>
+  </table>
+</div>
+
+<!-- ════════ SECTION 12: COMMUNICATIONS ════════ -->
+<div class="page" id="s12">
+  <h2 class="section-title"><span class="sec-num">12</span>Communications</h2>
+
+  <p>The Communications section is your unified message inbox - every email, SMS, WhatsApp, phone note, and log entry for every contact, all in one place.</p>
+
+  <h3>Layout</h3>
+  <ul>
+    <li><strong>Left panel:</strong> contact list, search bar, channel filter tabs (All, Email, SMS, WhatsApp, Note)</li>
+    <li><strong>Right panel:</strong> the conversation thread for the selected contact</li>
+  </ul>
+
+  <h3>Sending a Message</h3>
+  <ol>
+    <li>Click on a contact in the left panel</li>
+    <li>In the message input at the bottom, choose the channel (Email, SMS, WhatsApp)</li>
+    <li>Type your message and click Send</li>
+  </ol>
+
+  <h3>Logging a Communication</h3>
+  <p>If you had a phone call or in-person meeting, log it manually:</p>
+  <ol>
+    <li>Click "Log Communication" in the top right of the chat view</li>
+    <li>Choose the channel (Call, Note, etc.), enter a subject if needed, and write the summary</li>
+    <li>Save - it appears in the contact's conversation history with a timestamp</li>
+  </ol>
+
+  <div class="callout callout-tip">
+    <strong>Why log calls and meetings?</strong>
+    A complete communication history protects you if a dispute arises ("You said you'd do X on that call"). Every logged interaction is date-stamped and searchable.
+  </div>
+</div>
+
+<!-- ════════ SECTION 13: TEAM ════════ -->
+<div class="page" id="s13">
+  <h2 class="section-title"><span class="sec-num">13</span>Team Management</h2>
+
+  <p>Invite your crew, office staff, and project managers to Clear Build USA. Each person gets their own login with access based on their role.</p>
+
+  <h3>Team Roles</h3>
+  <table>
+    <tr><th>Role</th><th>What they can do</th></tr>
+    <tr><td><span class="role-owner">Owner</span></td><td>Full access to everything - including billing, settings, and reversing payments</td></tr>
+    <tr><td><span class="role-admin">Admin</span></td><td>Everything except billing and subscription management</td></tr>
+    <tr><td><span class="role-staff">Staff</span></td><td>View and edit contacts, quotes, invoices, projects. Cannot record payments or send notifications.</td></tr>
+    <tr><td><span class="role-crew">Crew</span></td><td>View assigned projects and tasks. Cannot access financial data.</td></tr>
+  </table>
+
+  <h3>Inviting a Team Member</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Go to Team in the sidebar → Click "Invite Member"</h4>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Enter their email address and choose a role</h4>
+        <p>The invite email contains a link that expires in 7 days.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>They accept the invite</h4>
+        <p>If they already have a Clear Build USA account, they log in and the business appears in their switcher. If not, they'll register first, then the business is added.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Removing a Team Member</h3>
+  <p>Find the member in the Team list, click the three-dot menu (⋯), and select "Remove from Team." Their access is revoked <strong>immediately</strong> - the next time they try to use the app, they are logged out automatically. Their past activity (quotes they created, etc.) is preserved.</p>
+
+  <div class="callout callout-warn">
+    <strong>Immediate Revocation</strong>
+    Access is revoked instantly when you remove someone - even if they are currently logged in. This is designed to protect your business data if a relationship ends unexpectedly.
+  </div>
+</div>
+
+<!-- ════════ SECTION 14: TEMPLATES & NOTIFICATIONS ════════ -->
+<div class="page" id="s14">
+  <h2 class="section-title"><span class="sec-num">14</span>Templates &amp; Notifications</h2>
+
+  <h3>Templates</h3>
+  <p>Templates are reusable message bodies for common communications - quote-sent messages, invoice reminders, payment confirmations, etc.</p>
+  <ul>
+    <li>Go to <strong>Templates</strong> in the sidebar to see your library</li>
+    <li>Click "New Template" to create one - give it a name, choose a type, write the subject and body</li>
+    <li>Use variables like <strong>{{contact_name}}</strong> and <strong>{{business_name}}</strong> - these are filled in automatically when you send</li>
+    <li>Duplicate any template to create a variation quickly</li>
+  </ul>
+
+  <p>Default templates are pre-loaded: <em>Quote Sent, Invoice Due Reminder, Payment Received</em>. Customise them with your own wording in <strong>Settings → Email Templates.</strong></p>
+
+  <h3>Notifications</h3>
+  <p>The Notifications section (bell icon) shows in-app alerts for events like quote approvals, invoice payments, and team invites. Two tabs:</p>
+  <ul>
+    <li><strong>Activity</strong> - your notification feed. Click "Mark all read" to clear the count.</li>
+    <li><strong>Templates</strong> - manage notification message templates</li>
+  </ul>
+
+  <p>To send a manual notification to a customer (e.g. a reminder email or WhatsApp message), go to Notifications, click "Send Notification," choose a template and the contact, and send. <em>Owner or Admin role required.</em></p>
+</div>
+
+<!-- ════════ SECTION 15: AI CHATBOT ════════ -->
+<div class="page" id="s15">
+  <h2 class="section-title"><span class="sec-num">15</span>AI Chatbot Assistant</h2>
+
+  <p>Clear Build USA includes a built-in AI business assistant powered by Google Gemini. Access it by clicking the chat icon in the bottom-right corner of any screen.</p>
+
+  <h3>What Can the AI Assistant Help With?</h3>
+  <ul>
+    <li>Questions about how to use any feature in the app</li>
+    <li>General contractor business advice (how to price a job, how to write a professional quote, how to handle a payment dispute)</li>
+    <li>Help drafting messages to customers</li>
+    <li>Business management questions</li>
+  </ul>
+
+  <div class="callout callout-note">
+    <strong>What the AI cannot do</strong>
+    The AI assistant cannot read your specific business data (your contacts, invoices, projects) - it provides general guidance only. For specific data, use the app's built-in reports and dashboards.
+  </div>
+
+  <h3>Example Questions to Ask</h3>
+  <ul>
+    <li>"How do I convert a quote to an invoice?"</li>
+    <li>"What should I include in a professional change order?"</li>
+    <li>"How do I set up a booking link for customer consultations?"</li>
+    <li>"What's a fair deposit percentage for a kitchen remodel?"</li>
+    <li>"Help me write a professional payment reminder email."</li>
+  </ul>
+</div>
+
+<!-- ════════ SECTION 16: SETTINGS ════════ -->
+<div class="page section-break" id="s16">
+  <h2 class="section-title"><span class="sec-num">16</span>Settings</h2>
+
+  <p>Settings is where you configure your business profile, preferences, and integrations. Go to <strong>Settings</strong> in the sidebar. The left navigation has 9 sections:</p>
+
+  <table>
+    <tr><th>Section</th><th>What to configure here</th></tr>
+    <tr>
+      <td>🏢 Business Profile</td>
+      <td>Business name, type (General Contractor, Electrician, etc.), address, phone number, and logo. <strong>Do this first</strong> - your logo and business name appear on all quotes and invoices.</td>
+    </tr>
+    <tr>
+      <td>⚙️ Preferences</td>
+      <td>Default currency (USD), date format (MM/DD/YYYY or DD/MM/YYYY), and fiscal year start month.</td>
+    </tr>
+    <tr>
+      <td>🔢 Tax &amp; Numbering</td>
+      <td>Default tax rate applied to new quotes and invoices. Document number prefixes: Quote (Q-), Invoice (INV-), Project (PRJ-). You can change these to match your existing numbering system.</td>
+    </tr>
+    <tr>
+      <td>🔔 Notification Preferences</td>
+      <td>Toggle which events trigger email or in-app notifications (quote approved, invoice paid, team invite accepted, etc.).</td>
+    </tr>
+    <tr>
+      <td>📧 Email Templates</td>
+      <td>Customise the subject and body of outgoing emails for: Quote Sent, Invoice Due Reminder, Payment Received. Supports {{contact_name}}, {{business_name}} variables.</td>
+    </tr>
+    <tr>
+      <td>🔌 Integrations</td>
+      <td>View Stripe connection status. Set up outbound webhooks for 8 event types (invoice.paid, quote.approved, etc.).</td>
+    </tr>
+    <tr>
+      <td>🌍 Region &amp; Language</td>
+      <td>Set your timezone (important for scheduling) and language preference.</td>
+    </tr>
+    <tr>
+      <td>🔒 Security</td>
+      <td>Change your password. Enter current password, then new password (min 8 characters).</td>
+    </tr>
+    <tr>
+      <td>🔗 API &amp; Webhooks</td>
+      <td>Configure a webhook endpoint URL. Clear Build will POST to this URL whenever a supported event occurs in your account.</td>
+    </tr>
+  </table>
+
+  <div class="callout callout-tip">
+    <strong>First-Time Setup Checklist</strong>
+    1. Upload your logo (Business Profile)<br>
+    2. Add your business address and phone (Business Profile)<br>
+    3. Set your default tax rate (Tax &amp; Numbering)<br>
+    4. Set your timezone (Region &amp; Language)<br>
+    5. Customise email templates with your business voice (Email Templates)
+  </div>
+</div>
+
+<!-- ════════ SECTION 17: SUBSCRIPTION ════════ -->
+<div class="page" id="s17">
+  <h2 class="section-title"><span class="sec-num">17</span>Subscription &amp; Billing</h2>
+
+  <p>Manage your subscription at <strong>Settings → Subscription</strong> (or go directly to /subscription).</p>
+
+  <h3>Plans</h3>
+  <table>
+    <tr><th>Plan</th><th>Cost</th><th>What's Included</th></tr>
+    <tr>
+      <td><strong>Free Trial</strong></td>
+      <td>$0 for 15 days</td>
+      <td>All features, unlimited contacts, no credit card required</td>
+    </tr>
+    <tr>
+      <td><strong>Monthly Pro</strong></td>
+      <td>$49/month</td>
+      <td>Full access to all features. Cancel any time.</td>
+    </tr>
+    <tr>
+      <td><strong>Yearly Pro</strong></td>
+      <td>$490/year</td>
+      <td>Full access + 2 months free (saves $98 vs monthly). Best value.</td>
+    </tr>
+  </table>
+
+  <h3>Upgrading Your Plan</h3>
+  <ol>
+    <li>Go to /subscription</li>
+    <li>Click "Start Monthly Plan" or "Start Yearly Plan"</li>
+    <li>You'll be taken to a secure Stripe checkout page</li>
+    <li>Enter your payment details and confirm</li>
+    <li>Your subscription activates immediately</li>
+  </ol>
+
+  <h3>Managing Your Billing</h3>
+  <p>Click <strong>"Manage Billing"</strong> on the subscription page to open the Stripe billing portal, where you can:</p>
+  <ul>
+    <li>Update your credit card</li>
+    <li>Download invoices / receipts</li>
+    <li>Cancel or change your plan</li>
+    <li>View billing history</li>
+  </ul>
+
+  <div class="callout callout-note">
+    <strong>Your data is safe</strong>
+    If your subscription expires or you cancel, your data is never deleted. You can re-subscribe at any time and continue right where you left off.
+  </div>
+</div>
+
+<!-- ════════ SECTION 18: PROFILE ════════ -->
+<div class="page" id="s18">
+  <h2 class="section-title"><span class="sec-num">18</span>Your Profile</h2>
+
+  <p>Your profile is your personal information within Clear Build USA. Access it by clicking your avatar in the top bar → "Profile."</p>
+
+  <h3>Profile Page (/profile)</h3>
+  <ul>
+    <li>Your name, bio, and profile photo</li>
+    <li>Activity stats (quotes created, invoices sent, etc.)</li>
+    <li>Skill tags (e.g. Framing, Electrical Rough-In, Tile Work)</li>
+    <li>Recent work grid</li>
+  </ul>
+
+  <h3>Editing Your Profile (/profile/edit)</h3>
+  <ul>
+    <li>Upload a profile photo</li>
+    <li>Edit your display name, bio, and contact info</li>
+    <li>Change your password (same as Settings → Security)</li>
+    <li>Toggle profile visibility (public vs private)</li>
+  </ul>
+
+  <h3>Switching Between Businesses</h3>
+  <p>If you belong to multiple businesses (e.g. you manage two separate LLCs), click your business name in the top bar to open the business switcher. Select the business you want to work in - the app reloads in that context. All data (contacts, projects, invoices) is completely separate between businesses.</p>
+</div>
+
+<!-- ════════ SECTION 19: FAQ ════════ -->
+<div class="page section-break" id="s19">
+  <h2 class="section-title"><span class="sec-num">19</span>Frequently Asked Questions</h2>
+
+  <h3>Getting Started</h3>
+
+  <div class="faq-item">
+    <div class="faq-q">Why didn't I receive the verification email?</div>
+    <div class="faq-a">Check your spam or junk folder first. If it's not there, go to the login page, click "Didn't receive the email?" and request a new one. Make sure you used the correct email address when registering.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Can I have more than one business on one account?</div>
+    <div class="faq-a">Yes. One Clear Build USA account can be a member of multiple businesses. Use the business switcher in the top bar to switch between them. Each business has its own separate data, contacts, invoices, and settings.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">What happens when my free trial ends?</div>
+    <div class="faq-a">After 15 days, your account enters "restricted mode." You can still see all your data, but creating new quotes, invoices, and projects will prompt you to upgrade. Your data is never deleted - upgrade at any time to regain full access.</div>
+  </div>
+
+  <h3>Quotes &amp; Invoices</h3>
+
+  <div class="faq-item">
+    <div class="faq-q">Can I change a quote after I've sent it?</div>
+    <div class="faq-a">Yes, but be careful - if the customer has already received the link, any changes you make will be reflected in their view the next time they open it. Best practice: if significant changes are needed, void the current quote, create a new revised version, and send the new link.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">How does online invoice payment work - when do I get the money?</div>
+    <div class="faq-a">When a customer pays by card, Stripe typically deposits the funds to your bank account within 2 business days. ACH bank transfers take 3–5 business days. You can see your deposit schedule in the Stripe dashboard (linked from Settings → Integrations).</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Can a customer pay a partial amount on an invoice?</div>
+    <div class="faq-a">Yes. You can record partial payments manually (50%, deposit %, or any custom amount). For online payments, the full invoice amount is charged - for partial billing, create separate invoices or record the partial payment manually after the fact.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">The customer approved a quote but I need to change some items before invoicing. What do I do?</div>
+    <div class="faq-a">Convert the quote to an invoice, then edit the invoice's line items as needed. If the change is significant (scope or price), issue a Change Order for the difference so there's a documented trail of why the amounts differ from the original quote.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">How do I customise my invoice/quote number format?</div>
+    <div class="faq-a">Go to Settings → Tax &amp; Numbering. You can change the prefix for quotes (default: Q-), invoices (default: INV-), and projects (default: PRJ-). The number continues sequentially from the last one created. You cannot retroactively renumber past documents.</div>
+  </div>
+
+  <h3>Projects &amp; Payments</h3>
+
+  <div class="faq-item">
+    <div class="faq-q">I created an invoice without linking a project - where did it go?</div>
+    <div class="faq-a">Clear Build automatically creates a project for you and links the invoice to it. Check your Projects list - you'll find a new project named after the invoice. You can rename and add details to it.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Can I track time worked on a project?</div>
+    <div class="faq-a">The current version supports task tracking (with due dates and completion status) and project updates (daily notes). Dedicated time/hour tracking per team member is planned for a future release.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">I recorded a payment for the wrong invoice. How do I fix it?</div>
+    <div class="faq-a">Reverse the payment on the incorrect invoice (open that invoice → Payments section → Reverse), then record it on the correct invoice. You need Owner or Admin role to reverse payments.</div>
+  </div>
+
+  <h3>Team &amp; Permissions</h3>
+
+  <div class="faq-item">
+    <div class="faq-q">A team member invited someone but they haven't signed up yet. Can I resend the invite?</div>
+    <div class="faq-a">Yes. Go to Team, find the pending invite in the list, and click "Resend Invite." The invite link is valid for 7 days from the time it was sent (or re-sent).</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">If I remove a team member, do they lose access right away?</div>
+    <div class="faq-a">Yes - immediately. Even if they are currently logged in, their next action in the app will log them out. This is by design to protect your business data.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Can a Staff member see financial data?</div>
+    <div class="faq-a">Staff can view and edit quotes, invoices, and projects. They cannot record payments, reverse payments, or send bulk notifications. Crew members have even more limited access - they can only see assigned projects and tasks.</div>
+  </div>
+
+  <h3>Account &amp; Security</h3>
+
+  <div class="faq-item">
+    <div class="faq-q">How do I change my password?</div>
+    <div class="faq-a">Go to Settings → Security. Enter your current password and then your new password (minimum 8 characters). Or, if you've forgotten your password, use the "Forgot Password" link on the login page.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Is my business data private from other businesses on the platform?</div>
+    <div class="faq-a">Yes, completely. Every piece of data (contacts, quotes, invoices, projects) is isolated to your business. No other business can see your data, and you cannot see theirs. This isolation is enforced at every level of the system.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">How long does the system keep me logged in?</div>
+    <div class="faq-a">Your login session lasts 15 days. After that, you'll be asked to log in again. If you check "Keep me signed in" on the login page (if available), the session extends further.</div>
+  </div>
+
+  <h3>Billing</h3>
+
+  <div class="faq-item">
+    <div class="faq-q">How do I cancel my subscription?</div>
+    <div class="faq-a">Go to /subscription → click "Manage Billing." This opens the Stripe billing portal where you can cancel your subscription. Cancellation takes effect at the end of your current billing period - you keep full access until then.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Can I get a refund?</div>
+    <div class="faq-a">Contact support (see Section 20) within 7 days of a charge if you believe there's been an error. We review each case individually. We do not offer prorated refunds for mid-period cancellations.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Is there a mobile app?</div>
+    <div class="faq-a">The web app is fully mobile-responsive and works on any smartphone browser. A dedicated iOS and Android app is on the roadmap for later in 2026. For now, you can add the website to your home screen for a near-app experience.</div>
+  </div>
+</div>
+
+<!-- ════════ SECTION 20: SUPPORT ════════ -->
+<div class="page section-break" id="s20">
+  <h2 class="section-title"><span class="sec-num">20</span>Support &amp; Contact</h2>
+
+  <p>We're here to help. Clear Build USA offers multiple support channels depending on your question.</p>
+
+  <div class="support-grid" style="margin-bottom:24px;">
+    <div class="support-item">
+      <div class="si-icon">💬</div>
+      <h4>In-App AI Assistant</h4>
+      <p>Click the chat icon (bottom-right of any screen) for instant AI-powered answers to how-to questions</p>
+    </div>
+    <div class="support-item">
+      <div class="si-icon">📚</div>
+      <h4>Help &amp; FAQs</h4>
+      <p>Go to Help in the sidebar - searchable FAQ for common questions and step-by-step guides</p>
+    </div>
+    <div class="support-item">
+      <div class="si-icon">🎫</div>
+      <h4>Support Ticket</h4>
+      <p>Go to Help → "Submit a Ticket" for issues that need human review. Track your ticket status in the app.</p>
+    </div>
+  </div>
+
+  <h3>Support Contact Information</h3>
+  <table>
+    <tr><th>Channel</th><th>Contact</th><th>Response Time</th></tr>
+    <tr>
+      <td>📧 Email Support</td>
+      <td>support@clearbuildusa.com</td>
+      <td>Within 24 business hours</td>
+    </tr>
+    <tr>
+      <td>🎫 In-App Ticket</td>
+      <td>Help → Submit a Ticket</td>
+      <td>Within 24 business hours</td>
+    </tr>
+    <tr>
+      <td>🌐 Website</td>
+      <td>clearbuildusa.com</td>
+      <td>Always available</td>
+    </tr>
+    <tr>
+      <td>💬 AI Chatbot</td>
+      <td>Chat icon in app (bottom right)</td>
+      <td>Instant (24/7)</td>
+    </tr>
+  </table>
+
+  <h3>Before You Contact Support - Quick Checklist</h3>
+  <ol>
+    <li>Search the FAQ in the Help section - most common issues are covered there</li>
+    <li>Try asking the AI chatbot - it can walk you through most features step by step</li>
+    <li>Try logging out and logging back in - this resolves most session-related issues</li>
+    <li>Check that your subscription is active (Settings → Subscription) if features are locked</li>
+    <li>If a quote or invoice isn't displaying correctly, try refreshing the page</li>
+  </ol>
+
+  <h3>When Submitting a Support Ticket, Include</h3>
+  <ul>
+    <li>Your business name and email address</li>
+    <li>The name of the feature or page where the issue occurred (e.g. "Invoice INV-0023")</li>
+    <li>What you were trying to do and what happened instead</li>
+    <li>A screenshot if possible - this speeds up diagnosis significantly</li>
+  </ul>
+
+  <div class="callout callout-green">
+    <strong>We Want Your Feedback</strong>
+    Is there a feature you'd love to see? Something confusing? Something you love? Go to <strong>Feedback</strong> in the sidebar and leave a note. We read every single submission. Clear Build USA is built for contractors - your feedback directly shapes what we build next.
+  </div>
+
+  <hr style="border:none; border-top:1px solid var(--border); margin:32px 0;" />
+
+  <h3>Quick Reference Card</h3>
+  <table>
+    <tr><th>Task</th><th>Where to Go</th><th>Minimum Role</th></tr>
+    <tr><td>Add a new contact / lead</td><td>Contacts → New Contact</td><td>Staff</td></tr>
+    <tr><td>Create and send a quote</td><td>Quotes → New Quote</td><td>Staff</td></tr>
+    <tr><td>Convert quote to invoice</td><td>Quotes → [Quote] → Convert</td><td>Staff</td></tr>
+    <tr><td>Record a manual payment</td><td>Invoices → [Invoice] → Record Payment</td><td>Admin</td></tr>
+    <tr><td>Reverse a payment</td><td>Payments → [Payment] → Reverse</td><td>Admin</td></tr>
+    <tr><td>Create a change order</td><td>Change Orders → New Change Order</td><td>Staff</td></tr>
+    <tr><td>Invite a team member</td><td>Team → Invite Member</td><td>Admin</td></tr>
+    <tr><td>Remove a team member</td><td>Team → [Member] → Remove</td><td>Admin</td></tr>
+    <tr><td>Upload your logo</td><td>Settings → Business Profile</td><td>Owner</td></tr>
+    <tr><td>Change tax rate or numbering</td><td>Settings → Tax &amp; Numbering</td><td>Owner</td></tr>
+    <tr><td>Upgrade / cancel subscription</td><td>Settings → Subscription → Manage Billing</td><td>Owner</td></tr>
+    <tr><td>Generate a customer booking link</td><td>Scheduling → Booking Links → New Link</td><td>Staff</td></tr>
+    <tr><td>Get help from AI assistant</td><td>Chat icon (bottom right of any screen)</td><td>Any</td></tr>
+    <tr><td>Submit a support ticket</td><td>Help → Submit a Ticket</td><td>Any</td></tr>
+  </table>
+
+  <div class="doc-footer">
+    <div><strong>Clear Build USA</strong> - Complete User Guide v1.0</div>
+    <div>clearbuildusa.com · support@clearbuildusa.com</div>
+    <div>May 2026</div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash",
       systemInstruction: SYSTEM_PROMPT + (currentPage ? `\n\nUser is currently on: ${currentPage}` : ""),
     });
 
@@ -107,9 +107,11 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[chatbot] Gemini error:", msg);
-    return NextResponse.json(
-      { message: "The assistant ran into an issue. Please try again in a moment.", actions: [] },
-      { status: 500 }
-    );
+    const friendly = msg.includes("API_KEY") || msg.includes("API key")
+      ? "The AI assistant isn't configured. Please add a valid **GEMINI_API_KEY** to your environment variables."
+      : msg.includes("quota") || msg.includes("RESOURCE_EXHAUSTED")
+      ? "The AI assistant has reached its usage limit. Please try again later."
+      : "The assistant ran into an issue. Please try again in a moment.";
+    return NextResponse.json({ message: friendly, actions: [] }, { status: 500 });
   }
 }

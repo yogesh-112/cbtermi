@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Clear Build USA - Master Product Document</title>
+<style>
+  :root {
+    --navy:   #16265a;
+    --blue:   #2453E4;
+    --green:  #3FA66B;
+    --amber:  #D97706;
+    --red:    #DC2626;
+    --bg:     #f6f6f3;
+    --border: #e7e6e1;
+    --text:   #1F2937;
+    --muted:  #6B7280;
+    --white:  #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text);
+    background: var(--white);
+  }
+
+  /* ── COVER PAGE ── */
+  .cover {
+    background: linear-gradient(145deg, var(--navy) 0%, #0d1a3e 100%);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 40px;
+    page-break-after: always;
+  }
+  .cover-logo {
+    width: 72px; height: 72px;
+    background: var(--green);
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; font-weight: 900; color: white;
+    margin: 0 auto 28px;
+    letter-spacing: -1px;
+  }
+  .cover h1 { font-size: 40px; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+  .cover .subtitle { font-size: 18px; color: rgba(255,255,255,0.7); margin-bottom: 40px; }
+  .cover-meta { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; margin-top: 48px; }
+  .cover-meta-item { text-align: center; }
+  .cover-meta-item .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+  .cover-meta-item .value { font-size: 15px; font-weight: 600; color: white; }
+  .cover-badge {
+    display: inline-block;
+    background: var(--green);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 20px;
+    border-radius: 100px;
+    letter-spacing: 0.5px;
+    margin-bottom: 24px;
+  }
+  .cover-divider { width: 60px; height: 3px; background: var(--green); margin: 28px auto; border-radius: 2px; }
+
+  /* ── LAYOUT ── */
+  .page { max-width: 900px; margin: 0 auto; padding: 40px 48px; }
+
+  /* ── TOC ── */
+  .toc-page { page-break-after: always; }
+  .toc h2 { font-size: 22px; font-weight: 800; color: var(--navy); margin-bottom: 24px; letter-spacing: -0.5px; }
+  .toc-section { margin-bottom: 6px; }
+  .toc-section a { color: var(--text); text-decoration: none; display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px dotted var(--border); }
+  .toc-section a:hover { color: var(--blue); }
+  .toc-section .toc-num { font-weight: 700; color: var(--navy); min-width: 28px; }
+  .toc-section .toc-title { flex: 1; padding: 0 8px; }
+  .toc-section .toc-page-num { color: var(--muted); font-size: 11px; }
+  .toc-group { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 16px 0 4px; }
+
+  /* ── SECTION ── */
+  .section { margin-bottom: 48px; page-break-inside: avoid; }
+  .section-break { page-break-before: always; }
+
+  h2.section-title {
+    font-size: 22px; font-weight: 800; color: var(--navy);
+    letter-spacing: -0.5px;
+    border-bottom: 3px solid var(--green);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+  h2.section-title .sec-num {
+    display: inline-block;
+    background: var(--navy);
+    color: white;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 10px;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  h3 { font-size: 15px; font-weight: 700; color: var(--navy); margin: 20px 0 8px; }
+  h4 { font-size: 13px; font-weight: 700; color: var(--text); margin: 14px 0 6px; }
+
+  p { margin-bottom: 10px; color: var(--text); }
+
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { margin-bottom: 4px; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-left: 4px solid;
+    font-size: 13px;
+  }
+  .callout-navy { background: #eef1f9; border-color: var(--navy); }
+  .callout-green { background: #edf7f2; border-color: var(--green); }
+  .callout-amber { background: #fef9ee; border-color: var(--amber); }
+  .callout-red   { background: #fef2f2; border-color: var(--red); }
+  .callout strong { display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── TABLES ── */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 12.5px; }
+  th { background: var(--navy); color: white; padding: 9px 12px; text-align: left; font-size: 11.5px; font-weight: 600; letter-spacing: 0.3px; }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf8; }
+  tr:last-child td { border-bottom: none; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 100px;
+    letter-spacing: 0.3px;
+  }
+  .badge-navy   { background: #eef1f9; color: var(--navy); }
+  .badge-green  { background: #edf7f2; color: #1a7a4a; }
+  .badge-red    { background: #fef2f2; color: var(--red); }
+  .badge-amber  { background: #fef9ee; color: var(--amber); }
+  .badge-blue   { background: #eff5ff; color: var(--blue); }
+  .badge-gray   { background: #f3f4f6; color: var(--muted); }
+
+  /* ── FEATURE CARDS ── */
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .feature-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: #fafafa;
+  }
+  .feature-card .fc-icon { font-size: 18px; margin-bottom: 6px; }
+  .feature-card h4 { margin: 0 0 4px; font-size: 13px; color: var(--navy); }
+  .feature-card p { margin: 0; font-size: 12px; color: var(--muted); }
+
+  /* ── PERSONA CARDS ── */
+  .persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+  .persona-card { border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .persona-card .persona-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 16px; color: white;
+    margin-bottom: 10px;
+  }
+  .persona-card h4 { margin: 0 0 2px; }
+  .persona-card .persona-role { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+
+  /* ── TIMELINE ── */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; margin-bottom: 20px; }
+  .timeline-item::before {
+    content: '';
+    position: absolute; left: -24px; top: 5px;
+    width: 12px; height: 12px;
+    border-radius: 50%; background: var(--green);
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px var(--green);
+  }
+  .timeline-item .ti-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+  .timeline-item h4 { margin: 0 0 4px; color: var(--navy); }
+
+  /* ── STATUS FLOW ── */
+  .status-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+  .status-flow .arrow { color: var(--muted); font-size: 14px; }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .page-header-icon {
+    width: 40px; height: 40px; background: var(--navy); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 18px;
+  }
+  .page-header h1 { font-size: 16px; font-weight: 700; color: var(--navy); margin: 0 0 2px; }
+  .page-header p { font-size: 12px; color: var(--muted); margin: 0; }
+
+  /* ── RISK TABLE ── */
+  .risk-high   { color: var(--red); font-weight: 700; }
+  .risk-medium { color: var(--amber); font-weight: 700; }
+  .risk-low    { color: var(--green); font-weight: 700; }
+
+  /* ── DIVIDERS ── */
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* ── FOOTER ── */
+  .doc-footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 2px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .doc-footer strong { color: var(--navy); }
+
+  /* ── PRINT ── */
+  @media print {
+    body { font-size: 12px; }
+    .cover { min-height: 100vh; }
+    .section-break { page-break-before: always; }
+    .no-break { page-break-inside: avoid; }
+    a { color: inherit; text-decoration: none; }
+    @page { margin: 18mm 16mm; size: A4; }
+  }
+
+  @media screen {
+    body { background: #f0f0ee; }
+    .page { background: white; box-shadow: 0 2px 20px rgba(0,0,0,0.08); border-radius: 4px; margin: 32px auto; }
+    .cover { border-radius: 4px; margin: 32px auto; max-width: 900px; min-height: 80vh; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════ COVER PAGE ════════════════ -->
+<div class="cover">
+  <div class="cover-logo">CB</div>
+  <div class="cover-badge">CONFIDENTIAL - INTERNAL USE</div>
+  <h1>Clear Build USA</h1>
+  <p class="subtitle">Master Product Document</p>
+  <div class="cover-divider"></div>
+  <p style="color:rgba(255,255,255,0.6); max-width:520px; font-size:14px; line-height:1.7;">
+    This is the single source of truth for the Clear Build USA platform - covering product vision, features, architecture, security, database design, APIs, testing, deployment, and launch plan.
+  </p>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <div class="label">Product</div>
+      <div class="value">Clear Build USA</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Version</div>
+      <div class="value">1.0 - Launch</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Date</div>
+      <div class="value">May 2026</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Status</div>
+      <div class="value" style="color:#3FA66B;">Production-Ready</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="label">Live URL</div>
+      <div class="value">clearbuildusa.com</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ TABLE OF CONTENTS ════════════════ -->
+<div class="page toc-page">
+  <div class="toc">
+    <h2>Table of Contents</h2>
+
+    <div class="toc-group">Overview</div>
+    <div class="toc-section"><a href="#s1"><span class="toc-num">1</span><span class="toc-title">Product Overview &amp; Vision</span><span class="toc-page-num">3</span></a></div>
+    <div class="toc-section"><a href="#s2"><span class="toc-num">2</span><span class="toc-title">Business Goals &amp; Success Metrics</span><span class="toc-page-num">4</span></a></div>
+    <div class="toc-section"><a href="#s3"><span class="toc-num">3</span><span class="toc-title">User Personas</span><span class="toc-page-num">5</span></a></div>
+
+    <div class="toc-group">Product</div>
+    <div class="toc-section"><a href="#s4"><span class="toc-num">4</span><span class="toc-title">Full Feature List</span><span class="toc-page-num">6</span></a></div>
+    <div class="toc-section"><a href="#s5"><span class="toc-num">5</span><span class="toc-title">Complete Screen List &amp; User Flows</span><span class="toc-page-num">9</span></a></div>
+    <div class="toc-section"><a href="#s6"><span class="toc-num">6</span><span class="toc-title">Subscription Plans &amp; Pricing</span><span class="toc-page-num">11</span></a></div>
+
+    <div class="toc-group">Technical</div>
+    <div class="toc-section"><a href="#s7"><span class="toc-num">7</span><span class="toc-title">Technical Architecture</span><span class="toc-page-num">12</span></a></div>
+    <div class="toc-section"><a href="#s8"><span class="toc-num">8</span><span class="toc-title">API Reference</span><span class="toc-page-num">13</span></a></div>
+    <div class="toc-section"><a href="#s9"><span class="toc-num">9</span><span class="toc-title">Database Structure</span><span class="toc-page-num">15</span></a></div>
+    <div class="toc-section"><a href="#s10"><span class="toc-num">10</span><span class="toc-title">Third-Party Integrations</span><span class="toc-page-num">17</span></a></div>
+
+    <div class="toc-group">Security &amp; Quality</div>
+    <div class="toc-section"><a href="#s11"><span class="toc-num">11</span><span class="toc-title">Security Requirements &amp; Implementation</span><span class="toc-page-num">18</span></a></div>
+    <div class="toc-section"><a href="#s12"><span class="toc-num">12</span><span class="toc-title">Testing Scenarios</span><span class="toc-page-num">19</span></a></div>
+
+    <div class="toc-group">Launch</div>
+    <div class="toc-section"><a href="#s13"><span class="toc-num">13</span><span class="toc-title">Deployment Plan</span><span class="toc-page-num">20</span></a></div>
+    <div class="toc-section"><a href="#s14"><span class="toc-num">14</span><span class="toc-title">Timeline &amp; Milestones</span><span class="toc-page-num">21</span></a></div>
+    <div class="toc-section"><a href="#s15"><span class="toc-num">15</span><span class="toc-title">Risks &amp; Assumptions</span><span class="toc-page-num">22</span></a></div>
+    <div class="toc-section"><a href="#s16"><span class="toc-num">16</span><span class="toc-title">FAQ</span><span class="toc-page-num">23</span></a></div>
+  </div>
+</div>
+
+<!-- ════════════════ SECTION 1: PRODUCT OVERVIEW ════════════════ -->
+<div class="page" id="s1">
+  <h2 class="section-title"><span class="sec-num">1</span>Product Overview &amp; Vision</h2>
+
+  <div class="callout callout-navy">
+    <strong>Mission</strong>
+    Clear Build USA gives US construction contractors a single, professional platform to manage their entire business - from first lead to final payment - replacing scattered spreadsheets, paper invoices, and disconnected apps.
+  </div>
+
+  <h3>What is Clear Build USA?</h3>
+  <p>Clear Build USA is a cloud-based <strong>construction business management SaaS</strong> built for US-based contractors, general contractors, remodelers, and specialty trades. It covers the complete business lifecycle:</p>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap; margin:14px 0;">
+    <span class="badge badge-navy">Lead Capture</span>
+    <span style="color:var(--muted)">→</span>
+    <span class="badge badge-blue">Quoting</span>
+    <span style="color:var(--muted)">→</span>
+    <span class="badge badge-green">Project Management</span>
+    <span style="color:var(--muted)">→</span>
+    <span class="badge badge-amber">Invoicing</span>
+    <span style="color:var(--muted)">→</span>
+    <span class="badge badge-navy">Payment Collection</span>
+  </div>
+
+  <p>The platform eliminates the need for separate tools like QuickBooks (invoicing), Calendly (scheduling), Slack (communications), and paper/Excel (quotes). Everything lives in one place, accessible on any device.</p>
+
+  <h3>Core Value Propositions</h3>
+  <table>
+    <tr><th>Value</th><th>Description</th></tr>
+    <tr><td><strong>Professional image</strong></td><td>Branded quotes and invoices with online approval - contractors look like established businesses, not sole proprietors with handwritten notes.</td></tr>
+    <tr><td><strong>Faster payment</strong></td><td>Online payment via Stripe, automated invoice reminders, and clear payment tracking reduce days-sales-outstanding.</td></tr>
+    <tr><td><strong>Less admin time</strong></td><td>Auto-numbered documents, change orders linked to projects, and one-click quote-to-invoice conversion cut paperwork by hours per week.</td></tr>
+    <tr><td><strong>Team coordination</strong></td><td>Assign crews to projects, share project visibility with clients, and manage roles so everyone sees only what they need.</td></tr>
+    <tr><td><strong>Client communication</strong></td><td>Unified inbox for Email, SMS, and WhatsApp communications. Customers can approve quotes online - no back-and-forth phone calls.</td></tr>
+    <tr><td><strong>Business intelligence</strong></td><td>Dashboard with revenue trends, outstanding amounts, and pending quotes gives owners an instant business health check.</td></tr>
+  </table>
+
+  <h3>Product Vision (3-Year)</h3>
+  <p>Become the <strong>#1 all-in-one business platform for US construction contractors with 1–50 employees</strong>. Expand from core job management into:</p>
+  <ul>
+    <li>Material procurement and supplier management</li>
+    <li>Payroll and labor hour tracking</li>
+    <li>AI-driven estimate generation from job photos</li>
+    <li>Customer-facing project portal with live progress updates</li>
+    <li>Integration marketplace (QuickBooks, Xero, DocuSign, Procore)</li>
+  </ul>
+
+  <h3>Target Geography &amp; Market</h3>
+  <table>
+    <tr><th>Segment</th><th>Detail</th></tr>
+    <tr><td>Geography</td><td>United States (all 50 states, primary focus: Sun Belt, Midwest construction markets)</td></tr>
+    <tr><td>Business size</td><td>1–50 employees; sweet spot is 2–15 employees</td></tr>
+    <tr><td>Trades</td><td>General Contractor, Remodeler, Electrician, Plumber, HVAC, Painter, Landscaper, Roofer, Flooring</td></tr>
+    <tr><td>TAM</td><td>~3.8 million US construction establishments (US Census); ~700K actively seeking digital tools</td></tr>
+    <tr><td>Pricing anchor</td><td>$49/month - positioned well below enterprise tools ($200+/mo) and above free spreadsheets</td></tr>
+  </table>
+</div>
+
+<!-- ════════════════ SECTION 2: BUSINESS GOALS ════════════════ -->
+<div class="page section-break" id="s2">
+  <h2 class="section-title"><span class="sec-num">2</span>Business Goals &amp; Success Metrics</h2>
+
+  <h3>Launch Goals (First 90 Days)</h3>
+  <table>
+    <tr><th>Goal</th><th>Target</th><th>Metric</th></tr>
+    <tr><td>Paying subscribers</td><td>50 businesses</td><td>Stripe active subscriptions</td></tr>
+    <tr><td>Trial sign-ups</td><td>300 free trials</td><td>businesses.trial_ends_at set</td></tr>
+    <tr><td>Trial → Paid conversion</td><td>≥ 15%</td><td>Trials that upgraded within 15 days</td></tr>
+    <tr><td>Monthly Recurring Revenue</td><td>$2,450 MRR</td><td>Stripe MRR dashboard</td></tr>
+    <tr><td>Churn rate</td><td>&lt; 5% / month</td><td>Stripe cancellations</td></tr>
+    <tr><td>Support tickets</td><td>&lt; 2 per 10 users</td><td>support_tickets table</td></tr>
+    <tr><td>NPS score</td><td>≥ 40</td><td>In-app feedback survey</td></tr>
+  </table>
+
+  <h3>6-Month Goals</h3>
+  <table>
+    <tr><th>Goal</th><th>Target</th></tr>
+    <tr><td>Paying subscribers</td><td>250</td></tr>
+    <tr><td>MRR</td><td>$12,500</td></tr>
+    <tr><td>Feature completeness</td><td>Project Gantt chart, mobile app, QuickBooks export</td></tr>
+    <tr><td>Reviews on G2 / Capterra</td><td>25+ reviews, 4.5★ average</td></tr>
+  </table>
+
+  <h3>Key Performance Indicators</h3>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <h4>Activation Rate</h4>
+      <p>% of trial users who create their first quote within 7 days. Target: 60%+</p>
+    </div>
+    <div class="feature-card">
+      <h4>Retention (Day 30)</h4>
+      <p>% of paid users still active at 30 days. Target: 85%+</p>
+    </div>
+    <div class="feature-card">
+      <h4>ARPU</h4>
+      <p>Average Revenue Per User. Target: $49–$55 blended (monthly vs annual mix)</p>
+    </div>
+    <div class="feature-card">
+      <h4>Time to First Value</h4>
+      <p>Minutes from sign-up to first quote created. Target: &lt; 10 minutes</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ SECTION 3: PERSONAS ════════════════ -->
+<div class="page" id="s3">
+  <h2 class="section-title"><span class="sec-num">3</span>User Personas</h2>
+
+  <div class="persona-grid">
+    <div class="persona-card">
+      <div class="persona-avatar" style="background:var(--navy);">MR</div>
+      <h4>Mike R. - Solo Contractor</h4>
+      <div class="persona-role">General Contractor · 1 person · Texas</div>
+      <p style="font-size:12px; color:var(--muted);">Runs his own GC business, does everything himself. Currently uses paper estimates and QuickBooks. Frustrated by chasing payments and looking unprofessional to clients.</p>
+      <p style="font-size:12px; margin-top:6px;"><strong>Needs:</strong> Fast quoting, online payment, professional appearance<br><strong>Pain:</strong> No time for complex software. Must be simple.</p>
+    </div>
+    <div class="persona-card">
+      <div class="persona-avatar" style="background:var(--green);">JS</div>
+      <h4>Jennifer S. - Small GC Owner</h4>
+      <div class="persona-role">GC Owner · 8 employees · Florida</div>
+      <p style="font-size:12px; color:var(--muted);">Manages a crew of 8. Runs multiple projects simultaneously. Uses Excel for job tracking, Google Calendar for scheduling, and texts crew assignments. Overwhelmed by admin.</p>
+      <p style="font-size:12px; margin-top:6px;"><strong>Needs:</strong> Multi-project dashboard, team roles, change orders<br><strong>Pain:</strong> No single view of all jobs + finances</p>
+    </div>
+    <div class="persona-card">
+      <div class="persona-avatar" style="background:var(--blue);">KP</div>
+      <h4>Kevin P. - Project Manager</h4>
+      <div class="persona-role">Project Manager · 15-person GC · Ohio</div>
+      <p style="font-size:12px; color:var(--muted);">Assigned to manage 4–6 active projects. Needs to track tasks, communicate with clients, and log daily updates without going through the owner for every action.</p>
+      <p style="font-size:12px; margin-top:6px;"><strong>Needs:</strong> Project tasks, team view, client communication log<br><strong>Pain:</strong> Owner bottleneck; no visibility sharing with clients</p>
+    </div>
+    <div class="persona-card">
+      <div class="persona-avatar" style="background:#7C3AED;">AL</div>
+      <h4>Amy L. - Office Administrator</h4>
+      <div class="persona-role">Office Admin · 12-person Remodeler · California</div>
+      <p style="font-size:12px; color:var(--muted);">Handles all invoicing, payment follow-ups, and customer communication. Needs a clean interface with no surprises, and confidence that what she sends looks professional.</p>
+      <p style="font-size:12px; margin-top:6px;"><strong>Needs:</strong> Invoice management, email templates, payment tracking<br><strong>Pain:</strong> Manual reminder emails; no payment status visibility</p>
+    </div>
+  </div>
+
+  <h3>Role Permissions Overview</h3>
+  <table>
+    <tr><th>Capability</th><th>Owner</th><th>Admin</th><th>Staff</th><th>Crew</th></tr>
+    <tr><td>View dashboard &amp; contacts</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+    <tr><td>Create/edit quotes &amp; invoices</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Record payments</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+    <tr><td>Approve change orders</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+    <tr><td>Send notifications/emails</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+    <tr><td>Manage team members</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+    <tr><td>Access billing &amp; settings</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+    <tr><td>View assigned projects</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+  </table>
+</div>
+
+<!-- ════════════════ SECTION 4: FEATURE LIST ════════════════ -->
+<div class="page section-break" id="s4">
+  <h2 class="section-title"><span class="sec-num">4</span>Full Feature List</h2>
+
+  <h3>4.1 Authentication &amp; User Management</h3>
+  <ul>
+    <li>Email + password registration with mandatory email verification</li>
+    <li>Secure login with JWT session (15-day expiry, stored in HTTP-only cookie)</li>
+    <li>Forgot password / reset password via email token (1-hour expiry)</li>
+    <li>Change password from settings (requires current password)</li>
+    <li>Multi-business support - one user can belong to multiple businesses</li>
+    <li>Business switcher in the top bar to switch active business context</li>
+    <li>Role-based access control: Owner, Admin, Staff, Crew</li>
+    <li>Immediate session revocation when a team member is removed</li>
+    <li>Resend verification email for unverified accounts</li>
+  </ul>
+
+  <h3>4.2 Dashboard</h3>
+  <ul>
+    <li>Personalised greeting (Good Morning/Afternoon/Evening, [First Name])</li>
+    <li>4 live stat cards: Outstanding Invoices Amount, Pending Quotes, Active Projects, Payments Received (MTD)</li>
+    <li>6-month revenue bar chart with month-by-month breakdown</li>
+    <li>Recent activity feed (latest quotes, invoices, payments, contacts)</li>
+    <li>Outstanding invoices list with quick "View" links</li>
+    <li>Quick action buttons: New Contact, New Quote, New Invoice, Payments</li>
+    <li>"No activity yet" state for new businesses</li>
+  </ul>
+
+  <h3>4.3 Contact Management</h3>
+  <ul>
+    <li>Unified contacts list with search and type filter</li>
+    <li>Three contact types: <strong>Lead</strong>, <strong>Customer</strong>, <strong>Direct Contact</strong></li>
+    <li>Lead status pipeline: New Lead → In Conversation → Meeting Scheduled → Site Visit → Proposal Sent → Negotiation → Won / Lost</li>
+    <li>Heat scoring: Hot (New Lead / In Conversation), Warm (Meeting/Site/Proposal/Negotiation), Cold (Lost/other)</li>
+    <li>Contact detail page with full activity timeline</li>
+    <li>Lifetime value (total invoiced) per contact</li>
+    <li>Separate Leads and Customers views with dedicated filters</li>
+    <li>Convert Lead → Customer with one click</li>
+    <li>Leads page: 4 stat cards (Total, Hot, Warm, Cold), Heat badges</li>
+    <li>Customers page: Grid/List toggle, star ratings, avatar cards</li>
+    <li>Server-side pagination (50 records per page) on all list views</li>
+  </ul>
+
+  <h3>4.4 Quotes</h3>
+  <ul>
+    <li>Create quotes with multiple line items (description, quantity, unit price, discount, tax)</li>
+    <li>Auto-numbering with configurable prefix (e.g., Q-0001)</li>
+    <li>3-column metadata: Customer, Job Site, Valid Through (default: today +30 days)</li>
+    <li>Send channel toggles: Email, SMS, WhatsApp</li>
+    <li>Activity sidebar showing all actions taken on the quote</li>
+    <li>Quote status flow: Draft → Sent → Approved / Rejected</li>
+    <li>Public quote preview page (no login required) - customer can Approve or Request Changes</li>
+    <li>Only "Sent" quotes can be approved (prevents double-approval exploit)</li>
+    <li>Convert approved quote to invoice with one click</li>
+    <li>5 stat cards on list: Total, Draft, Sent, Approved, Rejected</li>
+    <li>Filter tabs by status; avatar initials for quick contact identification</li>
+  </ul>
+
+  <h3>4.5 Invoices</h3>
+  <ul>
+    <li>Create invoices with line items (same structure as quotes)</li>
+    <li>Auto-numbering with configurable prefix (e.g., INV-0001)</li>
+    <li>Payment options panel: due date, deposit %, payment method</li>
+    <li>Schedule reminders: days before due, communication channel</li>
+    <li>Internal notes visible only to your team</li>
+    <li>Invoice status flow: Draft → Sent → Due → Overdue → Paid / Partial</li>
+    <li>Record payment modal: Full / 50% / Deposit / Custom amount tabs</li>
+    <li>Payment methods: Card, Bank Transfer, Check, Cash</li>
+    <li>Online payment via Stripe (customer clicks "Pay $X" in invoice)</li>
+    <li>Payment summary sidebar with progress bar on invoice detail</li>
+    <li>Activity timeline on invoice detail</li>
+    <li>Automatic project creation when no project is selected on invoice creation</li>
+    <li>4 stat cards on list: Total, Unpaid, Overdue, Paid (MTD)</li>
+  </ul>
+
+  <h3>4.6 Projects</h3>
+  <ul>
+    <li>Project list with gradient colour cards and progress bars</li>
+    <li>"Day X of Y" timeline display based on start/end dates</li>
+    <li>Budget tracking: budget amount, deposit %, financial summary</li>
+    <li>Team assignment: assign specific business members to a project</li>
+    <li>Task management: create tasks, assign due dates, mark complete</li>
+    <li>Client visibility toggle: share or hide project details from the customer</li>
+    <li>Project status: Planning, In Progress, On Hold, Completed, Cancelled</li>
+    <li>Link invoices, quotes, and change orders to projects</li>
+    <li>Auto-numbering with configurable prefix (e.g., PRJ-0001)</li>
+    <li>Project updates log for daily notes and progress photos</li>
+  </ul>
+
+  <h3>4.7 Payments</h3>
+  <ul>
+    <li>Full payment history across all invoices</li>
+    <li>4 stat cards: Card, Bank, Check, Cash totals</li>
+    <li>Mini bar chart of payments over time</li>
+    <li>Payment reversal (Owner/Admin only)</li>
+    <li>Stripe webhook integration for automatic payment status updates</li>
+    <li>"Cleared" badge for verified digital payments</li>
+  </ul>
+
+  <h3>4.8 Change Orders</h3>
+  <ul>
+    <li>Create change orders linked to existing projects</li>
+    <li>Line items with description, quantity, unit price</li>
+    <li>Status: Draft → Sent → Approved / Rejected / Void</li>
+    <li>Role-guarded: only Owner/Admin can approve or void</li>
+    <li>3 stat cards: Draft, Pending Approval, Approved</li>
+  </ul>
+
+  <h3>4.9 Scheduling</h3>
+  <ul>
+    <li><strong>Availability Slots:</strong> Create individual time slots with date, start/end time, meeting type, location, timezone. Support recurring slots (daily/weekly/monthly).</li>
+    <li><strong>Booking Links:</strong> Generate shareable booking link tokens tied to specific slots. Include message to recipient, expiry date.</li>
+    <li><strong>Public Booking Page:</strong> Customer-facing page (no login required) to select a slot and confirm a meeting.</li>
+    <li><strong>Meeting Management:</strong> Track all meetings with statuses: Scheduled, Confirmed, Completed, Canceled, No Show, Rescheduled</li>
+    <li>Meeting types: Consultation, Site Visit, Estimate Meeting, Project Discussion, Final Walkthrough, Follow-up Call, Other</li>
+  </ul>
+
+  <h3>4.10 Communications</h3>
+  <ul>
+    <li>Two-panel chat-style inbox grouped by contact</li>
+    <li>Channel support: Email, SMS, WhatsApp, Phone Call, Note</li>
+    <li>Filter tabs by channel (All, Email, SMS, WhatsApp, Note)</li>
+    <li>Search contacts and message content</li>
+    <li>Log manual communication records (call notes, manual emails)</li>
+    <li>Mobile-responsive: switches between list and chat views</li>
+  </ul>
+
+  <h3>4.11 Team Management</h3>
+  <ul>
+    <li>Invite team members by email (sends invitation email with token link)</li>
+    <li>4 roles: Owner, Admin, Staff, Crew - each with distinct permissions</li>
+    <li>4 stat cards on team page: Total, Online, Admins, Crew</li>
+    <li>Roles &amp; Permissions reference table on team page</li>
+    <li>Remove team member - immediately invalidates their JWT (force_logout_at)</li>
+    <li>Invited users who don't yet have an account get prompted to register first</li>
+  </ul>
+
+  <h3>4.12 Templates</h3>
+  <ul>
+    <li>Reusable message templates for notifications, quotes, invoices</li>
+    <li>Create, edit, delete, and duplicate templates</li>
+    <li>Variable support: {{contact_name}}, {{business_name}}, etc.</li>
+  </ul>
+
+  <h3>4.13 Notifications</h3>
+  <ul>
+    <li>In-app notification feed</li>
+    <li>Send notifications via Email or WhatsApp to contacts (Owner/Admin only)</li>
+    <li>Default notification templates: Quote Sent, Invoice Due Reminder, Payment Received</li>
+    <li>Mark as read, mark all as read</li>
+  </ul>
+
+  <h3>4.14 Settings (9 Sections)</h3>
+  <ul>
+    <li><strong>Business Profile:</strong> Name, type, address, phone, logo upload</li>
+    <li><strong>Preferences:</strong> Default currency, date format, fiscal year start</li>
+    <li><strong>Tax &amp; Numbering:</strong> Default tax rate, quote/invoice/project number prefixes</li>
+    <li><strong>Notification Preferences:</strong> Toggle email/push for various events</li>
+    <li><strong>Email Templates:</strong> Customise outgoing email body/subject per event type</li>
+    <li><strong>Integrations:</strong> Stripe connection status, webhook endpoint configuration</li>
+    <li><strong>Region &amp; Language:</strong> Timezone, language preference</li>
+    <li><strong>Security:</strong> Change password (requires current password)</li>
+    <li><strong>API &amp; Webhooks:</strong> Configure outbound webhooks for 8 event types</li>
+  </ul>
+
+  <h3>4.15 AI Chatbot</h3>
+  <ul>
+    <li>Powered by Google Gemini 2.0 Flash</li>
+    <li>Business assistant accessible from any page</li>
+    <li>Contextual help for using the platform</li>
+    <li>Graceful error handling - returns user-friendly messages if AI is unavailable</li>
+  </ul>
+
+  <h3>4.16 Help &amp; Support</h3>
+  <ul>
+    <li>FAQ system with search</li>
+    <li>Support ticket creation and management</li>
+    <li>Ticket status: Open, In Progress, Resolved, Closed</li>
+    <li>Message thread within each ticket</li>
+  </ul>
+
+  <h3>4.17 Profile Management</h3>
+  <ul>
+    <li>User profile: bio, skill tags, recent work grid</li>
+    <li>Photo upload</li>
+    <li>Change display name, bio, and social links</li>
+    <li>Danger zone: delete account</li>
+  </ul>
+
+  <h3>4.18 Admin Panel (Internal)</h3>
+  <ul>
+    <li>Separate admin login at /admin</li>
+    <li>Dashboard: MRR, total users, active businesses, churn analytics</li>
+    <li>User management: list, view, edit, deactivate users; impersonation</li>
+    <li>Business management: view all businesses, their subscription status</li>
+    <li>Subscription management: view, upgrade, cancel, override subscriptions</li>
+    <li>Plan management: create/edit plans and pricing</li>
+    <li>Broadcast messages: send announcements to all or filtered users</li>
+    <li>Audit logs: full platform activity log with filters</li>
+    <li>Stripe sync: reconcile Stripe data with database</li>
+  </ul>
+</div>
+
+<!-- ════════════════ SECTION 5: SCREEN LIST ════════════════ -->
+<div class="page section-break" id="s5">
+  <h2 class="section-title"><span class="sec-num">5</span>Complete Screen List &amp; User Flows</h2>
+
+  <h3>5.1 All Application Screens</h3>
+  <table>
+    <tr><th>#</th><th>Screen Name</th><th>Route</th><th>Auth Required</th><th>Status</th></tr>
+    <tr><td>01</td><td>Landing Page</td><td>/</td><td>No</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>02</td><td>Login</td><td>/login</td><td>No</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>03</td><td>Register</td><td>/register</td><td>No</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>04</td><td>Email Verification</td><td>/verify-email</td><td>No</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>05</td><td>Forgot Password</td><td>/forgot-password</td><td>No</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>06</td><td>Reset Password</td><td>/reset-password</td><td>No</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>07</td><td>Business Setup</td><td>/business-setup</td><td>Yes (no business)</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>08</td><td>Dashboard</td><td>/dashboard</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>09</td><td>Contacts List</td><td>/contacts</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>10</td><td>Contact Detail</td><td>/contacts/[id]</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>11</td><td>New Contact</td><td>/contacts/new</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>12</td><td>Leads List</td><td>/leads</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>13</td><td>Customers List</td><td>/customers</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>14</td><td>Quotes List</td><td>/quotes</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>15</td><td>Create Quote</td><td>/quotes/new</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>16</td><td>Quote Detail</td><td>/quotes/[id]</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>17</td><td>Quote Preview (Public)</td><td>/quotes/[id]/preview</td><td>No</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>18</td><td>Invoices List</td><td>/invoices</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>19</td><td>Create Invoice</td><td>/invoices/new</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>20</td><td>Invoice Detail</td><td>/invoices/[id]</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>21</td><td>Projects List</td><td>/projects</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>22</td><td>Create Project</td><td>/projects/new</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>23</td><td>Project Detail</td><td>/projects/[id]</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>24</td><td>Payments List</td><td>/payments</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>25</td><td>Change Orders List</td><td>/change-orders</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>26</td><td>Create Change Order</td><td>/change-orders/new</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>27</td><td>Change Order Detail</td><td>/change-orders/[id]</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>28</td><td>Scheduling</td><td>/scheduling</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>29</td><td>Public Booking Page</td><td>/book/[token]</td><td>No</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>30</td><td>Communications</td><td>/communications</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>31</td><td>Item Requirements</td><td>/item-requirements</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>32</td><td>Templates</td><td>/templates</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>33</td><td>Notifications</td><td>/notifications</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>34</td><td>Team Management</td><td>/team</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>35</td><td>Help &amp; Support</td><td>/help</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>36</td><td>Settings</td><td>/settings</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>37</td><td>Subscription &amp; Billing</td><td>/subscription</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>38</td><td>Profile</td><td>/profile</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>39</td><td>Profile Edit</td><td>/profile/edit</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>40</td><td>Audit Log</td><td>/audit-log</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>41</td><td>Feedback</td><td>/feedback</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+    <tr><td>42</td><td>Project Updates</td><td>/project-updates</td><td>Yes</td><td><span class="badge badge-green">Live</span></td></tr>
+  </table>
+
+  <h3>5.2 Core User Flows</h3>
+
+  <h4>Flow A: New Contractor Onboarding</h4>
+  <div class="status-flow">
+    <span class="badge badge-navy">Landing Page</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Register</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Verify Email</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Business Setup</span><span class="arrow">→</span>
+    <span class="badge badge-green">Dashboard</span>
+  </div>
+
+  <h4>Flow B: Lead to Paid Invoice</h4>
+  <div class="status-flow">
+    <span class="badge badge-navy">Add Lead</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Create Quote</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Send Quote</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Customer Approves</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Convert to Invoice</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Customer Pays Online</span><span class="arrow">→</span>
+    <span class="badge badge-green">Payment Recorded</span>
+  </div>
+
+  <h4>Flow C: Project Execution</h4>
+  <div class="status-flow">
+    <span class="badge badge-navy">Create Project</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Assign Team</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Log Daily Updates</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Issue Change Order</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Mark Complete</span><span class="arrow">→</span>
+    <span class="badge badge-green">Final Invoice</span>
+  </div>
+
+  <h4>Flow D: Team Member Invitation</h4>
+  <div class="status-flow">
+    <span class="badge badge-navy">Owner → Invite by Email</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Email Sent</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Invitee Clicks Link</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Register / Login</span><span class="arrow">→</span>
+    <span class="badge badge-green">Joins Business</span>
+  </div>
+
+  <h4>Flow E: Customer Books a Meeting</h4>
+  <div class="status-flow">
+    <span class="badge badge-navy">Contractor Creates Slot</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Generates Booking Link</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Shares Link with Customer</span><span class="arrow">→</span>
+    <span class="badge badge-navy">Customer Opens Public Page</span><span class="arrow">→</span>
+    <span class="badge badge-green">Meeting Confirmed</span>
+  </div>
+</div>
+
+<!-- ════════════════ SECTION 6: PRICING ════════════════ -->
+<div class="page" id="s6">
+  <h2 class="section-title"><span class="sec-num">6</span>Subscription Plans &amp; Pricing</h2>
+
+  <table>
+    <tr><th>Plan</th><th>Price</th><th>Billing</th><th>Features</th><th>Stripe Plan ID</th></tr>
+    <tr>
+      <td><strong>Free Trial</strong></td>
+      <td>$0</td>
+      <td>15 days, no card required</td>
+      <td>All features included, unlimited contacts, quotes &amp; invoices, team access, scheduling, email support</td>
+      <td>trial (internal)</td>
+    </tr>
+    <tr>
+      <td><strong>Monthly Pro</strong></td>
+      <td>$49/month</td>
+      <td>Monthly, cancel any time</td>
+      <td>Everything in Trial + Unlimited projects, scheduling &amp; bookings, team management, templates library, priority support</td>
+      <td>pro_monthly</td>
+    </tr>
+    <tr>
+      <td><strong>Yearly Pro</strong></td>
+      <td>$490/year</td>
+      <td>Annual (saves $98 = 2 months free)</td>
+      <td>Everything in Monthly + Annual billing receipt, early access to new features</td>
+      <td>pro_yearly</td>
+    </tr>
+  </table>
+
+  <h3>Billing Flow</h3>
+  <ol>
+    <li>User clicks "Start Monthly Plan" or "Start Yearly Plan" on /subscription</li>
+    <li>App calls <code>POST /api/billing/checkout</code> → creates Stripe Checkout Session</li>
+    <li>User redirected to Stripe-hosted checkout page</li>
+    <li>On success, Stripe sends webhook to <code>POST /api/webhooks/stripe</code></li>
+    <li>Webhook updates <code>subscriptions</code> table with Stripe subscription ID, status, and plan</li>
+    <li>User redirected to /subscription?success=1 with confirmation toast</li>
+  </ol>
+
+  <h3>Trial Expiry Behaviour</h3>
+  <ul>
+    <li>After 15 days, <code>restricted_mode = true</code> is set on the business</li>
+    <li>Restricted mode shows upgrade prompts on create flows</li>
+    <li>Read-only access to existing data remains available during restriction</li>
+  </ul>
+</div>
+
+<!-- ════════════════ SECTION 7: TECHNICAL ARCHITECTURE ════════════════ -->
+<div class="page section-break" id="s7">
+  <h2 class="section-title"><span class="sec-num">7</span>Technical Architecture</h2>
+
+  <h3>7.1 Technology Stack</h3>
+  <table>
+    <tr><th>Layer</th><th>Technology</th><th>Version</th><th>Purpose</th></tr>
+    <tr><td>Frontend Framework</td><td>Next.js (App Router)</td><td>15</td><td>Full-stack React framework, SSR + client components</td></tr>
+    <tr><td>UI Library</td><td>React</td><td>19</td><td>Component model, concurrent features</td></tr>
+    <tr><td>Language</td><td>TypeScript</td><td>5.x</td><td>Type safety across frontend and API routes</td></tr>
+    <tr><td>Styling</td><td>Tailwind CSS</td><td>3.x</td><td>Utility-first CSS, custom design system</td></tr>
+    <tr><td>Database</td><td>Supabase (PostgreSQL)</td><td>15</td><td>Relational database, real-time subscriptions</td></tr>
+    <tr><td>Auth</td><td>Custom JWT (jose + bcryptjs)</td><td>-</td><td>Signed JWT sessions, password hashing</td></tr>
+    <tr><td>Email</td><td>Resend</td><td>v1</td><td>Transactional emails (verification, invoices, invites)</td></tr>
+    <tr><td>Payments</td><td>Stripe</td><td>v14</td><td>Subscription billing, online invoice payments</td></tr>
+    <tr><td>AI</td><td>Google Gemini</td><td>2.0 Flash</td><td>In-app chatbot assistant</td></tr>
+    <tr><td>Icons</td><td>Lucide React</td><td>-</td><td>Consistent icon set throughout the app</td></tr>
+    <tr><td>Deployment</td><td>Hostinger</td><td>-</td><td>Node.js hosting, auto-deploy from GitHub</td></tr>
+    <tr><td>Version Control</td><td>GitHub</td><td>-</td><td>Source of truth: yogesh-112/cbtermi, branch: master</td></tr>
+  </table>
+
+  <h3>7.2 Application Architecture</h3>
+
+  <div class="callout callout-navy">
+    <strong>Pattern: Client Pages + API Routes</strong>
+    All <code>app/(app)/</code> pages are <code>"use client"</code> components that call their corresponding <code>app/api/</code> routes. The <code>app/(app)/layout.tsx</code> is the only server component - it reads the session and injects <code>user</code>, <code>businesses</code>, and <code>currentBusiness</code> into the sidebar. This keeps auth server-side while keeping UI interactive.
+  </div>
+
+  <h4>Authentication Flow</h4>
+  <ol>
+    <li>User logs in → <code>POST /api/auth/login</code> verifies password, signs JWT with <code>jose</code></li>
+    <li>JWT stored as <code>cb_session</code> cookie (HTTP-only, SameSite=Lax)</li>
+    <li>JWT payload: <code>{ id, name, email, businessId, role }</code></li>
+    <li>Every API route calls <code>requireSession()</code> from <code>lib/auth.ts</code></li>
+    <li><code>middleware.ts</code> runs before every page render to guard protected routes</li>
+    <li>Unauthenticated → redirect to /login; no businessId → redirect to /business-setup</li>
+  </ol>
+
+  <h4>Multi-Tenancy Pattern</h4>
+  <p>Every API query includes <code>.eq("business_id", session.businessId)</code>. The Supabase service role key is used server-side only, bypassing RLS. Application code enforces all tenancy boundaries - no user can see another business's data.</p>
+
+  <h4>File Structure</h4>
+  <table>
+    <tr><th>Path</th><th>Contents</th></tr>
+    <tr><td><code>app/(app)/</code></td><td>All authenticated app pages (client components)</td></tr>
+    <tr><td><code>app/api/</code></td><td>All API route handlers (server-side)</td></tr>
+    <tr><td><code>app/admin/</code></td><td>Admin panel pages</td></tr>
+    <tr><td><code>components/</code></td><td>Shared UI components (ui.tsx, layout/Topbar, Sidebar)</td></tr>
+    <tr><td><code>lib/</code></td><td>Server utilities: session.ts, auth.ts, supabase.ts, email.ts, utils.ts</td></tr>
+    <tr><td><code>app/globals.css</code></td><td>Design system: all custom Tailwind component classes</td></tr>
+    <tr><td><code>tailwind.config.js</code></td><td>Brand colors, custom screen breakpoints</td></tr>
+  </table>
+</div>
+
+<!-- ════════════════ SECTION 8: API REFERENCE ════════════════ -->
+<div class="page section-break" id="s8">
+  <h2 class="section-title"><span class="sec-num">8</span>API Reference</h2>
+
+  <div class="callout callout-navy">
+    <strong>Authentication</strong>
+    All private API routes require a valid <code>cb_session</code> JWT cookie. Public routes (quote preview, booking pages) are explicitly unauthenticated. All private routes filter data by <code>session.businessId</code>.
+  </div>
+
+  <h3>Authentication Routes</h3>
+  <table>
+    <tr><th>Method</th><th>Route</th><th>Description</th></tr>
+    <tr><td>POST</td><td>/api/auth/register</td><td>Create user account, send verification email</td></tr>
+    <tr><td>POST</td><td>/api/auth/login</td><td>Verify credentials, issue JWT cookie</td></tr>
+    <tr><td>POST</td><td>/api/auth/logout</td><td>Clear session cookie</td></tr>
+    <tr><td>GET</td><td>/api/auth/me</td><td>Return current session user</td></tr>
+    <tr><td>POST</td><td>/api/auth/verify-email</td><td>Verify email with token</td></tr>
+    <tr><td>POST</td><td>/api/auth/resend-verification</td><td>Resend verification email</td></tr>
+    <tr><td>POST</td><td>/api/auth/forgot-password</td><td>Send password reset email</td></tr>
+    <tr><td>POST</td><td>/api/auth/reset-password</td><td>Reset password with valid token</td></tr>
+    <tr><td>POST</td><td>/api/auth/change-password</td><td>Change password (requires current password)</td></tr>
+  </table>
+
+  <h3>Core Business Routes</h3>
+  <table>
+    <tr><th>Method</th><th>Route</th><th>Description</th></tr>
+    <tr><td>GET/POST</td><td>/api/contacts</td><td>List (paginated) / Create contact</td></tr>
+    <tr><td>GET/PATCH/DELETE</td><td>/api/contacts/[id]</td><td>Get / Update / Delete contact</td></tr>
+    <tr><td>GET/POST</td><td>/api/quotes</td><td>List / Create quote</td></tr>
+    <tr><td>GET/PATCH/DELETE</td><td>/api/quotes/[id]</td><td>Get / Update / Delete quote</td></tr>
+    <tr><td>GET/PATCH</td><td>/api/quotes/[id]/preview</td><td>Public quote view / Customer approval</td></tr>
+    <tr><td>GET/POST</td><td>/api/invoices</td><td>List / Create invoice</td></tr>
+    <tr><td>GET/PATCH/DELETE</td><td>/api/invoices/[id]</td><td>Get / Update / Delete invoice</td></tr>
+    <tr><td>POST</td><td>/api/invoices/[id]/pay</td><td>Initiate Stripe payment for invoice</td></tr>
+    <tr><td>GET/POST</td><td>/api/projects</td><td>List / Create project</td></tr>
+    <tr><td>GET/PATCH/DELETE</td><td>/api/projects/[id]</td><td>Get / Update / Delete project</td></tr>
+    <tr><td>GET/POST/PATCH/DELETE</td><td>/api/projects/[id]/tasks</td><td>Project task CRUD</td></tr>
+    <tr><td>GET/POST/DELETE</td><td>/api/projects/[id]/team</td><td>Project team assignment</td></tr>
+    <tr><td>GET/POST</td><td>/api/payments</td><td>List / Record payment</td></tr>
+    <tr><td>POST</td><td>/api/payments/[id]/reverse</td><td>Reverse a payment (Owner/Admin)</td></tr>
+    <tr><td>GET/POST</td><td>/api/change-orders</td><td>List / Create change order</td></tr>
+    <tr><td>GET/PATCH/DELETE</td><td>/api/change-orders/[id]</td><td>Get / Update (approve/reject) / Delete</td></tr>
+  </table>
+
+  <h3>Scheduling Routes</h3>
+  <table>
+    <tr><th>Method</th><th>Route</th><th>Description</th></tr>
+    <tr><td>GET/POST</td><td>/api/scheduling/slots</td><td>List / Create availability slot</td></tr>
+    <tr><td>PATCH/DELETE</td><td>/api/scheduling/slots/[id]</td><td>Update / Delete slot</td></tr>
+    <tr><td>GET/POST</td><td>/api/scheduling/booking-links</td><td>List / Create booking link</td></tr>
+    <tr><td>PATCH/DELETE</td><td>/api/scheduling/booking-links/[id]</td><td>Update / Delete booking link</td></tr>
+    <tr><td>GET/POST</td><td>/api/scheduling/meetings</td><td>List / Create meeting</td></tr>
+    <tr><td>PATCH</td><td>/api/scheduling/meetings/[id]</td><td>Update meeting status</td></tr>
+    <tr><td>GET/POST</td><td>/api/public/booking/[token]</td><td>Public booking page data / Confirm booking</td></tr>
+  </table>
+
+  <h3>Support &amp; Misc Routes</h3>
+  <table>
+    <tr><th>Method</th><th>Route</th><th>Description</th></tr>
+    <tr><td>GET/POST</td><td>/api/communications</td><td>Communication log list / Send message</td></tr>
+    <tr><td>GET/POST</td><td>/api/notifications</td><td>List notifications / Send notification</td></tr>
+    <tr><td>GET/POST/DELETE</td><td>/api/team</td><td>List team / Invite member / Remove member</td></tr>
+    <tr><td>GET/PATCH</td><td>/api/settings</td><td>Get / Update business settings (whitelisted fields)</td></tr>
+    <tr><td>GET/POST/PATCH/DELETE</td><td>/api/templates</td><td>Template CRUD</td></tr>
+    <tr><td>GET</td><td>/api/help/faqs</td><td>Search FAQs (max 200-char query)</td></tr>
+    <tr><td>GET/POST</td><td>/api/support/tickets</td><td>List / Create support ticket</td></tr>
+    <tr><td>GET/POST</td><td>/api/support/tickets/[id]/messages</td><td>Ticket message thread</td></tr>
+    <tr><td>GET</td><td>/api/dashboard</td><td>Dashboard stats, chart data, recent activity</td></tr>
+    <tr><td>GET</td><td>/api/search</td><td>Global search across contacts, quotes, invoices</td></tr>
+    <tr><td>POST</td><td>/api/upload</td><td>File / logo upload</td></tr>
+    <tr><td>GET/PATCH</td><td>/api/profile</td><td>Get / Update user profile</td></tr>
+    <tr><td>GET/PATCH</td><td>/api/subscription</td><td>Get subscription status</td></tr>
+    <tr><td>POST</td><td>/api/billing/checkout</td><td>Create Stripe Checkout session</td></tr>
+    <tr><td>POST</td><td>/api/billing/portal</td><td>Open Stripe customer billing portal</td></tr>
+    <tr><td>POST</td><td>/api/webhooks/stripe</td><td>Receive Stripe payment webhooks</td></tr>
+    <tr><td>POST</td><td>/api/chatbot</td><td>AI chatbot (Gemini 2.0 Flash)</td></tr>
+    <tr><td>GET/POST</td><td>/api/businesses</td><td>List user's businesses / Create new business</td></tr>
+    <tr><td>POST</td><td>/api/businesses/switch</td><td>Switch active business (re-signs JWT)</td></tr>
+  </table>
+
+  <h3>Webhook Events (Outbound)</h3>
+  <p>Configurable in Settings → API &amp; Webhooks. Events sent as POST to your configured URL:</p>
+  <div style="display:flex; flex-wrap:wrap; gap:6px; margin:10px 0;">
+    <span class="badge badge-gray">invoice.created</span>
+    <span class="badge badge-gray">invoice.paid</span>
+    <span class="badge badge-gray">invoice.overdue</span>
+    <span class="badge badge-gray">quote.approved</span>
+    <span class="badge badge-gray">quote.rejected</span>
+    <span class="badge badge-gray">payment.recorded</span>
+    <span class="badge badge-gray">contact.created</span>
+    <span class="badge badge-gray">project.updated</span>
+  </div>
+</div>
+
+<!-- ════════════════ SECTION 9: DATABASE STRUCTURE ════════════════ -->
+<div class="page section-break" id="s9">
+  <h2 class="section-title"><span class="sec-num">9</span>Database Structure</h2>
+
+  <div class="callout callout-amber">
+    <strong>Database Provider</strong>
+    PostgreSQL hosted on Supabase. The service role key is used server-side (bypasses Row Level Security). All tenancy isolation is enforced in application code via <code>business_id</code> filters.
+  </div>
+
+  <h3>Core Tables</h3>
+  <table>
+    <tr><th>Table</th><th>Key Columns</th><th>Purpose</th></tr>
+    <tr>
+      <td><code>users</code></td>
+      <td>id, email, password_hash, full_name, email_verified, last_business_id, force_logout_at</td>
+      <td>All platform users</td>
+    </tr>
+    <tr>
+      <td><code>businesses</code></td>
+      <td>id, name, type, owner_id, quote_prefix, invoice_prefix, project_prefix, trial_ends_at, restricted_mode, stripe_customer_id, logo_url</td>
+      <td>Contractor businesses (multi-tenant root)</td>
+    </tr>
+    <tr>
+      <td><code>business_members</code></td>
+      <td>user_id, business_id, role (owner/admin/staff/crew)</td>
+      <td>Many-to-many user ↔ business mapping</td>
+    </tr>
+    <tr>
+      <td><code>subscriptions</code></td>
+      <td>business_id, stripe_subscription_id, plan_id, status, current_period_end</td>
+      <td>Stripe subscription state per business</td>
+    </tr>
+    <tr>
+      <td><code>contacts</code></td>
+      <td>id, business_id, full_name, email, phone, contact_type, lead_status, lifetime_value, address</td>
+      <td>Leads, customers, and direct contacts</td>
+    </tr>
+  </table>
+
+  <h3>Documents Tables</h3>
+  <table>
+    <tr><th>Table</th><th>Key Columns</th><th>Purpose</th></tr>
+    <tr>
+      <td><code>quotes</code></td>
+      <td>id, business_id, contact_id, quote_number, title, status, subtotal, tax_amount, total, valid_until, notes, job_site</td>
+      <td>Quote headers</td>
+    </tr>
+    <tr>
+      <td><code>quote_items</code></td>
+      <td>quote_id, description, quantity, unit_price, discount, tax_rate, total</td>
+      <td>Quote line items</td>
+    </tr>
+    <tr>
+      <td><code>invoices</code></td>
+      <td>id, business_id, contact_id, project_id, invoice_number, status, subtotal, tax_amount, total, amount_paid, amount_due, due_date</td>
+      <td>Invoice headers</td>
+    </tr>
+    <tr>
+      <td><code>invoice_items</code></td>
+      <td>invoice_id, description, quantity, unit_price, discount, tax_rate, total</td>
+      <td>Invoice line items</td>
+    </tr>
+    <tr>
+      <td><code>change_orders</code></td>
+      <td>id, business_id, project_id, co_number, status, subtotal, total</td>
+      <td>Change order headers</td>
+    </tr>
+    <tr>
+      <td><code>change_order_items</code></td>
+      <td>change_order_id, description, quantity, unit_price</td>
+      <td>Change order line items</td>
+    </tr>
+  </table>
+
+  <h3>Project &amp; Operations Tables</h3>
+  <table>
+    <tr><th>Table</th><th>Key Columns</th><th>Purpose</th></tr>
+    <tr>
+      <td><code>projects</code></td>
+      <td>id, business_id, contact_id, project_number, name, status, budget, deposit_pct, start_date, end_date, client_visible</td>
+      <td>Project records</td>
+    </tr>
+    <tr>
+      <td><code>project_tasks</code></td>
+      <td>project_id, title, description, status, due_date, assigned_to</td>
+      <td>Tasks within a project</td>
+    </tr>
+    <tr>
+      <td><code>project_team_members</code></td>
+      <td>project_id, user_id, role</td>
+      <td>Team assigned to a project</td>
+    </tr>
+    <tr>
+      <td><code>project_updates</code></td>
+      <td>project_id, author_id, content, created_at</td>
+      <td>Daily log / progress notes</td>
+    </tr>
+    <tr>
+      <td><code>payments</code></td>
+      <td>id, business_id, invoice_id, amount, method, stripe_payment_id, recorded_by, reversed_at</td>
+      <td>Payment records</td>
+    </tr>
+    <tr>
+      <td><code>item_requirements</code></td>
+      <td>project_id, name, quantity, unit, estimated_cost, status</td>
+      <td>Material requirements per project</td>
+    </tr>
+  </table>
+
+  <h3>Communication &amp; System Tables</h3>
+  <table>
+    <tr><th>Table</th><th>Key Columns</th><th>Purpose</th></tr>
+    <tr>
+      <td><code>communications</code></td>
+      <td>business_id, contact_id, channel, direction, message, subject, sent_at</td>
+      <td>Communication log</td>
+    </tr>
+    <tr>
+      <td><code>notifications</code></td>
+      <td>business_id, user_id, type, title, body, read, sent_at</td>
+      <td>In-app notifications</td>
+    </tr>
+    <tr>
+      <td><code>team_invitations</code></td>
+      <td>business_id, email, token, role, accepted_at, expires_at</td>
+      <td>Pending team invitations</td>
+    </tr>
+    <tr>
+      <td><code>scheduling_slots</code></td>
+      <td>business_id, slot_date, start_time, end_time, meeting_type, location, status, repeat_option</td>
+      <td>Availability slots</td>
+    </tr>
+    <tr>
+      <td><code>booking_links</code></td>
+      <td>business_id, token, title, slot_ids, contact_id, expiry_date</td>
+      <td>Shareable booking tokens</td>
+    </tr>
+    <tr>
+      <td><code>meetings</code></td>
+      <td>business_id, slot_id, contact_id, status, confirmed_at</td>
+      <td>Confirmed meetings</td>
+    </tr>
+    <tr>
+      <td><code>templates</code></td>
+      <td>business_id, name, type, subject, body, variables</td>
+      <td>Reusable message templates</td>
+    </tr>
+    <tr>
+      <td><code>support_tickets</code></td>
+      <td>user_id, subject, status, priority, created_at</td>
+      <td>Support tickets</td>
+    </tr>
+    <tr>
+      <td><code>audit_events</code></td>
+      <td>business_id, user_id, action, resource, resource_id, metadata, created_at</td>
+      <td>Audit trail for all major actions</td>
+    </tr>
+    <tr>
+      <td><code>feedback</code></td>
+      <td>user_id, business_id, rating, comment, created_at</td>
+      <td>In-app feedback submissions</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ════════════════ SECTION 10: INTEGRATIONS ════════════════ -->
+<div class="page" id="s10">
+  <h2 class="section-title"><span class="sec-num">10</span>Third-Party Integrations</h2>
+
+  <table>
+    <tr><th>Service</th><th>Purpose</th><th>Env Variables</th><th>Notes</th></tr>
+    <tr>
+      <td><strong>Supabase</strong></td>
+      <td>PostgreSQL database, file storage</td>
+      <td>SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY</td>
+      <td>Service role key used server-side only. Row-level security bypassed - app enforces tenancy in code.</td>
+    </tr>
+    <tr>
+      <td><strong>Stripe</strong></td>
+      <td>Subscription billing, online invoice payments</td>
+      <td>STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PUBLISHABLE_KEY</td>
+      <td>Checkout Sessions for upgrades. Webhooks update subscription status. Invoice pay via Checkout Session.</td>
+    </tr>
+    <tr>
+      <td><strong>Resend</strong></td>
+      <td>Transactional email sending</td>
+      <td>RESEND_API_KEY</td>
+      <td>Falls back to console mock if key missing (for local dev). Templates: verification, password reset, team invite.</td>
+    </tr>
+    <tr>
+      <td><strong>Google Gemini</strong></td>
+      <td>AI chatbot assistant</td>
+      <td>GEMINI_API_KEY</td>
+      <td>Model: gemini-2.0-flash. Wrapped in try/catch - chatbot gracefully fails if API unavailable.</td>
+    </tr>
+    <tr>
+      <td><strong>Hostinger</strong></td>
+      <td>Node.js hosting, domain</td>
+      <td>PORT (auto-set by host)</td>
+      <td>Auto-deploys from GitHub master branch. App respects $PORT env var.</td>
+    </tr>
+  </table>
+
+  <h3>Environment Variables Reference</h3>
+  <table>
+    <tr><th>Variable</th><th>Required</th><th>Description</th></tr>
+    <tr><td>SUPABASE_URL</td><td>✅ Required</td><td>Supabase project URL (https://xxx.supabase.co)</td></tr>
+    <tr><td>SUPABASE_SERVICE_ROLE_KEY</td><td>✅ Required</td><td>Service role key - bypasses RLS. Never expose client-side.</td></tr>
+    <tr><td>JWT_SECRET</td><td>✅ Required</td><td>Minimum 32-char random string. Used to sign/verify all session JWTs. App throws on startup if missing.</td></tr>
+    <tr><td>NEXT_PUBLIC_APP_URL</td><td>✅ Required</td><td>Full URL of the app (https://clearbuildusa.com). Used for email links.</td></tr>
+    <tr><td>RESEND_API_KEY</td><td>⚡ Recommended</td><td>Email sending. If missing, emails log to console (dev only).</td></tr>
+    <tr><td>STRIPE_SECRET_KEY</td><td>⚡ Recommended</td><td>Stripe server key for creating checkout sessions and customers.</td></tr>
+    <tr><td>STRIPE_WEBHOOK_SECRET</td><td>⚡ Recommended</td><td>Validates incoming Stripe webhooks.</td></tr>
+    <tr><td>STRIPE_PUBLISHABLE_KEY</td><td>⚡ Recommended</td><td>Client-facing Stripe key (NEXT_PUBLIC_).</td></tr>
+    <tr><td>GEMINI_API_KEY</td><td>Optional</td><td>Google Gemini API key for chatbot. Chatbot disabled gracefully if missing.</td></tr>
+  </table>
+</div>
+
+<!-- ════════════════ SECTION 11: SECURITY ════════════════ -->
+<div class="page section-break" id="s11">
+  <h2 class="section-title"><span class="sec-num">11</span>Security Requirements &amp; Implementation</h2>
+
+  <h3>11.1 Authentication Security</h3>
+  <table>
+    <tr><th>Requirement</th><th>Implementation</th><th>Status</th></tr>
+    <tr><td>Password hashing</td><td>bcryptjs, 10 salt rounds</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+    <tr><td>JWT signing</td><td>jose HS256, strong secret required (throws on missing)</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+    <tr><td>Session cookie</td><td>HTTP-only, SameSite=Lax, 15-day expiry</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+    <tr><td>Email verification</td><td>Required before login, cryptographic token via Web Crypto API</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+    <tr><td>Password reset</td><td>Cryptographic token, 1-hour expiry enforced server-side</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+    <tr><td>Force logout</td><td>force_logout_at column - set when team member removed; API checks on every request</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+  </table>
+
+  <h3>11.2 Multi-Tenancy Security</h3>
+  <table>
+    <tr><th>Requirement</th><th>Implementation</th><th>Status</th></tr>
+    <tr><td>Business isolation</td><td>Every query: <code>.eq("business_id", session.businessId)</code></td><td><span class="badge badge-green">✅ Done</span></td></tr>
+    <tr><td>Cross-business data access</td><td>Impossible - businessId comes from signed JWT, not request body</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+    <tr><td>Quote approval exploit</td><td>Only "sent" quotes can be approved; status checked before update</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+    <tr><td>Invoice payment hijack</td><td>Business ownership verified before Stripe checkout created</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+  </table>
+
+  <h3>11.3 Input Validation &amp; API Security</h3>
+  <table>
+    <tr><th>Requirement</th><th>Implementation</th><th>Status</th></tr>
+    <tr><td>Settings field whitelist</td><td>ALLOWED_SETTINGS_FIELDS constant - only whitelisted columns can be updated</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+    <tr><td>Negative amounts</td><td>Math.max(0, parseFloat(v)) enforced on all line item numeric inputs</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+    <tr><td>Search query length</td><td>Max 200 chars on search endpoints, returns empty on exceeded</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+    <tr><td>Role-based guards</td><td>Owner/Admin required for: payments, change order approval, notification sending</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+    <tr><td>Tax calculation</td><td>Computed server-side from raw fields (not from client totals) to prevent manipulation</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+    <tr><td>Booking link contact validation</td><td>contact_id verified to belong to same business before insert</td><td><span class="badge badge-green">✅ Done</span></td></tr>
+  </table>
+
+  <h3>11.4 Stripe Webhook Security</h3>
+  <ul>
+    <li>Webhook signature verified using <code>STRIPE_WEBHOOK_SECRET</code> on every incoming event</li>
+    <li>Only processes known event types (checkout.session.completed, customer.subscription.*)</li>
+    <li>Idempotent handler - replaying a webhook does not double-record a payment</li>
+  </ul>
+
+  <div class="callout callout-red">
+    <strong>Pre-Launch Checklist</strong>
+    1. Confirm PLAYWRIGHT_TEST_SECRET is NOT set in Hostinger production environment (the /api/test/setup route is gated by this secret and returns 403 if it's missing - but best practice is to delete the route before launch).
+    2. Confirm JWT_SECRET is a strong 32+ character random string in production.
+    3. Confirm Stripe live keys (not test keys) are set in production.
+    4. Run one end-to-end Stripe payment test in production before opening to customers.
+  </div>
+</div>
+
+<!-- ════════════════ SECTION 12: TESTING ════════════════ -->
+<div class="page section-break" id="s12">
+  <h2 class="section-title"><span class="sec-num">12</span>Testing Scenarios</h2>
+
+  <h3>12.1 Test Coverage</h3>
+  <table>
+    <tr><th>Test Suite</th><th>Framework</th><th>Tests</th><th>Status</th></tr>
+    <tr><td>Authentication flows</td><td>Playwright (E2E)</td><td>12</td><td><span class="badge badge-green">✅ Passing</span></td></tr>
+    <tr><td>Contact management</td><td>Playwright (E2E)</td><td>15</td><td><span class="badge badge-green">✅ Passing</span></td></tr>
+    <tr><td>Quote flows</td><td>Playwright (E2E)</td><td>18</td><td><span class="badge badge-green">✅ Passing</span></td></tr>
+    <tr><td>Invoice flows</td><td>Playwright (E2E)</td><td>14</td><td><span class="badge badge-green">✅ Passing</span></td></tr>
+    <tr><td>Project management</td><td>Playwright (E2E)</td><td>16</td><td><span class="badge badge-green">✅ Passing</span></td></tr>
+    <tr><td>Payments</td><td>Playwright (E2E)</td><td>10</td><td><span class="badge badge-green">✅ Passing</span></td></tr>
+    <tr><td>Navigation</td><td>Playwright (E2E)</td><td>12</td><td><span class="badge badge-green">✅ Passing (6 skipped - mobile only)</span></td></tr>
+    <tr><td><strong>Total</strong></td><td></td><td><strong>97 / 103</strong></td><td><span class="badge badge-green">✅ 94% passing</span></td></tr>
+  </table>
+
+  <h3>12.2 Critical Manual Test Scenarios</h3>
+  <table>
+    <tr><th>#</th><th>Scenario</th><th>Expected Result</th></tr>
+    <tr><td>1</td><td>Register → Verify email → Login</td><td>Full auth flow completes, lands on Dashboard</td></tr>
+    <tr><td>2</td><td>Create quote with 3 line items, send via email, customer approves</td><td>Quote status → Approved, approval logged in activity</td></tr>
+    <tr><td>3</td><td>Convert approved quote to invoice, mark as paid</td><td>Invoice created, payment recorded, amount_due = 0</td></tr>
+    <tr><td>4</td><td>Invite team member → they register → appear in team list</td><td>member appears with correct role</td></tr>
+    <tr><td>5</td><td>Remove team member → they try to access app</td><td>Immediately redirected to login (force_logout)</td></tr>
+    <tr><td>6</td><td>Business A user tries to access Business B's invoice URL</td><td>404 or empty response - no data leaked</td></tr>
+    <tr><td>7</td><td>Stripe checkout for Monthly plan</td><td>Subscription activated, /subscription shows active plan</td></tr>
+    <tr><td>8</td><td>Create scheduling slot, generate booking link, public user selects slot</td><td>Meeting created, slot marked as booked</td></tr>
+    <tr><td>9</td><td>Staff user tries to record a payment</td><td>Blocked by role check - 403 Forbidden</td></tr>
+    <tr><td>10</td><td>Create change order for a project, approve it</td><td>Change order status → Approved</td></tr>
+  </table>
+
+  <h3>12.3 Pre-Launch Smoke Test Checklist</h3>
+  <ul>
+    <li>☐ Landing page loads correctly on mobile and desktop</li>
+    <li>☐ Registration email is delivered (check Resend dashboard)</li>
+    <li>☐ Login works with a real production account</li>
+    <li>☐ Dashboard shows correct data for a business with sample records</li>
+    <li>☐ Stripe Monthly plan checkout completes and subscription activates</li>
+    <li>☐ Invoice online payment works end-to-end in production</li>
+    <li>☐ Quote public preview page loads without login</li>
+    <li>☐ Public booking page loads and slot can be selected</li>
+    <li>☐ All 9 settings sections save without error</li>
+    <li>☐ AI chatbot responds in under 5 seconds</li>
+  </ul>
+</div>
+
+<!-- ════════════════ SECTION 13: DEPLOYMENT ════════════════ -->
+<div class="page section-break" id="s13">
+  <h2 class="section-title"><span class="sec-num">13</span>Deployment Plan</h2>
+
+  <h3>13.1 Deployment Pipeline</h3>
+  <table>
+    <tr><th>Step</th><th>Action</th><th>Tooling</th></tr>
+    <tr><td>1</td><td>Developer commits and pushes to GitHub master branch</td><td>git push origin master</td></tr>
+    <tr><td>2</td><td>Hostinger detects push via GitHub webhook</td><td>Hostinger auto-deploy integration</td></tr>
+    <tr><td>3</td><td>Hostinger pulls repo and runs <code>npm run build</code></td><td>Next.js build</td></tr>
+    <tr><td>4</td><td>If build passes, server restarts with new code</td><td>Hostinger Node.js process manager</td></tr>
+    <tr><td>5</td><td>Live at clearbuildusa.com</td><td>DNS: Hostinger → clearbuildusa.com</td></tr>
+  </table>
+
+  <h3>13.2 Pre-Deployment Checklist</h3>
+  <ul>
+    <li>☐ Run <code>npm run build</code> locally - zero TypeScript errors</li>
+    <li>☐ Run <code>npm run lint</code> - zero ESLint errors</li>
+    <li>☐ All critical Playwright tests passing (npm run test)</li>
+    <li>☐ Environment variables confirmed set on Hostinger</li>
+    <li>☐ Stripe live keys (not test) configured</li>
+    <li>☐ Test /api/test/setup endpoint returns 403 in production</li>
+    <li>☐ Verify SSL certificate active on clearbuildusa.com</li>
+    <li>☐ Test email delivery via Resend production key</li>
+    <li>☐ Confirm Stripe webhook endpoint points to https://clearbuildusa.com/api/webhooks/stripe</li>
+  </ul>
+
+  <h3>13.3 Rollback Plan</h3>
+  <ol>
+    <li>Identify the last stable commit hash in GitHub history</li>
+    <li>Push that commit to master: <code>git revert HEAD</code> or <code>git reset --hard &lt;commit&gt; &amp;&amp; git push --force</code></li>
+    <li>Hostinger auto-deploys the reverted code</li>
+    <li>Estimated rollback time: 3–5 minutes</li>
+  </ol>
+
+  <h3>13.4 Monitoring</h3>
+  <table>
+    <tr><th>What to Monitor</th><th>Tool</th></tr>
+    <tr><td>Server uptime</td><td>Hostinger dashboard, or add UptimeRobot (free)</td></tr>
+    <tr><td>Error logs</td><td>Hostinger server logs / console.error output</td></tr>
+    <tr><td>Payment failures</td><td>Stripe Dashboard → Events</td></tr>
+    <tr><td>Email delivery</td><td>Resend Dashboard → Logs</td></tr>
+    <tr><td>Database health</td><td>Supabase Dashboard → Database</td></tr>
+    <tr><td>User activity</td><td>audit_events table in Supabase</td></tr>
+  </table>
+</div>
+
+<!-- ════════════════ SECTION 14: TIMELINE ════════════════ -->
+<div class="page section-break" id="s14">
+  <h2 class="section-title"><span class="sec-num">14</span>Timeline &amp; Milestones</h2>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="ti-label">COMPLETED - April 2026</div>
+      <h4>Phase 1: Foundation</h4>
+      <p>Core auth, contacts, quotes, invoices, projects, payments, team management. Custom design system. Supabase integration.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="ti-label">COMPLETED - May 2026</div>
+      <h4>Phase 2: Full Redesign &amp; Polish</h4>
+      <p>42-screen UI redesign to professional design prototype. Change orders, scheduling, communications, templates, notifications, AI chatbot, landing page, admin panel, Playwright test suite (97/103 passing).</p>
+    </div>
+    <div class="timeline-item">
+      <div class="ti-label">COMPLETED - May 2026</div>
+      <h4>Phase 3: Security Audit &amp; Bug Fixes</h4>
+      <p>Full 28-bug audit. All P1 critical and P2 high bugs fixed. SQL migrations completed. Pagination implemented. Accessibility improvements.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="ti-label">NOW - May 2026</div>
+      <h4>Phase 4: Launch Preparation</h4>
+      <p>Production environment verification, Stripe live key setup, smoke testing, final documentation (this document).</p>
+    </div>
+    <div class="timeline-item">
+      <div class="ti-label">TARGET - June 2026</div>
+      <h4>Phase 5: Public Launch</h4>
+      <p>Marketing campaign activation, first 50 paid customers goal, support team readiness.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="ti-label">Q3 2026</div>
+      <h4>Phase 6: Growth Features</h4>
+      <p>Project Gantt chart, mobile app (React Native), QuickBooks export, more integrations, referral programme.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="ti-label">Q4 2026</div>
+      <h4>Phase 7: Scale</h4>
+      <p>AI-powered estimate generation from photos, customer-facing project portal, payroll/labor hours tracking, integration marketplace.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ SECTION 15: RISKS ════════════════ -->
+<div class="page section-break" id="s15">
+  <h2 class="section-title"><span class="sec-num">15</span>Risks &amp; Assumptions</h2>
+
+  <h3>Key Assumptions</h3>
+  <ul>
+    <li>Target contractors use smartphones and are comfortable with web apps</li>
+    <li>US contractors are willing to pay $49/month for an all-in-one tool (validated by ServiceTitan at $10K+/yr)</li>
+    <li>Stripe is available and reliable in the US contractor market</li>
+    <li>Email (Resend) is the primary notification channel; SMS integration may be needed later</li>
+    <li>15-day trial is sufficient to demonstrate value and convert</li>
+    <li>Hostinger provides sufficient reliability and performance for early growth (upgrade to Vercel/AWS may be needed at scale)</li>
+  </ul>
+
+  <h3>Risk Register</h3>
+  <table>
+    <tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th></tr>
+    <tr>
+      <td>Low trial → paid conversion</td>
+      <td class="risk-medium">Medium</td>
+      <td class="risk-high">High</td>
+      <td>In-app onboarding tour, email drip campaigns, personal outreach to trial users who haven't activated key features</td>
+    </tr>
+    <tr>
+      <td>Stripe payment failure in production</td>
+      <td class="risk-low">Low</td>
+      <td class="risk-high">High</td>
+      <td>Test end-to-end before launch. Monitor Stripe Dashboard daily post-launch.</td>
+    </tr>
+    <tr>
+      <td>Hostinger downtime / performance issues</td>
+      <td class="risk-medium">Medium</td>
+      <td class="risk-medium">Medium</td>
+      <td>UptimeRobot monitoring. Migration plan to Vercel/AWS if needed.</td>
+    </tr>
+    <tr>
+      <td>Competitor launches similar product</td>
+      <td class="risk-medium">Medium</td>
+      <td class="risk-medium">Medium</td>
+      <td>Speed to market. Niche focus on US small contractors. Price advantage vs ServiceTitan/Jobber.</td>
+    </tr>
+    <tr>
+      <td>Supabase data loss or outage</td>
+      <td class="risk-low">Low</td>
+      <td class="risk-high">High</td>
+      <td>Enable Supabase automatic daily backups. Set up point-in-time recovery.</td>
+    </tr>
+    <tr>
+      <td>GDPR / data privacy compliance</td>
+      <td class="risk-low">Low (US market)</td>
+      <td class="risk-medium">Medium</td>
+      <td>Privacy policy published. Data stored in US region. CCPA awareness for California users.</td>
+    </tr>
+    <tr>
+      <td>Gemini API cost at scale</td>
+      <td class="risk-low">Low (currently)</td>
+      <td class="risk-low">Low</td>
+      <td>Monitor Google Cloud billing. Add rate limiting per business if costs spike.</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ════════════════ SECTION 16: FAQ ════════════════ -->
+<div class="page section-break" id="s16">
+  <h2 class="section-title"><span class="sec-num">16</span>Frequently Asked Questions</h2>
+
+  <h3>Product FAQ</h3>
+
+  <h4>Q: Can a contractor use Clear Build USA without a business registered?</h4>
+  <p>A: No. After email verification, new users are redirected to /business-setup and must create a business before accessing any app features. This is enforced in middleware.</p>
+
+  <h4>Q: Can one user belong to multiple businesses?</h4>
+  <p>A: Yes. The business_members table supports many-to-many. The active business is in the JWT. The top bar business switcher lets users switch context without logging out.</p>
+
+  <h4>Q: What happens when a trial expires?</h4>
+  <p>A: The business enters restricted_mode. Create flows show upgrade prompts. Existing data remains accessible in read-only mode. No data is deleted.</p>
+
+  <h4>Q: Are customer-facing quote/invoice pages secure?</h4>
+  <p>A: Quote preview pages are public (by design - customers don't have accounts). They are read-only except for the approval action, which is protected: only quotes in "sent" status can be approved, preventing replay or double-approval attacks.</p>
+
+  <h4>Q: How does online invoice payment work?</h4>
+  <p>A: The contractor sends the invoice to the customer. The customer clicks "Pay $X" on the invoice page → Stripe Checkout is created → customer pays securely on Stripe's hosted page → Stripe sends a webhook → the invoice is marked as paid automatically.</p>
+
+  <h4>Q: Is there a mobile app?</h4>
+  <p>A: The web app is fully responsive and works on mobile browsers. A dedicated React Native mobile app is on the Q3 2026 roadmap.</p>
+
+  <h4>Q: How is my data isolated from other businesses?</h4>
+  <p>A: Every database query is filtered by the businessId in your signed JWT. This is enforced server-side on every API call - no user-supplied business ID is trusted. Cross-business data access is architecturally impossible.</p>
+
+  <h4>Q: What email provider is used?</h4>
+  <p>A: Resend (resend.com). Production emails are sent from a configured domain. In local development without a Resend key, emails are logged to the console so development works without credentials.</p>
+
+  <h4>Q: Where is data stored?</h4>
+  <p>A: PostgreSQL database on Supabase (US region). File uploads (logos, etc.) stored in Supabase Storage.</p>
+
+  <h4>Q: What is the admin panel for?</h4>
+  <p>A: The admin panel (/admin) is an internal tool for the Clear Build USA team - not for customers. It provides full visibility into all businesses, users, subscriptions, and platform analytics. It has a separate login and is not linked from the main app.</p>
+
+  <div class="doc-footer">
+    <div><strong>Clear Build USA</strong> - Master Product Document v1.0</div>
+    <div>Confidential - Internal Use Only</div>
+    <div>clearbuildusa.com · May 2026</div>
+  </div>
+</div>
+
+</body>
+</html>

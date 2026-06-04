@@ -1,0 +1,13 @@
+2026-05-26T08:25:44.878Z CLI info [main]    Server listening on port: 5400
+2026-05-26T08:25:44.922Z CLI info    Config : {"userName":"[REDACTED]","accessKey":"[REDACTED]","projectName":"Clear Build USA","buildName":"E2E — ${BUILD_NAME:-local}","buildIdentifier":"#${BUILD_NUMBER:-0} ${DATE_TIME}","testObservability":true,"interactiveDebugging":true,"browserstackLocal":false,"platforms":[{"browser":"chrome","os":"Windows","osVersion":"11","browserVersion":"latest"},{"browser":"firefox","os":"Windows","osVersion":"11","browserVersion":"latest"},{"browser":"edge","os":"Windows","osVersion":"11","browserVersion":"latest"},{"browser":"safari","os":"OS X","osVersion":"Sequoia","browserVersion":"latest"},{"deviceName":"iPhone 15","osVersion":"17","browserName":"safari"},{"deviceName":"Samsung Galaxy S23","osVersion":"13.0","browserName":"chrome"}],"parallelsPerPlatform":1}
+2026-05-26T08:25:45.044Z CLI info    Should start debug utility: undefined
+2026-05-26T08:25:45.050Z CLI info [testhub:module]   [3bf3818e-5a7b-4229-8cae-1b717838cd66]  Starting testhub from 22556:0
+2026-05-26T08:25:45.051Z CLI info   [3bf3818e-5a7b-4229-8cae-1b717838cd66]  [PRODUCTION] Making POST request to https://sdk.browserstack.com
+2026-05-26T08:25:45.054Z CLI info   [3bf3818e-5a7b-4229-8cae-1b717838cd66]  [PRODUCTION] Making GET request to https://hub.browserstack.com
+2026-05-26T08:25:45.224Z CLI info   [3bf3818e-5a7b-4229-8cae-1b717838cd66]  [PRODUCTION] Making GET request to https://hub-aps.browserstack.com
+2026-05-26T08:25:45.225Z CLI info   [3bf3818e-5a7b-4229-8cae-1b717838cd66]  [PRODUCTION] Making GET request to https://hub-euw.browserstack.com
+2026-05-26T08:25:45.225Z CLI info   [3bf3818e-5a7b-4229-8cae-1b717838cd66]  [PRODUCTION] Making GET request to https://hub-apse.browserstack.com
+2026-05-26T08:25:46.022Z CLI info [testhub:module]   [3bf3818e-5a7b-4229-8cae-1b717838cd66]  startBuild: response=w5umnvsz7xiug4rbll1darkp9gduytsasfhjkil8
+2026-05-26T08:25:46.023Z CLI info  [w5umnvsz7xiug4rbll1darkp9gduytsasfhjkil8]  [3bf3818e-5a7b-4229-8cae-1b717838cd66]  [PRODUCTION] Making POST request to https://api.browserstack.com
+2026-05-26T10:37:46.119Z CLI info  [w5umnvsz7xiug4rbll1darkp9gduytsasfhjkil8]  [3bf3818e-5a7b-4229-8cae-1b717838cd66]  [PRODUCTION] Making POST request to https://sdk.browserstack.com
+2026-05-26T12:49:46.183Z CLI info  [w5umnvsz7xiug4rbll1darkp9gduytsasfhjkil8]  [3bf3818e-5a7b-4229-8cae-1b717838cd66]  [PRODUCTION] Making POST request to https://sdk.browserstack.com

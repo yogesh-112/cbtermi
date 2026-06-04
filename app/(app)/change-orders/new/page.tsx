@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 import { toast, InfoTooltip } from "@/components/ui";
+import ContactSelect from "@/components/ui/ContactSelect";
 import { fmt } from "@/lib/utils";
 
 const EMPTY_ITEM = { description: "", qty: 1, unit: "", rate: 0, tax_rate: 0, total: 0 };
@@ -77,10 +78,10 @@ export default function NewChangeOrderPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="label">Contact</label>
-                <select value={form.contact_id} onChange={setF("contact_id")} className="field">
-                  <option value="">Select contact</option>
-                  {contacts.map(c => <option key={c.id} value={c.id}>{c.full_name}</option>)}
-                </select>
+                <ContactSelect contacts={contacts} value={form.contact_id}
+                  onChange={id => setForm(f => ({ ...f, contact_id: id }))}
+                  onContactCreated={c => setContacts(cs => [c, ...cs])}
+                  placeholder="Select contact" />
               </div>
               <div>
                 <label className="label">Project</label>

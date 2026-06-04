@@ -53,7 +53,28 @@
       "Bash(npx vercel *)",
       "Bash(Get-ChildItem -Recurse -Directory)",
       "WebFetch(domain:clearbuildusa.com)",
-      "WebFetch(domain:www.clearbuildusa.com)"
+      "WebFetch(domain:www.clearbuildusa.com)",
+      "Bash(npx playwright *)",
+      "Bash(npx supabase *)",
+      "Bash(psql *)",
+      "Bash(findstr -i gemini)",
+      "Bash(Write-Host \"auth cache cleared\")",
+      "Bash(New-Item -ItemType Directory -Force \"E:\\\\cbv1\\\\app\\\\api\\\\test\\\\setup\")",
+      "Bash(Write-Output \"done\")",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Read(//c/Program Files \\(x86\\)/Google/Chrome/Application/**)",
+      "Bash(dir E:/cbv1/docs/*.pdf)",
+      "Bash(npm init *)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:d[k] for k in ['scripts','devDependencies'] if k in d}, indent=2\\)\\)\")",
+      "PowerShell(cd E:\\\\cbv1; Get-Content .env.browserstack | ForEach-Object { if \\($_ -match '^\\([^#][^=]+\\)=\\(.+\\)$'\\) { [System.Environment]::SetEnvironmentVariable\\($matches[1], $matches[2]\\) } }; Write-Host \"Username: $env:BROWSERSTACK_USERNAME\"; Write-Host \"Email: $env:TEST_EMAIL\")",
+      "Bash(Get-Content *)",
+      "Bash(python -c \"import docx\")",
+      "Bash(pandoc --version)",
+      "PowerShell(py *)",
+      "PowerShell(cd \"E:\\\\cbv1\"; git add app\\\\\\(app\\\\\\)\\\\expenses\\\\ app\\\\\\(app\\\\\\)\\\\opportunities\\\\ app\\\\api\\\\expenses\\\\ app\\\\api\\\\opportunities\\\\ \"app\\\\api\\\\quotes\\\\[id]\\\\versions\\\\\" \"app\\\\api\\\\change-orders\\\\[id]\\\\preview\\\\\" \"app\\\\change-orders\\\\\" supabase\\\\migrations\\\\ \"app\\\\\\(app\\)\\\\change-orders\\\\[id]\\\\page.tsx\" \"app\\\\\\(app\\)\\\\dashboard\\\\page.tsx\" \"app\\\\\\(app\\)\\\\help\\\\page.tsx\" \"app\\\\\\(app\\)\\\\more\\\\page.tsx\" \"app\\\\\\(app\\)\\\\quotes\\\\[id]\\\\page.tsx\" app\\\\api\\\\dashboard\\\\route.ts components\\\\layout\\\\MobileNav.tsx components\\\\layout\\\\Sidebar.tsx lib\\\\i18n\\\\en.ts lib\\\\i18n\\\\es.ts lib\\\\i18n\\\\pt.ts; git status --short)",
+      "Bash(xargs grep -l \"super_admin\\\\|admin\")",
+      "Bash(grep -roh \"\\\\.from\\(['\\\\\"]\\\\\\\\\\([^'\\\\\"]*\\\\\\\\\\)['\\\\\"]\" \"E:\\\\cbv1\\\\app\\\\api\" \"E:\\\\cbv1\\\\lib\")",
+      "Bash(grep -v \"//\\\\|console\\\\|toast\\\\|className\\\\|styles\\\\|url\")"
     ]
   }
 }

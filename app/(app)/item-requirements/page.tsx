@@ -160,7 +160,7 @@ export default function ItemRequirementsPage() {
                 <div key={idx} className="grid grid-cols-12 gap-2 items-center">
                   <input value={item.item_name} onChange={e => setItem(idx, "item_name", e.target.value)}
                     className="field col-span-5" placeholder={t.itemRequirements.itemName} />
-                  <input type="number" value={item.quantity} onChange={e => setItem(idx, "quantity", e.target.value)}
+                  <input type="number" value={item.quantity} onChange={e => setItem(idx, "quantity", Math.max(1, parseInt(e.target.value) || 1))}
                     className="field col-span-2" placeholder={t.itemRequirements.qtyLabel} min={1} />
                   <input value={item.notes} onChange={e => setItem(idx, "notes", e.target.value)}
                     className="field col-span-4" placeholder={t.itemRequirements.itemNotes} />

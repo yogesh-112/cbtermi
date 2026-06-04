@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 
-const FROM = "Clear Build USA <no-reply@clearbuildusa.com>";
+// Use RESEND_FROM_EMAIL env var if set (for custom verified domain),
+// otherwise fall back to Resend's shared testing domain.
+const FROM = process.env.RESEND_FROM_EMAIL || "Clear Build USA <onboarding@resend.dev>";
 
 interface EmailOptions {
   to: string;

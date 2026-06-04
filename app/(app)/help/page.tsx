@@ -61,15 +61,17 @@ export default function HelpPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    const safe = (r: Response) => r.ok ? r.json() : Promise.resolve({});
     Promise.all([
-      fetch(`/api/help/faqs?lang=${lang}`).then(r => r.json()),
-      fetch("/api/help/common-issues").then(r => r.json()),
-      fetch("/api/support/tickets").then(r => r.json()),
-    ]).then(([f, i, t]) => {
+      fetch(`/api/help/faqs?lang=${lang}`).then(safe),
+      fetch("/api/help/common-issues").then(safe),
+      fetch("/api/support/tickets").then(safe),
+    ]).then(([f, i, tk]) => {
       setFaqs(f.faqs ?? []);
       setIssues(i.issues ?? []);
-      setTickets(t.tickets ?? []);
-    }).finally(() => setLoading(false));
+      setTickets(tk.tickets ?? []);
+    }).catch(e => console.error("[help] load failed:", e))
+      .finally(() => setLoading(false));
   }, []);
 
   const faqCategories = ["All", ...Array.from(new Set(faqs.map((f: any) => f.category)))];

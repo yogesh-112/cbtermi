@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useT } from "@/lib/i18n";
+import AddressAutocomplete from "@/components/ui/AddressAutocomplete";
 
 const BUSINESS_TYPES = ["General Contractor","Remodeler","Electrician","Plumber","HVAC","Painter","Landscaper","Roofer","Flooring","Other"];
 
@@ -23,10 +24,13 @@ export default function BusinessSetupPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) { setErr(`${t.businessSetup.businessName} ${t.common.required.toLowerCase()}`); return; }
-    if (!form.email.trim() && !form.phone.trim()) { setErr(`${t.businessSetup.businessEmail} ${t.common.required.toLowerCase()}`); return; }
+    // Business name is optional — auto-generate if blank
+    const payload = {
+      ...form,
+      name: form.name.trim() || "My Business",
+    };
     setLoading(true); setErr("");
-    const res = await fetch("/api/businesses", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+    const res = await fetch("/api/businesses", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     const data = await res.json();
     setLoading(false);
     if (!res.ok) setErr(data.message || t.businessSetup.creating);
@@ -53,7 +57,7 @@ export default function BusinessSetupPage() {
             <p className="section-title">{t.businessSetup.detailsSection} <span className="text-red-400">{t.businessSetup.requiredNote}</span></p>
             <div className="form-row">
               <div>
-                <label className="label">{t.businessSetup.businessName} *</label>
+                <label className="label">{t.businessSetup.businessName} <span className="text-[#8a8fa3] font-normal">(optional)</span></label>
                 <input value={form.name} onChange={set("name")} placeholder="ABC Remodeling LLC" className="field" />
               </div>
               <div>
@@ -85,7 +89,12 @@ export default function BusinessSetupPage() {
           <div>
             <p className="section-title">{t.common.address}</p>
             <div className="space-y-3">
-              <input value={form.address} onChange={set("address")} placeholder={t.businessSetup.streetAddress} className="field" />
+              <AddressAutocomplete
+                value={form.address}
+                onChange={v => setForm(f => ({ ...f, address: v }))}
+                onSelect={fill => setForm(f => ({ ...f, address: fill.address, city: fill.city, state: fill.state, zip: fill.zip, country: fill.country }))}
+                placeholder={t.businessSetup.streetAddress}
+              />
               <div className="form-row-3">
                 <input value={form.city} onChange={set("city")} placeholder={t.businessSetup.city} className="field" />
                 <input value={form.state} onChange={set("state")} placeholder={t.businessSetup.state} className="field" />

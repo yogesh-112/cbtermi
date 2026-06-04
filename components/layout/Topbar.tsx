@@ -73,13 +73,15 @@ export default function Topbar({ user, businesses, currentBusiness }: Props) {
   const meta = currentPage ? PAGE_META[currentPage] : { label: "" };
 
   const switchBusiness = async (id: string) => {
-    await fetch("/api/businesses/switch", {
+    const res = await fetch("/api/businesses/switch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ businessId: id }),
     });
-    router.refresh();
-    setBizOpen(false);
+    if (res.ok) {
+      setBizOpen(false);
+      window.location.reload();
+    }
   };
 
   const logout = async () => {

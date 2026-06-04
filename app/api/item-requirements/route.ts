@@ -12,7 +12,12 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  const { items, ...body } = await request.json();
+  const { items, ...rawBody } = await request.json();
+  const body = {
+    ...rawBody,
+    contact_id: rawBody.contact_id || null,
+    project_id: rawBody.project_id || null,
+  };
   const { data: list, error } = await supabase.from("item_requirement_lists").insert({ ...body, business_id: session.businessId, created_by: session.id }).select().single();
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
   if (items?.length) {

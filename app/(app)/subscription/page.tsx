@@ -58,13 +58,17 @@ export default function SubscriptionPage() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (searchParams.get("success") === "1") {
-      toast("Subscription activated! Your plan is now live.", "success");
-    }
-    fetch("/api/subscription")
-      .then(r => r.json())
-      .then(d => setSubscription(d.subscription))
-      .finally(() => setLoading(false));
+    const loadSub = async () => {
+      // If returning from Stripe checkout, sync from Stripe first (in case webhook hasn't fired)
+      if (searchParams.get("success") === "1") {
+        toast("Subscription activated! Your plan is now live.", "success");
+        await fetch("/api/billing/sync", { method: "POST" }).catch(() => {});
+      }
+      const d = await fetch("/api/subscription").then(r => r.json()).catch(() => ({}));
+      setSubscription(d.subscription ?? null);
+      setLoading(false);
+    };
+    loadSub();
   }, []);
 
   const applyCoupon = async () => {

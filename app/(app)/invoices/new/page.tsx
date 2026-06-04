@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Plus, Trash2, ArrowLeft, CreditCard, Landmark, FileCheck, Banknote, Bell, FileText } from "lucide-react";
 import { toast } from "@/components/ui";
+import ContactSelect from "@/components/ui/ContactSelect";
 import { fmt } from "@/lib/utils";
 
 const EMPTY_ITEM = { item_name: "", description: "", quantity: 1, unit: "", unit_price: 0, tax_rate: 0, discount: 0, total: 0 };
@@ -63,17 +64,40 @@ function InvoiceForm() {
   const taxAmount = items.reduce((s, i) => s + i.total * (i.tax_rate / 100), 0);
   const total     = subtotal + taxAmount;
 
-  const save = async (status = "draft") => {
-    if (!form.contact_id) { toast("Please select a contact", "error"); return; }
+  const validate = () => {
+    if (!form.contact_id) { toast("Please select a contact", "error"); return false; }
+    const validItems = items.filter(i => (i.item_name || i.description) && i.quantity > 0);
+    if (!validItems.length) { toast("Add at least one line item with a quantity > 0", "error"); return false; }
+    const badRate = validItems.find(i => i.unit_price <= 0);
+    if (badRate) { toast("All line items must have a rate greater than 0", "error"); return false; }
+    if (form.issue_date && form.due_date && form.due_date < form.issue_date) {
+      toast("Due date must be on or after the issue date", "error"); return false;
+    }
+    return true;
+  };
+
+  const save = async (action: "draft" | "review" | "send") => {
+    if (action !== "draft" && !validate()) return;
+    if (action === "draft" && !form.contact_id) { toast("Please select a contact first", "error"); return; }
     setSaving(true);
+    const status = action === "draft" ? "draft" : "sent";
     const res = await fetch("/api/invoices", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...form, status, items }),
     });
     const d = await res.json().catch(() => ({}));
+    if (!res.ok) { setSaving(false); toast(d.message || "Failed to save", "error"); return; }
+    const invoiceId = d.invoice.id;
+    if (action === "send") {
+      const sr = await fetch(`/api/invoices/${invoiceId}/send`, { method: "POST" });
+      const sd = await sr.json().catch(() => ({}));
+      if (!sr.ok) toast(sd.message || "Invoice saved but email failed to send", "error");
+      else toast("Invoice sent to contact", "success");
+    } else {
+      toast(action === "draft" ? "Draft saved" : "Invoice ready for review", "success");
+    }
     setSaving(false);
-    if (res.ok) { toast("Invoice saved"); router.push(`/invoices/${d.invoice.id}`); }
-    else toast(d.message || "Failed to save", "error");
+    router.push(`/invoices/${invoiceId}`);
   };
 
   const selectedContact = contacts.find(c => c.id === form.contact_id);
@@ -86,12 +110,15 @@ function InvoiceForm() {
           <h1 className="page-title">New invoice</h1>
           <p className="text-[12px] text-[#8a8fa3]">Draft · auto-saves every 10 seconds</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button onClick={() => save("draft")} disabled={saving} className="btn btn-outline btn-sm">
-            Save draft
+            Save as Draft
           </button>
-          <button onClick={() => save("sent")} disabled={saving} className="btn btn-primary btn-sm">
-            {saving ? "Saving…" : "Review & send"}
+          <button onClick={() => save("review")} disabled={saving} className="btn btn-soft btn-sm">
+            Save and Review
+          </button>
+          <button onClick={() => save("send")} disabled={saving} className="btn btn-primary btn-sm gap-1.5">
+            <FileText size={13} /> {saving ? "Saving…" : "Save and Send"}
           </button>
         </div>
       </div>
@@ -105,10 +132,10 @@ function InvoiceForm() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="label">Customer <span className="text-red-500">*</span></label>
-                <select value={form.contact_id} onChange={set("contact_id")} className="field">
-                  <option value="">Select contact…</option>
-                  {contacts.map(c => <option key={c.id} value={c.id}>{c.full_name}{c.business_name ? ` — ${c.business_name}` : ""}</option>)}
-                </select>
+                <ContactSelect contacts={contacts} value={form.contact_id}
+                  onChange={id => setForm(f => ({ ...f, contact_id: id }))}
+                  onContactCreated={c => setContacts(cs => [c, ...cs])}
+                  placeholder="Select contact…" />
                 {selectedContact && (
                   <p className="text-[11px] text-[#8a8fa3] mt-1">{selectedContact.email}</p>
                 )}
@@ -277,11 +304,14 @@ function InvoiceForm() {
 
           {/* Save actions */}
           <div className="space-y-2">
-            <button onClick={() => save("sent")} disabled={saving} className="btn btn-primary w-full">
-              {saving ? "Saving…" : "Review & send"}
+            <button onClick={() => save("send")} disabled={saving} className="btn btn-primary w-full">
+              {saving ? "Saving…" : "Save and Send"}
+            </button>
+            <button onClick={() => save("review")} disabled={saving} className="btn btn-soft w-full">
+              Save and Review
             </button>
             <button onClick={() => save("draft")} disabled={saving} className="btn btn-outline w-full">
-              Save as draft
+              Save as Draft
             </button>
           </div>
         </div>

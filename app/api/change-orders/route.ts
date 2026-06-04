@@ -20,7 +20,14 @@ export async function POST(request: NextRequest) {
   const trialErr = await checkTrialAccess(session.businessId);
   if (trialErr) return trialErr;
 
-  const { items, ...body } = await request.json();
+  const { items, ...rawBody } = await request.json();
+  // Sanitize UUID fields — empty string "" is not a valid UUID
+  const body = {
+    ...rawBody,
+    contact_id: rawBody.contact_id || null,
+    project_id: rawBody.project_id || null,
+    quote_id:   rawBody.quote_id   || null,
+  };
 
   // Auto-number
   const { count } = await supabase

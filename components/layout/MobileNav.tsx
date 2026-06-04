@@ -1,15 +1,14 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Briefcase, Receipt, MoreHorizontal } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Briefcase, Receipt, MoreHorizontal } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 const MORE_PATHS = [
-  "/quotes", "/payments", "/notifications", "/communications",
+  "/projects", "/payments", "/notifications", "/communications",
   "/item-requirements", "/project-updates", "/feedback",
   "/team", "/settings", "/change-orders", "/more",
   "/scheduling", "/templates", "/help", "/expenses", "/opportunities",
-  "/invoices",
 ];
 
 export default function MobileNav() {
@@ -24,7 +23,7 @@ export default function MobileNav() {
   const PRIMARY = [
     { href: "/dashboard", icon: LayoutDashboard, label: t.nav.dashboard },
     { href: "/contacts",  icon: Users,           label: t.nav.contacts },
-    { href: "/projects",  icon: Briefcase,       label: t.nav.projects },
+    { href: "/quotes",    icon: FileText,        label: t.nav.quotes },
     { href: "/invoices",  icon: Receipt,         label: t.nav.invoices },
   ];
 

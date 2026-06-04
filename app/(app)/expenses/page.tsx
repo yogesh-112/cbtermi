@@ -62,8 +62,9 @@ export default function ExpensesPage() {
   };
 
   const save = async () => {
-    if (!form.title.trim())  { toast(t.common.required, "error"); return; }
+    if (!form.title.trim()) { toast(t.common.required, "error"); return; }
     if (!form.amount || parseFloat(form.amount) < 0) { toast(t.common.required, "error"); return; }
+    if (form.expense_date > new Date().toISOString().split("T")[0]) { toast("Expense date cannot be in the future", "error"); return; }
     setSaving(true);
     const body = {
       ...form,
@@ -308,7 +309,7 @@ export default function ExpensesPage() {
           </div>
           <div>
             <label className="label">{t.expenses.dateLabel}</label>
-            <input type="date" value={form.expense_date}
+            <input type="date" value={form.expense_date} max={new Date().toISOString().split("T")[0]}
               onChange={e => setForm({ ...form, expense_date: e.target.value })} className="field" />
           </div>
           <div>

@@ -2,10 +2,11 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import {
-  Plus, Search, Phone, Mail, MessageCircle, Eye, Pencil,
-  UserCheck, Trash2, Users,
+  Plus, Search, Phone, Mail, MessageCircle, MessageSquare,
+  Eye, Pencil, UserCheck, Trash2, Users, ChevronDown,
 } from "lucide-react";
 import { Modal, StatusBadge, EmptyState, toast, ConfirmDialog, ActionMenu, Tabs } from "@/components/ui";
+import AddressAutocomplete from "@/components/ui/AddressAutocomplete";
 import { useT } from "@/lib/i18n";
 
 const LEAD_STATUSES = [
@@ -70,7 +71,9 @@ export default function ContactsPage() {
 
   const set = (k: keyof typeof EMPTY_FORM) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-      const val = e.target.value;
+      let val = e.target.value;
+      // Phone/WhatsApp: strip everything except digits, spaces, +, -, (, )
+      if (k === "phone" || k === "whatsapp") val = val.replace(/[^0-9+\-() ]/g, "");
       if (k === "phone" && (form as any).whatsapp_same) {
         setForm((f) => ({ ...f, phone: val, whatsapp: val }));
       } else {
@@ -234,20 +237,25 @@ export default function ContactsPage() {
                 </Link>
                 {c.business_name && <p className="text-xs text-[#8a8fa3] truncate">{c.business_name}</p>}
               </div>
-              <ActionMenu items={[
-                { label: t.contacts.view, icon: <Eye size={14} />, onClick: () => window.location.href = `/contacts/${c.id}` },
-                { label: t.contacts.editAction, icon: <Pencil size={14} />, onClick: () => openEdit(c) },
-                ...(c.contact_type !== "customer" ? [{ label: t.contacts.convertAction, icon: <UserCheck size={14} />, onClick: () => convertToCustomer(c.id) }] : []),
-                { label: t.common.delete, icon: <Trash2 size={14} />, onClick: () => setDeleteId(c.id), danger: true },
-              ]} />
-            </div>
-            <div className="flex items-center gap-2 mt-3 flex-wrap">
               <StatusBadge status={c.contact_type} />
-              <span className="badge bg-[#f0efea] text-[#4a5168]">{c.lead_status || "New Lead"}</span>
             </div>
-            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[#f0efea]">
-              {c.phone && <a href={`tel:${c.phone}`} className="flex items-center gap-1.5 text-xs text-[#4a5168]"><Phone size={12} /> {c.phone}</a>}
-              {c.email && <a href={`mailto:${c.email}`} className="flex items-center gap-1.5 text-xs text-[#4a5168] truncate"><Mail size={12} /> {c.email}</a>}
+            {/* Quick status update */}
+            <div className="relative mt-2">
+              <select value={c.lead_status || "New Lead"}
+                onChange={e => updateStatus(c.id, e.target.value)}
+                className="text-[12px] font-medium text-[#4a5168] bg-[#f0efea] border-0 rounded-full px-3 py-1 pr-7 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-navy/20 w-full">
+                {LEAD_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#8a8fa3]" />
+            </div>
+            {/* Quick action buttons */}
+            <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-[#f0efea] flex-wrap">
+              {c.phone && <a href={`tel:${c.phone}`} title="Call" className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium text-[#4a5168] bg-[#f6f6f3] hover:bg-[#eef2ff] hover:text-brand-navy transition-colors"><Phone size={12} />Call</a>}
+              {c.phone && <a href={`sms:${c.phone}`} title="SMS" className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium text-[#4a5168] bg-[#f6f6f3] hover:bg-[#eef2ff] hover:text-brand-navy transition-colors"><MessageSquare size={12} />SMS</a>}
+              {(c.whatsapp || c.phone) && <a href={`https://wa.me/${(c.whatsapp||c.phone).replace(/\D/g,"")}`} target="_blank" rel="noreferrer" title="WhatsApp" className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium text-[#4a5168] bg-[#f6f6f3] hover:bg-[#dcfce7] hover:text-green-700 transition-colors"><MessageCircle size={12} />WhatsApp</a>}
+              {c.email && <a href={`mailto:${c.email}`} title="Email" className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium text-[#4a5168] bg-[#f6f6f3] hover:bg-[#eef2ff] hover:text-brand-navy transition-colors"><Mail size={12} />Email</a>}
+              <Link href={`/contacts/${c.id}`} title="View" className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium text-[#4a5168] bg-[#f6f6f3] hover:bg-[#eef2ff] hover:text-brand-navy transition-colors"><Eye size={12} />View</Link>
+              {c.contact_type !== "customer" && <button onClick={() => convertToCustomer(c.id)} title="Convert to Customer" className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium text-[#4a5168] bg-[#f6f6f3] hover:bg-[#dcfce7] hover:text-green-700 transition-colors"><UserCheck size={12} />Convert</button>}
             </div>
           </div>
         ))}
@@ -293,7 +301,20 @@ export default function ContactsPage() {
                     </div>
                   </div>
                 </td>
-                <td><StatusBadge status={c.contact_type} /></td>
+                <td>
+                  <div className="flex flex-col gap-1">
+                    <StatusBadge status={c.contact_type} />
+                    {/* Quick inline status dropdown */}
+                    <div className="relative">
+                      <select value={c.lead_status || "New Lead"}
+                        onChange={e => updateStatus(c.id, e.target.value)}
+                        className="text-[11px] font-medium text-[#4a5168] bg-[#f0efea] border-0 rounded-full pl-2.5 pr-5 py-0.5 appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-brand-navy/20 max-w-[140px]">
+                        {LEAD_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      <ChevronDown size={10} className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#8a8fa3]" />
+                    </div>
+                  </div>
+                </td>
                 <td className="text-[13px] text-[#4a5168]">
                   {[c.city, c.state].filter(Boolean).join(", ") || "—"}
                 </td>
@@ -301,23 +322,15 @@ export default function ContactsPage() {
                 <td className="text-[13px] font-medium text-[#0c1226]">$0</td>
                 <td className="text-[12px] text-[#8a8fa3]">—</td>
                 <td>
-                  <div className="flex items-center gap-1">
-                    {c.phone && (
-                      <a href={`tel:${c.phone}`}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8a8fa3] hover:text-brand-navy hover:bg-[#f6f6f3] transition-colors">
-                        <Phone size={13} />
-                      </a>
-                    )}
-                    {c.whatsapp && (
-                      <a href={`https://wa.me/${c.whatsapp.replace(/\D/g,"")}`} target="_blank" rel="noreferrer"
-                        className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8a8fa3] hover:text-brand-green hover:bg-[#f6f6f3] transition-colors">
-                        <MessageCircle size={13} />
-                      </a>
-                    )}
+                  <div className="flex items-center gap-0.5">
+                    {c.phone && <a href={`tel:${c.phone}`} title="Call" className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8a8fa3] hover:text-brand-navy hover:bg-[#f6f6f3] transition-colors"><Phone size={13} /></a>}
+                    {c.phone && <a href={`sms:${c.phone}`} title="SMS" className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8a8fa3] hover:text-brand-navy hover:bg-[#f6f6f3] transition-colors"><MessageSquare size={13} /></a>}
+                    {(c.whatsapp || c.phone) && <a href={`https://wa.me/${(c.whatsapp||c.phone).replace(/\D/g,"")}`} target="_blank" rel="noreferrer" title="WhatsApp" className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8a8fa3] hover:text-green-600 hover:bg-[#f6f6f3] transition-colors"><MessageCircle size={13} /></a>}
+                    {c.email && <a href={`mailto:${c.email}`} title="Email" className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8a8fa3] hover:text-brand-navy hover:bg-[#f6f6f3] transition-colors"><Mail size={13} /></a>}
+                    <Link href={`/contacts/${c.id}`} title="View" className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8a8fa3] hover:text-brand-navy hover:bg-[#f6f6f3] transition-colors"><Eye size={13} /></Link>
+                    {c.contact_type !== "customer" && <button onClick={() => convertToCustomer(c.id)} title="Convert to Customer" className="w-7 h-7 flex items-center justify-center rounded-lg text-[#8a8fa3] hover:text-green-600 hover:bg-[#f6f6f3] transition-colors"><UserCheck size={13} /></button>}
                     <ActionMenu items={[
-                      { label: t.contacts.view, icon: <Eye size={14} />, onClick: () => window.location.href = `/contacts/${c.id}` },
                       { label: t.contacts.editAction, icon: <Pencil size={14} />, onClick: () => openEdit(c) },
-                      ...(c.contact_type !== "customer" ? [{ label: t.contacts.convertAction, icon: <UserCheck size={14} />, onClick: () => convertToCustomer(c.id) }] : []),
                       { label: t.common.delete, icon: <Trash2 size={14} />, onClick: () => setDeleteId(c.id), danger: true },
                     ]} />
                   </div>
@@ -370,7 +383,12 @@ export default function ContactsPage() {
           </div>
           <div className="md:col-span-2">
             <label className="label">{t.contacts.addressLabel}</label>
-            <input value={form.address} onChange={set("address")} placeholder="123 Main St" className="field" />
+            <AddressAutocomplete
+              value={form.address}
+              onChange={v => setForm(f => ({ ...f, address: v }))}
+              onSelect={fill => setForm(f => ({ ...f, address: fill.address, city: fill.city, state: fill.state, zip: fill.zip }))}
+              placeholder="123 Main St"
+            />
           </div>
           <div>
             <label className="label">{t.contacts.cityLabel}</label>

@@ -18,7 +18,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   const { data: messages } = await supabase
     .from("support_ticket_messages")
-    .select("*, users(name, email)")
+    .select("*, users(full_name, email)")
     .eq("ticket_id", id)
     .order("created_at");
 

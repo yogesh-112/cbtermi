@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Clear Build USA - Marketing &amp; Sales Playbook</title>
+<style>
+  :root {
+    --navy:   #16265a;
+    --blue:   #2453E4;
+    --green:  #3FA66B;
+    --amber:  #D97706;
+    --red:    #DC2626;
+    --bg:     #f6f6f3;
+    --border: #e7e6e1;
+    --text:   #1F2937;
+    --muted:  #6B7280;
+    --white:  #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px; line-height: 1.65; color: var(--text); background: var(--white);
+  }
+
+  /* COVER */
+  .cover {
+    background: linear-gradient(135deg, #1a3a6e 0%, #2453E4 60%, #3FA66B 100%);
+    color: white; min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center; padding: 60px 40px; page-break-after: always;
+  }
+  .cover-logo { width: 72px; height: 72px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; color: white; margin: 0 auto 24px; }
+  .cover h1 { font-size: 42px; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 10px; }
+  .cover .subtitle { font-size: 20px; color: rgba(255,255,255,0.8); margin-bottom: 12px; }
+  .cover .tagline { font-size: 15px; color: rgba(255,255,255,0.6); max-width: 480px; margin: 0 auto 40px; }
+  .cover-divider { width: 60px; height: 3px; background: rgba(255,255,255,0.5); margin: 24px auto; border-radius: 2px; }
+  .cover-badge { display: inline-block; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; font-size: 12px; font-weight: 700; padding: 6px 20px; border-radius: 100px; margin-bottom: 24px; }
+  .cover-stats { display: flex; gap: 48px; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
+  .cover-stat .num { font-size: 36px; font-weight: 900; color: white; line-height: 1; }
+  .cover-stat .lbl { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* LAYOUT */
+  .page { max-width: 900px; margin: 0 auto; padding: 40px 48px; }
+  .section-break { page-break-before: always; }
+
+  /* HEADINGS */
+  h2.section-title { font-size: 22px; font-weight: 800; color: var(--navy); letter-spacing: -0.5px; border-bottom: 3px solid var(--green); padding-bottom: 10px; margin-bottom: 20px; }
+  h2.section-title .sec-num { display: inline-block; background: var(--navy); color: white; font-size: 12px; padding: 2px 8px; border-radius: 4px; margin-right: 10px; font-weight: 700; }
+  h3 { font-size: 15px; font-weight: 700; color: var(--navy); margin: 24px 0 10px; }
+  h4 { font-size: 13px; font-weight: 700; color: var(--text); margin: 16px 0 6px; }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { margin-bottom: 5px; }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 12.5px; }
+  th { background: var(--navy); color: white; padding: 9px 12px; text-align: left; font-size: 11.5px; font-weight: 600; }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: #fafaf8; }
+
+  /* BADGES */
+  .badge { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 100px; }
+  .badge-green  { background: #edf7f2; color: #1a7a4a; }
+  .badge-red    { background: #fef2f2; color: var(--red); }
+  .badge-amber  { background: #fef9ee; color: var(--amber); }
+  .badge-navy   { background: #eef1f9; color: var(--navy); }
+  .badge-blue   { background: #eff5ff; color: var(--blue); }
+
+  /* CALLOUTS */
+  .callout { border-radius: 8px; padding: 14px 18px; margin: 16px 0; border-left: 4px solid; font-size: 13px; }
+  .callout-green { background: #edf7f2; border-color: var(--green); }
+  .callout-navy  { background: #eef1f9; border-color: var(--navy); }
+  .callout-amber { background: #fef9ee; border-color: var(--amber); }
+  .callout strong { display: block; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 800; }
+
+  /* HERO QUOTE */
+  .hero-quote { background: var(--navy); color: white; border-radius: 12px; padding: 28px 32px; margin: 20px 0; text-align: center; }
+  .hero-quote .quote-text { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.4; margin-bottom: 8px; }
+  .hero-quote .quote-sub { font-size: 13px; color: rgba(255,255,255,0.6); }
+
+  /* FEATURE CARDS */
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+  .feature-card { border: 1px solid var(--border); border-radius: 10px; padding: 16px; background: #fafafa; }
+  .feature-card .fc-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .feature-card .fc-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .feature-card h4 { margin: 0; font-size: 13px; color: var(--navy); }
+  .feature-card p { margin: 0; font-size: 12px; color: var(--muted); }
+
+  /* BENEFIT ROWS */
+  .benefit-row { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+  .benefit-row:last-child { border-bottom: none; }
+  .benefit-icon { width: 36px; height: 36px; border-radius: 9px; background: #eef1f9; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; margin-top: 2px; }
+  .benefit-row h4 { margin: 0 0 3px; color: var(--navy); }
+  .benefit-row p { margin: 0; font-size: 12px; color: var(--muted); }
+
+  /* COMPETITOR TABLE */
+  .comp-yes { color: #1a7a4a; font-weight: 700; }
+  .comp-no  { color: var(--red); font-weight: 700; }
+  .comp-partial { color: var(--amber); font-weight: 700; }
+  .comp-us { background: #f0f7ff !important; font-weight: 600; }
+
+  /* PERSONA CARDS */
+  .audience-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 16px 0; }
+  .audience-card { border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; }
+  .audience-card .a-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: white; margin: 0 auto 10px; }
+  .audience-card h4 { font-size: 13px; margin: 0 0 3px; color: var(--navy); }
+  .audience-card .a-role { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .audience-card p { font-size: 11.5px; color: var(--text); margin: 0; }
+
+  /* PRICING CARDS */
+  .pricing-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 16px 0; }
+  .pricing-card { border: 2px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+  .pricing-card.featured { border-color: var(--green); }
+  .pricing-card .price { font-size: 32px; font-weight: 900; color: var(--navy); line-height: 1; }
+  .pricing-card .period { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+  .pricing-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: var(--navy); }
+  .pricing-card .desc { font-size: 11.5px; color: var(--muted); margin-bottom: 14px; }
+  .pricing-card ul { list-style: none; padding: 0; text-align: left; }
+  .pricing-card ul li { font-size: 12px; padding: 3px 0; color: var(--text); }
+  .pricing-card ul li::before { content: "✓ "; color: var(--green); font-weight: 700; }
+
+  /* CONTENT IDEAS */
+  .content-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .content-card { border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+  .content-card .c-type { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; }
+  .content-card h4 { font-size: 12.5px; margin: 0 0 4px; color: var(--navy); }
+  .content-card p { font-size: 11.5px; margin: 0; color: var(--muted); }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; margin-bottom: 22px; }
+  .timeline-item::before { content: ''; position: absolute; left: -24px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: var(--green); border: 2px solid white; box-shadow: 0 0 0 2px var(--green); }
+  .timeline-item .ti-label { font-size: 11px; font-weight: 700; color: var(--blue); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .timeline-item h4 { margin: 0 0 4px; color: var(--navy); }
+  .timeline-item p { font-size: 12px; color: var(--muted); margin: 0; }
+
+  /* MOCK SCREENSHOT */
+  .mock-screen { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin: 14px 0; font-size: 12px; }
+  .mock-screen .mock-topbar { background: var(--navy); color: white; border-radius: 6px 6px 0 0; padding: 8px 14px; font-size: 11px; display: flex; justify-content: space-between; margin: -16px -16px 12px; }
+  .mock-screen .mock-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; }
+  .mock-stat-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .mock-stat { flex: 1; background: white; border: 1px solid var(--border); border-radius: 6px; padding: 10px; text-align: center; }
+  .mock-stat .ms-val { font-size: 18px; font-weight: 800; color: var(--navy); }
+  .mock-stat .ms-lbl { font-size: 10px; color: var(--muted); }
+  .mock-row { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+  .mock-row .mr-name { font-weight: 600; font-size: 12px; }
+  .mock-row .mr-sub { font-size: 10.5px; color: var(--muted); }
+  .mock-amount { font-size: 13px; font-weight: 700; color: var(--navy); }
+
+  /* FOOTER */
+  .doc-footer { margin-top: 60px; padding-top: 20px; border-top: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); }
+
+  /* PRINT */
+  @media print {
+    body { font-size: 12px; }
+    .cover { min-height: 100vh; }
+    .section-break { page-break-before: always; }
+    a { color: inherit; text-decoration: none; }
+    @page { margin: 18mm 16mm; size: A4; }
+  }
+  @media screen {
+    body { background: #f0f0ee; }
+    .page { background: white; box-shadow: 0 2px 20px rgba(0,0,0,0.08); border-radius: 4px; margin: 32px auto; }
+    .cover { border-radius: 4px; margin: 32px auto; max-width: 900px; min-height: 80vh; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-logo">CB</div>
+  <div class="cover-badge">MARKETING &amp; SALES TEAM - INTERNAL</div>
+  <h1>Clear Build USA</h1>
+  <p class="subtitle">Marketing &amp; Sales Playbook</p>
+  <div class="cover-divider"></div>
+  <p class="tagline">Everything you need to sell, market, and position Clear Build USA in the US contractor market.</p>
+  <div class="cover-stats">
+    <div class="cover-stat"><div class="num">$49</div><div class="lbl">per month</div></div>
+    <div class="cover-stat"><div class="num">15</div><div class="lbl">day free trial</div></div>
+    <div class="cover-stat"><div class="num">42</div><div class="lbl">app screens</div></div>
+    <div class="cover-stat"><div class="num">3.8M</div><div class="lbl">US contractors (TAM)</div></div>
+  </div>
+</div>
+
+<!-- ════════ SECTION 1: BRAND POSITIONING ════════ -->
+<div class="page" id="s1">
+  <h2 class="section-title"><span class="sec-num">1</span>Brand Positioning</h2>
+
+  <div class="hero-quote">
+    <div class="quote-text">"The all-in-one business platform built specifically for US construction contractors."</div>
+    <div class="quote-sub">Position statement - use this in all marketing materials</div>
+  </div>
+
+  <h3>Brand Identity</h3>
+  <table>
+    <tr><th>Element</th><th>Definition</th></tr>
+    <tr><td><strong>Brand Name</strong></td><td>Clear Build USA</td></tr>
+    <tr><td><strong>Tagline</strong></td><td>"Build your business, not just buildings."</td></tr>
+    <tr><td><strong>Alternative Taglines</strong></td><td>"From first lead to final payment - all in one place." / "Run your contracting business like a pro."</td></tr>
+    <tr><td><strong>Primary Color</strong></td><td>Navy #16265a - trust, professionalism, depth</td></tr>
+    <tr><td><strong>Accent Color</strong></td><td>Green #3FA66B - growth, money, success</td></tr>
+    <tr><td><strong>Tone of Voice</strong></td><td>Direct, confident, practical. No corporate jargon. Speak like a business owner, not a software company.</td></tr>
+    <tr><td><strong>Personality</strong></td><td>Reliable contractor + smart advisor. The platform knows construction, respects the contractor's time, and makes them look more professional.</td></tr>
+  </table>
+
+  <h3>Positioning Map</h3>
+  <table>
+    <tr><th>Dimension</th><th>Our Position</th><th>Why It Matters</th></tr>
+    <tr><td>Price</td><td>Affordable - $49/month</td><td>Under 1/10th the cost of enterprise tools. Less than a tank of gas per month for a contractor.</td></tr>
+    <tr><td>Complexity</td><td>Simple - built for contractors, not accountants</td><td>Setup in 10 minutes. No training required. Intuitive enough for a solo handyman.</td></tr>
+    <tr><td>Completeness</td><td>All-in-one - replaces 5+ separate tools</td><td>Eliminates subscription fatigue and data fragmentation.</td></tr>
+    <tr><td>Specialisation</td><td>Contractor-specific - not generic small business</td><td>Features like change orders, crew roles, job site tracking are built-in, not bolted on.</td></tr>
+  </table>
+
+  <h3>Elevator Pitch (30 seconds)</h3>
+  <div class="callout callout-navy">
+    <strong>Use this script</strong>
+    "Clear Build USA is a business management app made for US contractors. Instead of juggling Excel spreadsheets, paper quotes, and five different apps, contractors get everything in one place - leads, quotes, projects, invoices, payments, and team management. It takes 10 minutes to set up, costs $49 a month, and pays for itself the first time a customer approves a quote and pays online instead of you chasing a check for three weeks."
+  </div>
+</div>
+
+<!-- ════════ SECTION 2: TARGET AUDIENCE ════════ -->
+<div class="page section-break" id="s2">
+  <h2 class="section-title"><span class="sec-num">2</span>Target Audience</h2>
+
+  <h3>Primary Audience: US Construction Contractors</h3>
+
+  <div class="audience-grid">
+    <div class="audience-card">
+      <div class="a-avatar" style="background:var(--navy);">SC</div>
+      <h4>Solo Contractor</h4>
+      <div class="a-role">1 person · $200K–$600K/yr revenue</div>
+      <p>Does everything himself. Needs to look professional, get paid faster, and stop losing leads because he forgot to follow up.</p>
+    </div>
+    <div class="audience-card">
+      <div class="a-avatar" style="background:var(--green);">SG</div>
+      <h4>Small GC (2–10 crew)</h4>
+      <div class="a-role">Owner + small crew · $500K–$3M/yr</div>
+      <p>Juggling multiple jobs. Needs project visibility, change order management, and team coordination without enterprise software complexity.</p>
+    </div>
+    <div class="audience-card">
+      <div class="a-avatar" style="background:var(--blue);">ST</div>
+      <h4>Specialty Trade (10–50)</h4>
+      <div class="a-role">Electrician / Plumber / HVAC / Roofer</div>
+      <p>Has office staff. Needs professional invoicing, recurring customer management, and scheduling for service calls and estimates.</p>
+    </div>
+  </div>
+
+  <h3>Audience Demographics</h3>
+  <table>
+    <tr><th>Attribute</th><th>Detail</th></tr>
+    <tr><td>Age range</td><td>28–55 years old</td></tr>
+    <tr><td>Geography</td><td>United States - all states; highest density in TX, FL, CA, NY, OH, IL, GA, NC</td></tr>
+    <tr><td>Business size</td><td>1–50 employees; sweet spot 2–15</td></tr>
+    <tr><td>Annual revenue</td><td>$100K – $5M</td></tr>
+    <tr><td>Tech comfort</td><td>Comfortable with smartphones; skeptical of complex software</td></tr>
+    <tr><td>Current tools</td><td>Excel/Google Sheets, paper invoices, QuickBooks, phone texts, Google Calendar</td></tr>
+    <tr><td>Decision trigger</td><td>Lost a client due to unprofessional quote, didn't get paid for 60+ days, grew past what spreadsheets can handle</td></tr>
+    <tr><td>Buying behaviour</td><td>Word of mouth + Google search. Needs to see it work in &lt; 5 minutes. Price-sensitive but ROI-driven.</td></tr>
+  </table>
+
+  <h3>Audience Pain Points (Use These in Ad Copy)</h3>
+  <ul>
+    <li><strong>"I'm still chasing payment on a job I finished 6 weeks ago."</strong> → Clear Build: online payment in one click.</li>
+    <li><strong>"My quotes look like they came from 1995."</strong> → Clear Build: professional branded quotes customers can approve online.</li>
+    <li><strong>"I forget to follow up on leads and lose jobs I should have won."</strong> → Clear Build: lead tracking with heat scores and status pipeline.</li>
+    <li><strong>"I'm paying for 5 different apps that don't talk to each other."</strong> → Clear Build: everything in one platform for $49/month.</li>
+    <li><strong>"My crew doesn't know what they're supposed to be working on today."</strong> → Clear Build: project tasks and team assignment.</li>
+    <li><strong>"The customer keeps adding scope and I don't have a paper trail."</strong> → Clear Build: change orders sent and approved digitally.</li>
+  </ul>
+
+  <h3>Secondary Audience: Influencers &amp; Referral Sources</h3>
+  <ul>
+    <li><strong>Construction trade associations</strong> (NAHB, AGC, NECA, PHCC) - partnership opportunities</li>
+    <li><strong>YouTube / TikTok contractor creators</strong> - "Contractor bro" channels, tool review channels</li>
+    <li><strong>Accountants &amp; bookkeepers</strong> who serve contractors - referral commissions</li>
+    <li><strong>Material suppliers &amp; lumber yards</strong> - co-marketing, digital flyers at point-of-sale</li>
+    <li><strong>Construction-focused Facebook groups</strong> - 50K–200K member communities</li>
+  </ul>
+</div>
+
+<!-- ════════ SECTION 3: PRODUCT FEATURES (SALES) ════════ -->
+<div class="page section-break" id="s3">
+  <h2 class="section-title"><span class="sec-num">3</span>Product Features for Sales</h2>
+
+  <p>Use these descriptions in pitches, emails, landing pages, and ads. Each feature has a <strong>feature name</strong>, a plain-English description, and a <strong>sales hook</strong> to close with.</p>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon" style="background:#eef1f9;">📋</div>
+        <h4>Professional Quote Builder</h4>
+      </div>
+      <p>Build line-item quotes with tax, discount, and job site info. Send via email, SMS, or WhatsApp. Customers approve online - no phone tag.</p>
+      <p style="color:var(--green); font-size:11px; margin-top:6px; font-weight:700;">HOOK: "Get quotes approved in hours, not days."</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon" style="background:#edf7f2;">💰</div>
+        <h4>Online Invoicing &amp; Payments</h4>
+      </div>
+      <p>Send branded invoices. Customers pay online by card or bank transfer via Stripe. Payment recorded automatically. No more chasing checks.</p>
+      <p style="color:var(--green); font-size:11px; margin-top:6px; font-weight:700;">HOOK: "Get paid the same day you send the invoice."</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon" style="background:#eff5ff;">🔥</div>
+        <h4>Lead Tracking &amp; Heat Scores</h4>
+      </div>
+      <p>Every potential customer enters as a lead. Track their status from first contact to won deal. Hot/Warm/Cold heat scores show who needs attention.</p>
+      <p style="color:var(--green); font-size:11px; margin-top:6px; font-weight:700;">HOOK: "Stop losing jobs because you forgot to follow up."</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon" style="background:#fef9ee;">🏗️</div>
+        <h4>Project Management</h4>
+      </div>
+      <p>Track every active job with budgets, timelines, tasks, and team assignments. Know the status of every project without making a single phone call.</p>
+      <p style="color:var(--green); font-size:11px; margin-top:6px; font-weight:700;">HOOK: "See all your jobs in one dashboard view."</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon" style="background:#eef1f9;">📝</div>
+        <h4>Change Orders</h4>
+      </div>
+      <p>When scope changes, create a change order, send it to the customer, and get written digital approval. No more verbal agreements that turn into disputes.</p>
+      <p style="color:var(--green); font-size:11px; margin-top:6px; font-weight:700;">HOOK: "Get every scope change approved in writing, instantly."</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon" style="background:#edf7f2;">📅</div>
+        <h4>Scheduling &amp; Booking Links</h4>
+      </div>
+      <p>Set your availability, generate a booking link, and let customers pick a time slot for consultations or site visits. No phone calls needed to schedule meetings.</p>
+      <p style="color:var(--green); font-size:11px; margin-top:6px; font-weight:700;">HOOK: "Your own Calendly, built into your contractor app."</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon" style="background:#eff5ff;">💬</div>
+        <h4>Communications Inbox</h4>
+      </div>
+      <p>All customer messages in one place - email, SMS, WhatsApp, calls, and notes. See the full conversation history with every contact at a glance.</p>
+      <p style="color:var(--green); font-size:11px; margin-top:6px; font-weight:700;">HOOK: "Never lose a customer conversation again."</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon" style="background:#fef9ee;">👥</div>
+        <h4>Team Management</h4>
+      </div>
+      <p>Invite your crew and office staff. Assign roles (Owner, Admin, Staff, Crew) so everyone sees exactly what they need and nothing more. Remove someone instantly.</p>
+      <p style="color:var(--green); font-size:11px; margin-top:6px; font-weight:700;">HOOK: "Your whole team, properly organised, on one platform."</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon" style="background:#eef1f9;">📊</div>
+        <h4>Business Dashboard</h4>
+      </div>
+      <p>One screen shows you: outstanding invoices, pending quotes, active projects, and a 6-month revenue chart. Know the health of your business in 10 seconds.</p>
+      <p style="color:var(--green); font-size:11px; margin-top:6px; font-weight:700;">HOOK: "Your entire business, visible at a glance."</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon" style="background:#edf7f2;">🤖</div>
+        <h4>AI Business Assistant</h4>
+      </div>
+      <p>Ask questions, get answers. Powered by Google Gemini AI. Helps with business questions, app navigation, and contractor best practices.</p>
+      <p style="color:var(--green); font-size:11px; margin-top:6px; font-weight:700;">HOOK: "Like having a business consultant available 24/7."</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon" style="background:#eff5ff;">⚙️</div>
+        <h4>Fully Customisable Settings</h4>
+      </div>
+      <p>Your logo, your brand colours, your document numbering (Q-001, INV-001), your email templates. The app represents your business, not ours.</p>
+      <p style="color:var(--green); font-size:11px; margin-top:6px; font-weight:700;">HOOK: "White-labelled to your business from day one."</p>
+    </div>
+    <div class="feature-card">
+      <div class="fc-header">
+        <div class="fc-icon" style="background:#fef9ee;">🏢</div>
+        <h4>Multi-Business Support</h4>
+      </div>
+      <p>Managing more than one business entity? One account, multiple businesses. Switch between them instantly from the top bar - separate data, one login.</p>
+      <p style="color:var(--green); font-size:11px; margin-top:6px; font-weight:700;">HOOK: "Run multiple companies from one account."</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ SECTION 4: BENEFITS ════════ -->
+<div class="page section-break" id="s4">
+  <h2 class="section-title"><span class="sec-num">4</span>Benefits (Not Just Features)</h2>
+
+  <div class="callout callout-green">
+    <strong>Sales tip</strong>
+    Contractors buy outcomes, not software. Lead with the benefit ("get paid faster"), then explain the feature ("online invoice payment via Stripe"). Never lead with the technology.
+  </div>
+
+  <div class="benefit-row">
+    <div class="benefit-icon">💵</div>
+    <div>
+      <h4>Get Paid Faster</h4>
+      <p>Online payment via Stripe means customers can pay by card or bank transfer the moment they receive the invoice. Average contractors wait 45–60 days for payment. Clear Build customers get paid in days, not weeks. One online payment per month more than covers the $49 subscription.</p>
+    </div>
+  </div>
+  <div class="benefit-row">
+    <div class="benefit-icon">🏆</div>
+    <div>
+      <h4>Look More Professional Than Your Competitors</h4>
+      <p>Branded quotes and invoices with your logo, professional layout, and online approval make your business look established and trustworthy. Customers choose contractors they trust - and a professionally delivered quote builds that trust before you even meet.</p>
+    </div>
+  </div>
+  <div class="benefit-row">
+    <div class="benefit-icon">⏱️</div>
+    <div>
+      <h4>Save 5–10 Hours Per Week on Admin</h4>
+      <p>Auto-numbered documents, quote-to-invoice conversion, payment reminders, and email templates eliminate repetitive admin. What used to take an hour now takes minutes. That time goes back to billable work or to going home earlier.</p>
+    </div>
+  </div>
+  <div class="benefit-row">
+    <div class="benefit-icon">🔒</div>
+    <div>
+      <h4>Protect Yourself from Scope Disputes</h4>
+      <p>Digital change orders with customer approval create a paper trail for every scope change. No more "you said you'd include that" disputes. Every addition is documented, priced, and approved before work starts.</p>
+    </div>
+  </div>
+  <div class="benefit-row">
+    <div class="benefit-icon">📈</div>
+    <div>
+      <h4>Win More Jobs with Better Lead Follow-Up</h4>
+      <p>The lead pipeline and heat scores surface which prospects need attention today. Studies show 80% of sales require 5+ follow-ups, yet 44% of contractors give up after one. Clear Build keeps follow-ups visible so no opportunity falls through the cracks.</p>
+    </div>
+  </div>
+  <div class="benefit-row">
+    <div class="benefit-icon">🗂️</div>
+    <div>
+      <h4>Everything in One Place - Cancel Your Other Subscriptions</h4>
+      <p>The average contractor uses 4–7 separate apps (calendar, invoicing, CRM, notes, messaging). Clear Build replaces most of them. One login, one monthly payment, all your business data connected and searchable.</p>
+    </div>
+  </div>
+  <div class="benefit-row">
+    <div class="benefit-icon">👷</div>
+    <div>
+      <h4>Scale Your Team Without Losing Control</h4>
+      <p>Role-based access means your crew sees their jobs, your admins see financials, and you stay in control. Add and remove team members instantly. No shared passwords, no data leaks, no confusion about who can do what.</p>
+    </div>
+  </div>
+
+  <h3>ROI Calculator (Use in Sales Conversations)</h3>
+  <table>
+    <tr><th>Scenario</th><th>Without Clear Build</th><th>With Clear Build</th><th>Monthly Value</th></tr>
+    <tr><td>Invoice paid 30 days faster (avg $8,000 invoice)</td><td>Wait 60 days for $8K</td><td>Paid in &lt; 5 days</td><td><strong style="color:var(--green);">$66+ in financing cost avoided</strong></td></tr>
+    <tr><td>Admin time saved (5 hrs/week × $50/hr value)</td><td>20 hrs/month on admin</td><td>10 hrs/month on admin</td><td><strong style="color:var(--green);">$500/month time savings</strong></td></tr>
+    <tr><td>1 extra job won from better follow-up</td><td>Miss 1–2 leads/month</td><td>Capture 1 extra job</td><td><strong style="color:var(--green);">$500–$5,000 revenue</strong></td></tr>
+    <tr><td><strong>Total monthly value</strong></td><td></td><td></td><td><strong style="color:var(--green);">$1,000–$5,500+</strong></td></tr>
+    <tr><td><strong>Subscription cost</strong></td><td></td><td></td><td><strong style="color:var(--red);">$49</strong></td></tr>
+  </table>
+</div>
+
+<!-- ════════ SECTION 5: COMPETITOR COMPARISON ════════ -->
+<div class="page section-break" id="s5">
+  <h2 class="section-title"><span class="sec-num">5</span>Competitor Comparison</h2>
+
+  <h3>Competitive Landscape</h3>
+  <p>The construction software market has two extremes: enterprise solutions (expensive, complex) and generic small-business tools (missing contractor-specific features). Clear Build USA owns the middle - affordable, contractor-specific, and genuinely easy to use.</p>
+
+  <table>
+    <tr>
+      <th>Feature</th>
+      <th class="comp-us" style="background:var(--navy); color:white;">Clear Build USA</th>
+      <th>ServiceTitan</th>
+      <th>Jobber</th>
+      <th>BuilderTrend</th>
+      <th>FreshBooks</th>
+    </tr>
+    <tr>
+      <td>Monthly price</td>
+      <td class="comp-us"><strong>$49/mo</strong></td>
+      <td>$398–$858/mo</td>
+      <td>$49–$349/mo</td>
+      <td>$299–$699/mo</td>
+      <td>$19–$55/mo</td>
+    </tr>
+    <tr>
+      <td>Free trial</td>
+      <td class="comp-us"><span class="comp-yes">✓ 15 days, no card</span></td>
+      <td><span class="comp-no">✗ Demo only</span></td>
+      <td><span class="comp-yes">✓ 14 days</span></td>
+      <td><span class="comp-partial">~ Demo only</span></td>
+      <td><span class="comp-yes">✓ 30 days</span></td>
+    </tr>
+    <tr>
+      <td>Online quote approval</td>
+      <td class="comp-us"><span class="comp-yes">✓ Built-in</span></td>
+      <td><span class="comp-yes">✓</span></td>
+      <td><span class="comp-yes">✓</span></td>
+      <td><span class="comp-yes">✓</span></td>
+      <td><span class="comp-no">✗</span></td>
+    </tr>
+    <tr>
+      <td>Online invoice payment (Stripe)</td>
+      <td class="comp-us"><span class="comp-yes">✓ Built-in</span></td>
+      <td><span class="comp-yes">✓</span></td>
+      <td><span class="comp-yes">✓</span></td>
+      <td><span class="comp-partial">~ Add-on</span></td>
+      <td><span class="comp-yes">✓</span></td>
+    </tr>
+    <tr>
+      <td>Change orders</td>
+      <td class="comp-us"><span class="comp-yes">✓ Built-in</span></td>
+      <td><span class="comp-yes">✓</span></td>
+      <td><span class="comp-partial">~ Limited</span></td>
+      <td><span class="comp-yes">✓</span></td>
+      <td><span class="comp-no">✗</span></td>
+    </tr>
+    <tr>
+      <td>Lead / CRM pipeline</td>
+      <td class="comp-us"><span class="comp-yes">✓ Built-in</span></td>
+      <td><span class="comp-yes">✓</span></td>
+      <td><span class="comp-partial">~ Basic</span></td>
+      <td><span class="comp-partial">~ Basic</span></td>
+      <td><span class="comp-no">✗</span></td>
+    </tr>
+    <tr>
+      <td>Scheduling &amp; booking links</td>
+      <td class="comp-us"><span class="comp-yes">✓ Built-in</span></td>
+      <td><span class="comp-yes">✓</span></td>
+      <td><span class="comp-yes">✓</span></td>
+      <td><span class="comp-partial">~ Basic</span></td>
+      <td><span class="comp-no">✗</span></td>
+    </tr>
+    <tr>
+      <td>Team roles &amp; permissions</td>
+      <td class="comp-us"><span class="comp-yes">✓ 4 roles</span></td>
+      <td><span class="comp-yes">✓</span></td>
+      <td><span class="comp-yes">✓</span></td>
+      <td><span class="comp-yes">✓</span></td>
+      <td><span class="comp-partial">~ Basic</span></td>
+    </tr>
+    <tr>
+      <td>AI assistant</td>
+      <td class="comp-us"><span class="comp-yes">✓ Gemini AI</span></td>
+      <td><span class="comp-partial">~ Limited</span></td>
+      <td><span class="comp-no">✗</span></td>
+      <td><span class="comp-no">✗</span></td>
+      <td><span class="comp-no">✗</span></td>
+    </tr>
+    <tr>
+      <td>Multi-business support</td>
+      <td class="comp-us"><span class="comp-yes">✓ Built-in</span></td>
+      <td><span class="comp-no">✗</span></td>
+      <td><span class="comp-no">✗</span></td>
+      <td><span class="comp-no">✗</span></td>
+      <td><span class="comp-partial">~ Separate accounts</span></td>
+    </tr>
+    <tr>
+      <td>Setup time</td>
+      <td class="comp-us"><strong>&lt; 10 minutes</strong></td>
+      <td>Days (onboarding required)</td>
+      <td>30–60 mins</td>
+      <td>1–2 days</td>
+      <td>30 mins</td>
+    </tr>
+    <tr>
+      <td>Target business size</td>
+      <td class="comp-us"><strong>1–50 employees</strong></td>
+      <td>50–500+</td>
+      <td>1–50</td>
+      <td>10–500</td>
+      <td>1–10 (freelancers)</td>
+    </tr>
+  </table>
+
+  <h3>Key Competitive Advantages</h3>
+  <ul>
+    <li><strong>Price:</strong> 8–17x cheaper than ServiceTitan, 6–14x cheaper than BuilderTrend</li>
+    <li><strong>All-in-one at entry price:</strong> Jobber's scheduling is locked behind $149+ plans; ours starts at $49 with everything included</li>
+    <li><strong>AI assistant:</strong> No direct competitor at this price point includes built-in AI</li>
+    <li><strong>Multi-business:</strong> Only platform that natively supports one user with multiple business entities</li>
+    <li><strong>Speed:</strong> Running in &lt; 10 minutes vs. day-long onboarding calls for enterprise tools</li>
+  </ul>
+
+  <h3>Competitive Objection Handling</h3>
+  <table>
+    <tr><th>Objection</th><th>Response</th></tr>
+    <tr><td>"I already use Jobber."</td><td>Jobber's core scheduling is great but their CRM is basic, change orders are limited, and they charge $149/mo for features we include at $49/mo. Many contractors run both for a month then switch.</td></tr>
+    <tr><td>"I use FreshBooks for invoicing."</td><td>FreshBooks is excellent for freelancers. It doesn't have lead tracking, change orders, project management, or scheduling. Clear Build is built for the construction lifecycle, not generic services.</td></tr>
+    <tr><td>"ServiceTitan is the industry standard."</td><td>ServiceTitan is built for large field service companies ($400+/month, sales calls required, implementation takes weeks). Clear Build is specifically for contractors under 50 people who need to be running today, not after a 30-day onboarding.</td></tr>
+    <tr><td>"I'll just use Excel / Google Sheets."</td><td>Spreadsheets can't send quotes for online approval, accept online payments, send automated invoice reminders, or give customers a self-service booking page. The first invoice paid online covers 12 months of Clear Build.</td></tr>
+  </table>
+</div>
+
+<!-- ════════ SECTION 6: MOCK SCREENS ════════ -->
+<div class="page section-break" id="s6">
+  <h2 class="section-title"><span class="sec-num">6</span>Key Screens &amp; Visual Overview</h2>
+
+  <p>Use these screen representations to orient the sales team and for slide decks. Screenshots from the live app at <strong>clearbuildusa.com</strong>.</p>
+
+  <h3>Dashboard - Business Overview</h3>
+  <div class="mock-screen">
+    <div class="mock-topbar">
+      <span>☰ Clear Build USA</span>
+      <span>Good Morning, Mike · 🔔 3 · Dashboard</span>
+    </div>
+    <div class="mock-label">Key Stats (Live from your business)</div>
+    <div class="mock-stat-row">
+      <div class="mock-stat"><div class="ms-val" style="color:#DC2626;">$14,200</div><div class="ms-lbl">Outstanding</div></div>
+      <div class="mock-stat"><div class="ms-val" style="color:#2453E4;">7</div><div class="ms-lbl">Quotes Pending</div></div>
+      <div class="mock-stat"><div class="ms-val" style="color:#3FA66B;">4</div><div class="ms-lbl">Active Projects</div></div>
+      <div class="mock-stat"><div class="ms-val" style="color:#7C3AED;">$8,500</div><div class="ms-lbl">Received MTD</div></div>
+    </div>
+    <div class="mock-label">Recent Activity</div>
+    <div class="mock-row">
+      <div><div class="mr-name">Johnson Kitchen Remodel</div><div class="mr-sub">Invoice INV-0023 · Due in 7 days</div></div>
+      <div class="mock-amount">$4,800</div>
+    </div>
+    <div class="mock-row">
+      <div><div class="mr-name">Smith Bathroom Addition</div><div class="mr-sub">Quote Q-0041 · Awaiting approval</div></div>
+      <div class="mock-amount">$12,500</div>
+    </div>
+  </div>
+
+  <h3>Quotes - Professional Line-Item Quote Builder</h3>
+  <div class="mock-screen">
+    <div class="mock-topbar">
+      <span>Quotes / Create New Quote</span>
+      <span>Q-0042 · Draft</span>
+    </div>
+    <div class="mock-label">Quote Details</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
+      <div style="background:white; border:1px solid var(--border); border-radius:6px; padding:8px 10px; font-size:11px;"><strong>Customer:</strong> Mike Johnson</div>
+      <div style="background:white; border:1px solid var(--border); border-radius:6px; padding:8px 10px; font-size:11px;"><strong>Job Site:</strong> 123 Oak St, Austin TX</div>
+      <div style="background:white; border:1px solid var(--border); border-radius:6px; padding:8px 10px; font-size:11px;"><strong>Valid Until:</strong> Jun 25, 2026</div>
+    </div>
+    <div class="mock-label">Line Items</div>
+    <div class="mock-row"><div><div class="mr-name">Labour - Demo &amp; Framing</div><div class="mr-sub">40 hrs × $85.00</div></div><div class="mock-amount">$3,400</div></div>
+    <div class="mock-row"><div><div class="mr-name">Materials - Drywall &amp; Insulation</div><div class="mr-sub">1 lot × $1,200.00</div></div><div class="mock-amount">$1,200</div></div>
+    <div style="background:white; border:1px solid var(--border); border-radius:6px; padding:10px 12px; text-align:right; font-size:12px;">
+      Subtotal: $4,600 &nbsp;|&nbsp; Tax (8.25%): $379.50 &nbsp;|&nbsp; <strong>Total: $4,979.50</strong>
+    </div>
+  </div>
+
+  <h3>Project Detail - Full Job View</h3>
+  <div class="mock-screen">
+    <div class="mock-topbar">
+      <span>Projects / Johnson Kitchen Remodel · PRJ-0007</span>
+      <span><span style="background:#3FA66B; padding:2px 8px; border-radius:4px; font-size:10px;">IN PROGRESS</span></span>
+    </div>
+    <div class="mock-stat-row">
+      <div class="mock-stat"><div class="ms-val">Day 12</div><div class="ms-lbl">of 30</div></div>
+      <div class="mock-stat"><div class="ms-val">40%</div><div class="ms-lbl">Complete</div></div>
+      <div class="mock-stat"><div class="ms-val">$18,000</div><div class="ms-lbl">Budget</div></div>
+      <div class="mock-stat"><div class="ms-val">3</div><div class="ms-lbl">Team Members</div></div>
+    </div>
+    <div class="mock-label" style="margin-top:8px;">Tasks</div>
+    <div class="mock-row"><div><div class="mr-name">✅ Demo kitchen walls</div><div class="mr-sub">Completed May 18</div></div></div>
+    <div class="mock-row"><div><div class="mr-name">🔄 Rough electrical</div><div class="mr-sub">In Progress · Due May 28</div></div></div>
+    <div class="mock-row"><div><div class="mr-name">⬜ Install cabinets</div><div class="mr-sub">Not Started · Due Jun 5</div></div></div>
+  </div>
+</div>
+
+<!-- ════════ SECTION 7: LAUNCH TIMELINE ════════ -->
+<div class="page section-break" id="s7">
+  <h2 class="section-title"><span class="sec-num">7</span>Launch Timeline &amp; Marketing Calendar</h2>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="ti-label">Week 1–2 · June 2026</div>
+      <h4>Soft Launch - Founder &amp; Friends</h4>
+      <p>Invite 20–30 contractors personally known to the founding team. Offer 3 months free in exchange for feedback and testimonials. Set up support channel. Fix any critical bugs found in real usage.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="ti-label">Week 3–4 · June 2026</div>
+      <h4>Public Beta - Organic Traffic</h4>
+      <p>Publish landing page to clearbuildusa.com. Submit to Product Hunt. Post in 5 construction Facebook groups (200K+ combined members). Activate Google Business profile. Publish first 3 blog posts for SEO.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="ti-label">Month 2 · July 2026</div>
+      <h4>Paid Acquisition Start</h4>
+      <p>Launch Google Ads targeting "contractor invoicing software", "construction estimate app", "contractor management app". Target $500–$1,000/month ad spend initially. A/B test 3 landing page variants. Start retargeting trial users who didn't convert.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="ti-label">Month 3 · August 2026</div>
+      <h4>Content &amp; Referral Engine</h4>
+      <p>Launch referral programme ($25 credit per referred paid user). Publish 10 SEO articles. Reach out to 10 YouTube contractor channels for reviews/sponsorships. Submit to G2, Capterra, Trustpilot for reviews. Target: 25 reviews by end of month.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="ti-label">Month 4–6 · Sep–Nov 2026</div>
+      <h4>Partnership Channel</h4>
+      <p>Approach NAHB local chapters for partnership. Reach out to 5 construction-focused accountants for referral partnerships ($100/converted referral). Co-market with a building materials supplier for co-branded flyers at point-of-sale.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="ti-label">Q1 2027</div>
+      <h4>Scale</h4>
+      <p>Increase paid ads to $5K+/month (if CAC &lt; $300). Hire first sales/support person. Launch affiliate programme. Target 500 paying subscribers.</p>
+    </div>
+  </div>
+
+  <h3>Marketing Budget Guidance (Monthly)</h3>
+  <table>
+    <tr><th>Channel</th><th>Month 1–2</th><th>Month 3–6</th><th>Notes</th></tr>
+    <tr><td>Google Ads</td><td>$500</td><td>$1,500</td><td>Search: contractor software keywords</td></tr>
+    <tr><td>Facebook/Instagram Ads</td><td>$300</td><td>$800</td><td>Target US contractors, homebuilding groups</td></tr>
+    <tr><td>Content/SEO</td><td>$0 (in-house)</td><td>$500</td><td>2 blog posts/week; focus on how-to contractor content</td></tr>
+    <tr><td>YouTube sponsorships</td><td>$0</td><td>$500</td><td>Small contractor YouTube channels (1K–50K subs)</td></tr>
+    <tr><td>Referral programme</td><td>$0</td><td>$25/referral</td><td>Only costs when it works</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>$800</strong></td><td><strong>$3,300</strong></td><td></td></tr>
+  </table>
+</div>
+
+<!-- ════════ SECTION 8: CONTENT IDEAS ════════ -->
+<div class="page section-break" id="s8">
+  <h2 class="section-title"><span class="sec-num">8</span>Content Ideas &amp; Messaging</h2>
+
+  <h3>SEO Blog Post Ideas</h3>
+  <div class="content-grid">
+    <div class="content-card">
+      <div class="c-type">How-To · High Traffic</div>
+      <h4>How to Create a Professional Contractor Quote in 5 Minutes</h4>
+      <p>Target: "contractor quote template" - 12,000 searches/mo</p>
+    </div>
+    <div class="content-card">
+      <div class="c-type">Problem/Solution</div>
+      <h4>Why Contractors Don't Get Paid on Time (And How to Fix It)</h4>
+      <p>Target: "contractor invoice not paid" - 3,400 searches/mo</p>
+    </div>
+    <div class="content-card">
+      <div class="c-type">Comparison · High Intent</div>
+      <h4>Best Contractor Software 2026: 7 Tools Compared</h4>
+      <p>Target: "best contractor software" - 8,100 searches/mo</p>
+    </div>
+    <div class="content-card">
+      <div class="c-type">How-To</div>
+      <h4>How to Write a Change Order That Protects You Legally</h4>
+      <p>Target: "contractor change order" - 6,600 searches/mo</p>
+    </div>
+    <div class="content-card">
+      <div class="c-type">List Post</div>
+      <h4>10 Things Every Contractor Should Track in Their Business</h4>
+      <p>Target: "contractor business management" - 4,200 searches/mo</p>
+    </div>
+    <div class="content-card">
+      <div class="c-type">SEO Targeting</div>
+      <h4>Free Contractor Invoice Template (Downloadable)</h4>
+      <p>Target: "contractor invoice template" - 27,000 searches/mo</p>
+    </div>
+  </div>
+
+  <h3>Social Media Content Angles</h3>
+  <table>
+    <tr><th>Platform</th><th>Content Type</th><th>Example Post</th></tr>
+    <tr>
+      <td>Facebook (Groups)</td>
+      <td>Value post + soft CTA</td>
+      <td>"I used to chase payments for 60 days. Now I send an invoice and customers pay online same day. Changed everything. App is Clear Build USA - 15 day free trial." [screenshot of payment notification]</td>
+    </tr>
+    <tr>
+      <td>Instagram / TikTok</td>
+      <td>Before/After demo video</td>
+      <td>30-second screen recording: "This is how long it takes to create and send a professional contractor quote with Clear Build USA." [demo of quote creation → send → customer approval]</td>
+    </tr>
+    <tr>
+      <td>YouTube</td>
+      <td>Tutorial / Review</td>
+      <td>"I tried EVERY contractor app - here's the only one worth $49/month" (product walkthrough with honest review)</td>
+    </tr>
+    <tr>
+      <td>Google Ads</td>
+      <td>Search ad headline</td>
+      <td>"Contractor Software - $49/Month · Get Paid Faster · Free 15-Day Trial · Quotes, Invoices, Projects"</td>
+    </tr>
+    <tr>
+      <td>Email campaign</td>
+      <td>Trial user activation</td>
+      <td>Subject: "Mike, you're one quote away from getting paid faster" - Body: walk them through creating their first quote, show them the online payment feature.</td>
+    </tr>
+  </table>
+
+  <h3>Ad Copy Swipe File</h3>
+
+  <h4>Short Ad (Facebook/Instagram - 3 lines)</h4>
+  <div class="callout callout-navy">
+    <strong>Version A</strong>
+    Still chasing payments? 💵<br>
+    Clear Build USA lets your customers pay invoices online - by card or bank transfer.<br>
+    Free 15-day trial. No credit card. → clearbuildusa.com
+  </div>
+  <div class="callout callout-navy">
+    <strong>Version B</strong>
+    Your quote still looks like 2005? 😬<br>
+    Send professional branded quotes your customers can approve with one click.<br>
+    Try Clear Build USA free for 15 days.
+  </div>
+  <div class="callout callout-navy">
+    <strong>Version C</strong>
+    5 apps. $200/month. All still disconnected. 🤦<br>
+    Clear Build USA replaces them all - leads, quotes, projects, invoices, payments - $49/month.<br>
+    Free trial. Cancel any time.
+  </div>
+
+  <h3>Email Drip Sequence (Trial Users - 7 Days)</h3>
+  <table>
+    <tr><th>Day</th><th>Subject</th><th>Goal</th></tr>
+    <tr><td>Day 0</td><td>Welcome to Clear Build USA - Start here</td><td>Orientation - link to create first contact and quote</td></tr>
+    <tr><td>Day 1</td><td>Did you send your first quote yet?</td><td>Activation - push quote creation + online approval</td></tr>
+    <tr><td>Day 3</td><td>The feature that gets contractors paid in 24 hours</td><td>Retention - showcase online payment via Stripe</td></tr>
+    <tr><td>Day 5</td><td>Your projects, your team, all in one place</td><td>Feature discovery - project management + team roles</td></tr>
+    <tr><td>Day 7</td><td>Your trial ends in 8 days - here's how to upgrade</td><td>Conversion - soft urgency, show pricing page</td></tr>
+    <tr><td>Day 12</td><td>Last 3 days of your free trial</td><td>Conversion - strong CTA, address common objections</td></tr>
+    <tr><td>Day 15</td><td>Your trial has ended - pick a plan</td><td>Conversion - final CTA with "cancel any time" reassurance</td></tr>
+  </table>
+
+  <h3>Testimonial Template (Use After Soft Launch)</h3>
+  <div class="callout callout-green">
+    <strong>Ask beta users to answer these 3 questions</strong>
+    1. "What was your biggest frustration before using Clear Build USA?" (problem = their words, more credible than ours)<br>
+    2. "What's the first thing you did in the app that impressed you?" (feature highlight)<br>
+    3. "What would you tell another contractor who is thinking about trying it?" (social proof)
+  </div>
+
+  <div class="doc-footer">
+    <div><strong>Clear Build USA</strong> - Marketing &amp; Sales Playbook v1.0</div>
+    <div>Internal - Sales Team</div>
+    <div>clearbuildusa.com · May 2026</div>
+  </div>
+</div>
+
+</body>
+</html>

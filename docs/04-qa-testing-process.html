@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Clear Build USA — QA Testing Process & Tracker</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  :root {
+    --navy:#16265a; --green:#3FA66B; --blue:#2453E4;
+    --bg:#f6f6f3; --border:#e7e6e1; --text:#1a1a1a;
+    --muted:#6B7280; --red:#DC2626; --orange:#D97706; --yellow:#F59E0B;
+    --pass:#d1fae5; --fail:#fee2e2; --skip:#fef9c3; --na:#f3f4f6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:11px;line-height:1.5;}
+
+  /* ── COVER PAGE ── */
+  .cover{background:var(--navy);color:white;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 40px;page-break-after:always;}
+  .cover-logo{width:72px;height:72px;background:var(--green);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:white;margin:0 auto 24px;}
+  .cover h1{font-size:38px;font-weight:900;letter-spacing:-1px;margin-bottom:8px;}
+  .cover h2{font-size:20px;font-weight:600;color:#93c5fd;margin-bottom:32px;}
+  .cover-meta{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:24px 40px;display:inline-block;margin-bottom:40px;}
+  .cover-meta table{border-collapse:collapse;text-align:left;}
+  .cover-meta td{padding:5px 20px 5px 0;font-size:13px;}
+  .cover-meta td:first-child{color:#93c5fd;font-weight:600;white-space:nowrap;}
+  .cover-tags{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .cover-tag{background:rgba(63,166,107,0.25);border:1px solid rgba(63,166,107,0.5);color:#6ee7b7;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;}
+
+  /* ── LAYOUT ── */
+  .page-wrap{max-width:1100px;margin:0 auto;padding:32px 28px;}
+  h1.section-h{font-size:22px;font-weight:800;color:var(--navy);margin:0 0 6px;}
+  .section-desc{color:var(--muted);font-size:12px;margin-bottom:20px;}
+
+  /* ── SECTION HEADERS ── */
+  .section-banner{background:var(--navy);color:white;padding:14px 20px;border-radius:10px 10px 0 0;margin-top:36px;display:flex;align-items:center;gap:12px;}
+  .section-banner .snum{background:var(--green);color:white;font-size:12px;font-weight:800;border-radius:6px;padding:2px 10px;}
+  .section-banner h2{font-size:15px;font-weight:700;margin:0;}
+  .section-body{background:white;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:20px;margin-bottom:8px;}
+
+  /* ── INFO BOXES ── */
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+  .info-box{background:#f8f9ff;border:1px solid #dde3f5;border-radius:8px;padding:14px 16px;}
+  .info-box h3{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;}
+  .info-box ul{margin:0;padding-left:14px;}
+  .info-box li{font-size:11px;color:#374151;margin-bottom:4px;}
+
+  /* ── STATUS LEGEND ── */
+  .status-legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+  .status-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;}
+  .sp-pass{background:var(--pass);color:#065f46;}
+  .sp-fail{background:var(--fail);color:#991b1b;}
+  .sp-skip{background:var(--skip);color:#92400e;}
+  .sp-na{background:var(--na);color:#374151;}
+  .sp-p1{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;}
+  .sp-p2{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;}
+  .sp-p3{background:#fefce8;color:#854d0e;border:1px solid #fde68a;}
+  .sp-p4{background:#f0fdf4;color:#14532d;border:1px solid #bbf7d0;}
+
+  /* ── TABLES ── */
+  table.qa-table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:10.5px;}
+  table.qa-table th{background:#f1f3f8;color:var(--navy);font-weight:700;padding:7px 8px;text-align:left;border:1px solid var(--border);white-space:nowrap;}
+  table.qa-table td{padding:7px 8px;border:1px solid var(--border);vertical-align:top;}
+  table.qa-table tr:hover td{background:#fafbff;}
+  .tc-id{font-weight:700;color:var(--navy);white-space:nowrap;font-size:10px;}
+  .tc-module{color:var(--muted);font-size:10px;white-space:nowrap;}
+  .tc-steps{color:#374151;}
+  .tc-steps ol{padding-left:14px;margin:0;}
+  .tc-steps li{margin-bottom:2px;}
+  .tc-expected{color:#065f46;}
+  .result-cell{min-width:90px;background:#fafafa;}
+  .status-cell{min-width:70px;text-align:center;}
+  .prio-badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:9px;font-weight:700;}
+  .p1{background:#fee2e2;color:#991b1b;}
+  .p2{background:#ffedd5;color:#9a3412;}
+  .p3{background:#fef9c3;color:#854d0e;}
+  .p4{background:#dcfce7;color:#14532d;}
+
+  /* ── COMPAT MATRIX ── */
+  table.compat{width:100%;border-collapse:collapse;font-size:10.5px;}
+  table.compat th{background:var(--navy);color:white;padding:8px 10px;text-align:center;border:1px solid #2d3a6a;}
+  table.compat th:first-child{text-align:left;}
+  table.compat td{padding:8px 10px;border:1px solid var(--border);text-align:center;}
+  table.compat td:first-child{text-align:left;font-weight:600;color:var(--navy);}
+  .compat-cell{width:80px;min-width:80px;}
+  .check-box{display:inline-block;width:24px;height:24px;border:2px solid #d1d5db;border-radius:4px;}
+
+  /* ── BUG REPORT ── */
+  .bug-form{background:#fffbfb;border:2px solid #fecaca;border-radius:10px;padding:20px;margin-bottom:16px;}
+  .bug-form h3{color:var(--red);font-size:13px;font-weight:800;margin-bottom:14px;}
+  .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+  .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;}
+  .field-group label{display:block;font-size:10px;font-weight:700;color:var(--navy);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;}
+  .field-input{border:1px solid var(--border);border-radius:6px;padding:6px 10px;width:100%;font-size:11px;min-height:32px;background:white;}
+  .field-input.tall{min-height:60px;}
+  .field-input.taller{min-height:90px;}
+
+  /* ── DAILY / FINAL REPORT TEMPLATES ── */
+  .report-form{background:#f8f9ff;border:1px solid #dde3f5;border-radius:10px;padding:20px;margin-bottom:16px;}
+  .report-form h3{color:var(--navy);font-size:13px;font-weight:800;margin-bottom:14px;}
+  .progress-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+  .progress-box{background:white;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;}
+  .progress-box .num{font-size:24px;font-weight:900;color:var(--navy);margin-bottom:2px;}
+  .progress-box .lbl{font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;}
+  .progress-bar-wrap{background:#e5e7eb;border-radius:4px;height:10px;margin:12px 0;overflow:hidden;}
+  .progress-bar-fill{background:var(--green);height:100%;border-radius:4px;width:0%;}
+
+  /* ── MODULE PROGRESS TABLE ── */
+  table.module-progress{width:100%;border-collapse:collapse;font-size:10.5px;}
+  table.module-progress th{background:#f1f3f8;color:var(--navy);font-weight:700;padding:7px 8px;text-align:left;border:1px solid var(--border);}
+  table.module-progress td{padding:7px 8px;border:1px solid var(--border);}
+  table.module-progress .status-col{text-align:center;width:90px;}
+
+  /* ── CHECKLIST ── */
+  .checklist{list-style:none;padding:0;margin:0;}
+  .checklist li{display:flex;align-items:flex-start;gap:10px;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:11px;}
+  .checklist li:last-child{border-bottom:none;}
+  .checklist .cb{width:16px;height:16px;min-width:16px;border:2px solid #d1d5db;border-radius:3px;margin-top:1px;}
+  .checklist .tag{font-size:9px;font-weight:700;color:var(--navy);background:#eef1f9;padding:1px 7px;border-radius:10px;white-space:nowrap;}
+
+  /* ── UI/UX CHECKS ── */
+  .ux-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .ux-card{background:white;border:1px solid var(--border);border-radius:8px;padding:14px;}
+  .ux-card h4{font-size:11px;font-weight:700;color:var(--navy);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+
+  /* ── COLOR SWATCHES ── */
+  .color-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+  .swatch{display:flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:6px;padding:6px 10px;}
+  .swatch-dot{width:20px;height:20px;border-radius:4px;border:1px solid rgba(0,0,0,0.1);}
+  .swatch-info{font-size:10px;}
+  .swatch-name{font-weight:600;display:block;color:var(--navy);}
+  .swatch-hex{color:var(--muted);}
+
+  /* ── PAGE BREAKS ── */
+  .page-break{page-break-before:always;}
+  @media print{
+    body{font-size:10px;}
+    .cover{page-break-after:always;}
+    .section-banner{page-break-inside:avoid;}
+    tr{page-break-inside:avoid;}
+    .page-break{page-break-before:always;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     COVER PAGE
+════════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-logo">CB</div>
+  <h1>QA Testing Process &amp; Tracker</h1>
+  <h2>Clear Build USA — clearbuildusa.com</h2>
+
+  <div class="cover-meta">
+    <table>
+      <tr><td>Prepared by</td><td>Clear Build USA — Product Team</td></tr>
+      <tr><td>Test Environment</td><td>https://clearbuildusa.com</td></tr>
+      <tr><td>Document Version</td><td>v1.0 — May 2026</td></tr>
+      <tr><td>Total Test Cases</td><td>220+ across 22 modules</td></tr>
+      <tr><td>Browsers Covered</td><td>Chrome · Firefox · Safari · Edge</td></tr>
+      <tr><td>Devices Covered</td><td>Desktop · Tablet · Mobile (iOS &amp; Android)</td></tr>
+      <tr><td>Tester Instructions</td><td>See Section 1 before starting</td></tr>
+    </table>
+  </div>
+
+  <div class="cover-tags">
+    <span class="cover-tag">UI/UX Testing</span>
+    <span class="cover-tag">Browser Compatibility</span>
+    <span class="cover-tag">Device Compatibility</span>
+    <span class="cover-tag">Functional Testing</span>
+    <span class="cover-tag">Form Validation</span>
+    <span class="cover-tag">Navigation &amp; Clicks</span>
+    <span class="cover-tag">Color &amp; Typography</span>
+    <span class="cover-tag">Responsive Design</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 1 — TESTER ONBOARDING
+════════════════════════════════════════════════════════════ -->
+<div class="page-wrap">
+
+<div class="section-banner">
+  <span class="snum">01</span>
+  <h2>Tester Onboarding — Read This First</h2>
+</div>
+<div class="section-body">
+
+  <div class="info-grid">
+    <div class="info-box">
+      <h3>Your Tools</h3>
+      <ul>
+        <li>This PDF printed or on screen — fill the Result/Status columns with a pen or annotation tool</li>
+        <li>Google Chrome (latest) as primary browser</li>
+        <li>Firefox, Safari (Mac/iPhone), Edge — for compat checks</li>
+        <li>Mobile phone + tablet — for device checks</li>
+        <li>Browser DevTools (F12) — resize window for responsive</li>
+        <li>Screenshot tool (Windows: Win+Shift+S / Mac: Cmd+Shift+4)</li>
+        <li>Folder to save bug screenshots — name them BUG-001.png etc.</li>
+      </ul>
+    </div>
+    <div class="info-box">
+      <h3>Test Account Setup</h3>
+      <ul>
+        <li>URL: <strong>https://clearbuildusa.com</strong></li>
+        <li>Register a fresh account with a real email address</li>
+        <li>Verify your email (check inbox for verification link)</li>
+        <li>Complete business setup (business name, phone, address)</li>
+        <li>Use this account throughout all tests</li>
+        <li>Do NOT use a production business's real data</li>
+        <li>For Stripe payment tests — use card: <strong>4242 4242 4242 4242</strong>, any future date, any CVC</li>
+      </ul>
+    </div>
+    <div class="info-box">
+      <h3>How to Record Results</h3>
+      <ul>
+        <li><strong>Actual Result:</strong> Write exactly what you see (even if it passed)</li>
+        <li><strong>Status:</strong> Write PASS / FAIL / SKIP / N/A</li>
+        <li><strong>FAIL = </strong>anything that doesn't match Expected Result</li>
+        <li><strong>SKIP = </strong>test you could not run (note why)</li>
+        <li><strong>N/A = </strong>test not applicable to current config</li>
+        <li>If FAIL: fill a Bug Report (Section 23) immediately</li>
+        <li>Take a screenshot for every FAIL</li>
+      </ul>
+    </div>
+    <div class="info-box">
+      <h3>Daily Reporting</h3>
+      <ul>
+        <li>At end of each testing session, fill the Daily Report (Section 24)</li>
+        <li>Share the report + screenshots with the project owner</li>
+        <li>Do NOT move to next module until current module is fully recorded</li>
+        <li>Test in module order (01 → 22) — some modules depend on data from earlier ones</li>
+        <li>Mark ✓ next to test ID when complete</li>
+        <li>Ask for clarification if any Expected Result is unclear</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px;">Status Definitions</h3>
+  <div class="status-legend">
+    <span class="status-pill sp-pass">✓ PASS — Result matches expected</span>
+    <span class="status-pill sp-fail">✗ FAIL — Result does not match, or error occurred</span>
+    <span class="status-pill sp-skip">◌ SKIP — Could not test (note reason)</span>
+    <span class="status-pill sp-na">— N/A — Not applicable</span>
+  </div>
+
+  <h3 style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px;">Priority Definitions</h3>
+  <div class="status-legend">
+    <span class="status-pill sp-p1">P1 CRITICAL — App unusable, data loss, security</span>
+    <span class="status-pill sp-p2">P2 HIGH — Major feature broken, blocks user</span>
+    <span class="status-pill sp-p3">P3 MEDIUM — Feature partially broken, workaround exists</span>
+    <span class="status-pill sp-p4">P4 LOW — Minor cosmetic, typo, UI spacing</span>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 2 — BROWSER × DEVICE COMPATIBILITY MATRIX
+════════════════════════════════════════════════════════════ -->
+<div class="section-banner page-break">
+  <span class="snum">02</span>
+  <h2>Browser &amp; Device Compatibility Matrix</h2>
+</div>
+<div class="section-body">
+
+  <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">For each cell: write PASS, FAIL, or SKIP. Test the core user journey in each environment: login → dashboard → create quote → view invoice.</p>
+
+  <table class="compat" style="margin-bottom:24px;">
+    <thead>
+      <tr>
+        <th style="min-width:160px;">Browser / Version</th>
+        <th class="compat-cell">Windows 11<br/>Desktop</th>
+        <th class="compat-cell">macOS<br/>Desktop</th>
+        <th class="compat-cell">iPad<br/>Safari</th>
+        <th class="compat-cell">Android<br/>Tablet</th>
+        <th class="compat-cell">iPhone<br/>Safari</th>
+        <th class="compat-cell">Android<br/>Phone</th>
+        <th style="min-width:120px;">Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Chrome (latest)</td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td></tr>
+      <tr><td>Firefox (latest)</td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell">—</td><td class="result-cell"></td><td class="result-cell">—</td><td class="result-cell"></td><td class="result-cell"></td></tr>
+      <tr><td>Safari (latest)</td><td class="result-cell">—</td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell">—</td><td class="result-cell"></td><td class="result-cell">—</td><td class="result-cell"></td></tr>
+      <tr><td>Edge (latest)</td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td></tr>
+      <tr><td>Chrome Mobile</td><td class="result-cell">—</td><td class="result-cell">—</td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px;">Screen Size / Responsive Breakpoints</h3>
+  <table class="compat">
+    <thead>
+      <tr>
+        <th>Viewport Size</th>
+        <th>Width</th>
+        <th>Sidebar visible?</th>
+        <th>Tables readable?</th>
+        <th>Modals fit screen?</th>
+        <th>Forms usable?</th>
+        <th>Buttons tappable?</th>
+        <th>Overall Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Large Desktop</td><td>1440px+</td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td></tr>
+      <tr><td>Standard Desktop</td><td>1280px</td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td></tr>
+      <tr><td>Small Desktop / Laptop</td><td>1024px</td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td></tr>
+      <tr><td>Tablet Landscape</td><td>1024px</td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td></tr>
+      <tr><td>Tablet Portrait</td><td>768px</td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td></tr>
+      <tr><td>Mobile Large</td><td>430px</td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td></tr>
+      <tr><td>Mobile Standard</td><td>390px</td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td></tr>
+      <tr><td>Mobile Small</td><td>375px</td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td><td class="result-cell"></td></tr>
+    </tbody>
+  </table>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 3 — GLOBAL UI/UX CHECKLIST
+════════════════════════════════════════════════════════════ -->
+<div class="section-banner page-break">
+  <span class="snum">03</span>
+  <h2>Global UI/UX Checklist — Run Once Across All Pages</h2>
+</div>
+<div class="section-body">
+
+  <h3 style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px;">Brand Colors — Verify on Every Screen</h3>
+  <div class="color-row" style="margin-bottom:16px;">
+    <div class="swatch"><div class="swatch-dot" style="background:#16265a;"></div><div class="swatch-info"><span class="swatch-name">Navy</span><span class="swatch-hex">#16265a — Headings, sidebar, primary text</span></div></div>
+    <div class="swatch"><div class="swatch-dot" style="background:#3FA66B;"></div><div class="swatch-info"><span class="swatch-name">Green</span><span class="swatch-hex">#3FA66B — Primary action buttons, success</span></div></div>
+    <div class="swatch"><div class="swatch-dot" style="background:#2453E4;"></div><div class="swatch-info"><span class="swatch-name">Blue</span><span class="swatch-hex">#2453E4 — Links, secondary actions</span></div></div>
+    <div class="swatch"><div class="swatch-dot" style="background:#f6f6f3; border:1px solid #ccc;"></div><div class="swatch-info"><span class="swatch-name">Background</span><span class="swatch-hex">#f6f6f3 — Page background</span></div></div>
+    <div class="swatch"><div class="swatch-dot" style="background:#e7e6e1; border:1px solid #ccc;"></div><div class="swatch-info"><span class="swatch-name">Border</span><span class="swatch-hex">#e7e6e1 — Card borders, dividers</span></div></div>
+  </div>
+
+  <div class="ux-grid">
+    <div class="ux-card">
+      <h4>Typography</h4>
+      <ul class="checklist">
+        <li><div class="cb"></div><span>Font is Inter (clean sans-serif) on all pages</span></li>
+        <li><div class="cb"></div><span>Page titles are large, bold, navy colored</span></li>
+        <li><div class="cb"></div><span>Body text is readable (min 14px equivalent)</span></li>
+        <li><div class="cb"></div><span>No text overflow or truncation on standard screens</span></li>
+        <li><div class="cb"></div><span>Labels above form fields are visible</span></li>
+        <li><div class="cb"></div><span>No spelling errors visible on main screens</span></li>
+      </ul>
+    </div>
+    <div class="ux-card">
+      <h4>Spacing &amp; Layout</h4>
+      <ul class="checklist">
+        <li><div class="cb"></div><span>Sidebar is visible and not overlapping content</span></li>
+        <li><div class="cb"></div><span>Cards have consistent padding (approx 20-24px)</span></li>
+        <li><div class="cb"></div><span>Page header has title + action button aligned</span></li>
+        <li><div class="cb"></div><span>Tables have proper column spacing (not cramped)</span></li>
+        <li><div class="cb"></div><span>Form rows have consistent spacing between fields</span></li>
+        <li><div class="cb"></div><span>Footer / bottom content not cut off</span></li>
+      </ul>
+    </div>
+    <div class="ux-card">
+      <h4>Hover &amp; Focus States</h4>
+      <ul class="checklist">
+        <li><div class="cb"></div><span>Buttons: hover changes background color visibly</span></li>
+        <li><div class="cb"></div><span>Sidebar links: hover shows highlight</span></li>
+        <li><div class="cb"></div><span>Table rows: hover shows light blue/gray highlight</span></li>
+        <li><div class="cb"></div><span>Input fields: focus shows blue border outline</span></li>
+        <li><div class="cb"></div><span>Tab key navigates through all form fields in order</span></li>
+        <li><div class="cb"></div><span>Links: cursor changes to pointer on hover</span></li>
+      </ul>
+    </div>
+    <div class="ux-card">
+      <h4>Loading &amp; Transitions</h4>
+      <ul class="checklist">
+        <li><div class="cb"></div><span>Loading spinner appears when fetching data</span></li>
+        <li><div class="cb"></div><span>Buttons show loading state (disabled, spinner) on submit</span></li>
+        <li><div class="cb"></div><span>Page transitions are smooth (not jarring flashes)</span></li>
+        <li><div class="cb"></div><span>Modals open with fade animation</span></li>
+        <li><div class="cb"></div><span>Toast notifications appear and auto-dismiss</span></li>
+        <li><div class="cb"></div><span>No white flash on page load</span></li>
+      </ul>
+    </div>
+    <div class="ux-card">
+      <h4>Empty States</h4>
+      <ul class="checklist">
+        <li><div class="cb"></div><span>New account: each module shows "No X yet" message</span></li>
+        <li><div class="cb"></div><span>Empty states have an icon + message + call-to-action button</span></li>
+        <li><div class="cb"></div><span>No blank white boxes or missing content placeholders</span></li>
+        <li><div class="cb"></div><span>Empty tables don't show broken headers with no rows</span></li>
+        <li><div class="cb"></div><span>Dashboard stats show "0" not blank when no data exists</span></li>
+      </ul>
+    </div>
+    <div class="ux-card">
+      <h4>Error States</h4>
+      <ul class="checklist">
+        <li><div class="cb"></div><span>Form validation: red error text appears below each invalid field</span></li>
+        <li><div class="cb"></div><span>Required fields clearly marked (asterisk or "Required")</span></li>
+        <li><div class="cb"></div><span>API errors show user-friendly toast message (not raw JSON)</span></li>
+        <li><div class="cb"></div><span>404 page shows "Page not found" with a back button</span></li>
+        <li><div class="cb"></div><span>Network timeout: app shows error, doesn't freeze</span></li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 4 — TEST CASES: AUTHENTICATION
+════════════════════════════════════════════════════════════ -->
+<div class="section-banner page-break">
+  <span class="snum">04</span>
+  <h2>Module: Authentication (Register · Login · Forgot Password)</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="tc-id">TC-001</td><td><span class="prio-badge p1">P1</span></td><td>Register</td>
+      <td class="tc-steps"><ol><li>Go to /register</li><li>Fill all fields with valid data</li><li>Click "Create Account"</li></ol></td>
+      <td class="tc-expected">Redirects to "Check your email" page. Verification email arrives in inbox.</td>
+      <td class="result-cell"></td><td class="status-cell"></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">TC-002</td><td><span class="prio-badge p1">P1</span></td><td>Email Verify</td>
+      <td class="tc-steps"><ol><li>Click verification link in email</li></ol></td>
+      <td class="tc-expected">Email verified. Redirected to login page with success message.</td>
+      <td class="result-cell"></td><td class="status-cell"></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">TC-003</td><td><span class="prio-badge p1">P1</span></td><td>Login</td>
+      <td class="tc-steps"><ol><li>Go to /login</li><li>Enter verified email + correct password</li><li>Click "Sign In"</li></ol></td>
+      <td class="tc-expected">Redirected to /business-setup (first time) or /dashboard.</td>
+      <td class="result-cell"></td><td class="status-cell"></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">TC-004</td><td><span class="prio-badge p2">P2</span></td><td>Wrong Password</td>
+      <td class="tc-steps"><ol><li>Login with wrong password</li></ol></td>
+      <td class="tc-expected">Error message: "Invalid credentials". No login. Page stays on /login.</td>
+      <td class="result-cell"></td><td class="status-cell"></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">TC-005</td><td><span class="prio-badge p2">P2</span></td><td>Unverified Email</td>
+      <td class="tc-steps"><ol><li>Register new account, don't verify</li><li>Try to login</li></ol></td>
+      <td class="tc-expected">Error: "Please verify your email before logging in".</td>
+      <td class="result-cell"></td><td class="status-cell"></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">TC-006</td><td><span class="prio-badge p2">P2</span></td><td>Forgot Password</td>
+      <td class="tc-steps"><ol><li>Click "Forgot password" on login</li><li>Enter email, submit</li><li>Check inbox, click reset link</li><li>Enter new password, submit</li></ol></td>
+      <td class="tc-expected">Reset email arrives. New password works on login. Old password no longer works.</td>
+      <td class="result-cell"></td><td class="status-cell"></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">TC-007</td><td><span class="prio-badge p2">P2</span></td><td>Register Validation</td>
+      <td class="tc-steps"><ol><li>Submit register form with empty fields</li><li>Submit with invalid email format</li><li>Submit with password &lt; 8 chars</li></ol></td>
+      <td class="tc-expected">Each invalid field shows a specific error message. Form does not submit.</td>
+      <td class="result-cell"></td><td class="status-cell"></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">TC-008</td><td><span class="prio-badge p1">P1</span></td><td>Auth Guard</td>
+      <td class="tc-steps"><ol><li>Log out</li><li>Paste /dashboard URL in browser</li></ol></td>
+      <td class="tc-expected">Redirected to /login. Cannot access dashboard when unauthenticated.</td>
+      <td class="result-cell"></td><td class="status-cell"></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">TC-009</td><td><span class="prio-badge p2">P2</span></td><td>Logout</td>
+      <td class="tc-steps"><ol><li>Click user avatar / menu</li><li>Click "Sign Out"</li></ol></td>
+      <td class="tc-expected">Session cleared. Redirected to /login. Back button doesn't restore session.</td>
+      <td class="result-cell"></td><td class="status-cell"></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">TC-010</td><td><span class="prio-badge p3">P3</span></td><td>Login UI</td>
+      <td class="tc-steps"><ol><li>Open /login on desktop and mobile</li></ol></td>
+      <td class="tc-expected">Logo, form, "Forgot password" link all visible. No overflow. Green CTA button.</td>
+      <td class="result-cell"></td><td class="status-cell"></td><td></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 5 — BUSINESS SETUP -->
+<div class="section-banner">
+  <span class="snum">05</span>
+  <h2>Module: Business Setup &amp; Onboarding</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-011</td><td><span class="prio-badge p1">P1</span></td><td>Business Setup</td><td class="tc-steps"><ol><li>After first login</li><li>Fill business name, phone, address</li><li>Click Save / Continue</li></ol></td><td class="tc-expected">Business created. Redirected to /dashboard. Business name shows in sidebar.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-012</td><td><span class="prio-badge p2">P2</span></td><td>Business Setup Validation</td><td class="tc-steps"><ol><li>Submit empty business name</li></ol></td><td class="tc-expected">Error: "Business name is required". Form stays open.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-013</td><td><span class="prio-badge p3">P3</span></td><td>Logo Upload</td><td class="tc-steps"><ol><li>In Business Setup or Settings</li><li>Upload a PNG logo file</li></ol></td><td class="tc-expected">Logo preview shows. Logo appears in app header/sidebar after save.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 6 — DASHBOARD -->
+<div class="section-banner page-break">
+  <span class="snum">06</span>
+  <h2>Module: Dashboard</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-014</td><td><span class="prio-badge p1">P1</span></td><td>Stats Load</td><td class="tc-steps"><ol><li>Navigate to /dashboard</li><li>Wait for page to load</li></ol></td><td class="tc-expected">4 stat cards visible: Revenue, Quotes, Invoices, Active Projects. Values load (0 if no data).</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-015</td><td><span class="prio-badge p2">P2</span></td><td>Revenue Chart</td><td class="tc-steps"><ol><li>View dashboard after creating at least 1 paid invoice</li></ol></td><td class="tc-expected">Revenue chart renders with correct months on X-axis. Bars/line visible.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-016</td><td><span class="prio-badge p2">P2</span></td><td>Quick Actions</td><td class="tc-steps"><ol><li>Click each quick action button on dashboard</li></ol></td><td class="tc-expected">Each button navigates to correct module: New Quote, New Invoice, New Contact, New Project.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-017</td><td><span class="prio-badge p2">P2</span></td><td>Recent Activity</td><td class="tc-steps"><ol><li>Create a quote</li><li>Return to dashboard</li></ol></td><td class="tc-expected">Recent activity section shows the newly created quote.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-018</td><td><span class="prio-badge p3">P3</span></td><td>Dashboard UI</td><td class="tc-steps"><ol><li>Check cards, chart, sidebar on 1280px screen</li></ol></td><td class="tc-expected">No overflow. All elements visible. Navy heading. Green stat card borders or icons.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-019</td><td><span class="prio-badge p2">P2</span></td><td>Notifications Bell</td><td class="tc-steps"><ol><li>Click the notification bell in the header</li></ol></td><td class="tc-expected">Dropdown opens with notification list. Unread count badge visible if notifications exist.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 7 — SIDEBAR NAVIGATION -->
+<div class="section-banner">
+  <span class="snum">07</span>
+  <h2>Module: Sidebar Navigation &amp; Routing</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-020</td><td><span class="prio-badge p1">P1</span></td><td>All Nav Links</td><td class="tc-steps"><ol><li>Click each sidebar link: Dashboard, Contacts, Leads, Quotes, Invoices, Payments, Projects, Change Orders, Scheduling, Communications, Templates, Reports, Team, Settings</li></ol></td><td class="tc-expected">Each link navigates to the correct page without 404 or error.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-021</td><td><span class="prio-badge p2">P2</span></td><td>Active State</td><td class="tc-steps"><ol><li>Navigate to each page via sidebar</li></ol></td><td class="tc-expected">Active sidebar link is highlighted (green or bold). Other links not highlighted.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-022</td><td><span class="prio-badge p2">P2</span></td><td>Business Switcher</td><td class="tc-steps"><ol><li>Click the business name dropdown in sidebar</li></ol></td><td class="tc-expected">Shows current business name. If multiple businesses, shows list to switch.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-023</td><td><span class="prio-badge p2">P2</span></td><td>Mobile Nav</td><td class="tc-steps"><ol><li>Open app on 390px viewport</li><li>Look for hamburger/menu icon</li><li>Tap it</li></ol></td><td class="tc-expected">Sidebar drawer opens from left or bottom nav appears. All links accessible.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-024</td><td><span class="prio-badge p3">P3</span></td><td>Hover States</td><td class="tc-steps"><ol><li>Hover over each sidebar item</li></ol></td><td class="tc-expected">Hover shows color change (light background or text brightens). Cursor is pointer.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 8 — CONTACTS -->
+<div class="section-banner page-break">
+  <span class="snum">08</span>
+  <h2>Module: Contacts (All, Customers, Leads)</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-025</td><td><span class="prio-badge p1">P1</span></td><td>Create Contact</td><td class="tc-steps"><ol><li>Contacts → "New Contact"</li><li>Fill: name, email, phone, address</li><li>Select type: Customer</li><li>Click Save</li></ol></td><td class="tc-expected">Contact saved. Appears in contacts list. Success toast shown.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-026</td><td><span class="prio-badge p1">P1</span></td><td>Create Lead</td><td class="tc-steps"><ol><li>Contacts → "New Contact"</li><li>Select type: Lead</li><li>Set Lead Status to "New Lead"</li><li>Save</li></ol></td><td class="tc-expected">Lead saved. Appears in Leads tab. Lead status "New Lead" visible.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-027</td><td><span class="prio-badge p2">P2</span></td><td>Edit Contact</td><td class="tc-steps"><ol><li>Open a contact</li><li>Edit the phone number</li><li>Click Save</li></ol></td><td class="tc-expected">Updated phone number saved and shown on contact detail page.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-028</td><td><span class="prio-badge p2">P2</span></td><td>Delete Contact</td><td class="tc-steps"><ol><li>Open a contact</li><li>Click Delete</li><li>Confirm in dialog</li></ol></td><td class="tc-expected">Contact removed from list. Cannot be found by search.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-029</td><td><span class="prio-badge p2">P2</span></td><td>Search Contacts</td><td class="tc-steps"><ol><li>Type a name in search box on contacts page</li></ol></td><td class="tc-expected">List filters in real-time to show only matching contacts.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-030</td><td><span class="prio-badge p2">P2</span></td><td>Lead Status Update</td><td class="tc-steps"><ol><li>Open a lead contact</li><li>Change lead status to "In Conversation"</li><li>Save</li></ol></td><td class="tc-expected">Status updated. Badge on lead shows "In Conversation".</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-031</td><td><span class="prio-badge p3">P3</span></td><td>Contact Tabs</td><td class="tc-steps"><ol><li>Navigate between All / Customers / Leads tabs</li></ol></td><td class="tc-expected">Each tab shows only the relevant contact type. Counts shown in tab labels.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-032</td><td><span class="prio-badge p3">P3</span></td><td>Contact Detail</td><td class="tc-steps"><ol><li>Click a contact name to open detail page</li></ol></td><td class="tc-expected">Detail page shows all contact info, linked quotes, invoices, projects, notes.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 9 — QUOTES -->
+<div class="section-banner page-break">
+  <span class="snum">09</span>
+  <h2>Module: Quotes</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-033</td><td><span class="prio-badge p1">P1</span></td><td>Create Quote</td><td class="tc-steps"><ol><li>Quotes → "New Quote"</li><li>Select a contact</li><li>Add 2 line items (name, qty, rate)</li><li>Apply 10% tax</li><li>Click Save</li></ol></td><td class="tc-expected">Quote created with auto-number Q-0001. Totals calculated correctly. Status: Draft.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-034</td><td><span class="prio-badge p1">P1</span></td><td>Quote Totals</td><td class="tc-steps"><ol><li>Add items: $100 + $200</li><li>Apply 10% tax</li></ol></td><td class="tc-expected">Subtotal: $300.00. Tax (10%): $30.00. Total: $330.00. Numbers update on change.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-035</td><td><span class="prio-badge p2">P2</span></td><td>Add/Remove Items</td><td class="tc-steps"><ol><li>Create quote with 3 items</li><li>Delete the middle item</li></ol></td><td class="tc-expected">Item removed. Total updates instantly. No page reload needed.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-036</td><td><span class="prio-badge p2">P2</span></td><td>Send Quote</td><td class="tc-steps"><ol><li>Open a Draft quote</li><li>Click "Send"</li><li>Confirm</li></ol></td><td class="tc-expected">Quote status changes to Sent. Email sent to contact (check inbox).</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-037</td><td><span class="prio-badge p2">P2</span></td><td>Quote → Invoice</td><td class="tc-steps"><ol><li>Open a Sent quote</li><li>Click "Convert to Invoice"</li></ol></td><td class="tc-expected">New invoice created with same line items and contact. Invoice status: Draft.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-038</td><td><span class="prio-badge p2">P2</span></td><td>Edit Quote</td><td class="tc-steps"><ol><li>Open a Draft quote</li><li>Edit item name and rate</li><li>Save</li></ol></td><td class="tc-expected">Changes saved. Updated totals shown.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-039</td><td><span class="prio-badge p2">P2</span></td><td>Quote Status Flow</td><td class="tc-steps"><ol><li>Check status badges on quotes list</li></ol></td><td class="tc-expected">Badges: Draft (gray), Sent (blue), Accepted (green), Rejected (red). Colors correct.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-040</td><td><span class="prio-badge p3">P3</span></td><td>Quote PDF</td><td class="tc-steps"><ol><li>Open a quote</li><li>Click "Download PDF" or "Print"</li></ol></td><td class="tc-expected">PDF downloads or opens with professional layout — logo, contact info, line items, total.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-041</td><td><span class="prio-badge p2">P2</span></td><td>Auto-numbering</td><td class="tc-steps"><ol><li>Create 3 quotes back to back</li></ol></td><td class="tc-expected">Numbers are sequential: Q-0001, Q-0002, Q-0003. No duplicates.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-042</td><td><span class="prio-badge p3">P3</span></td><td>Quote Notes</td><td class="tc-steps"><ol><li>Add a note in the notes field of a quote</li><li>Save</li></ol></td><td class="tc-expected">Notes saved and visible in quote detail view and on PDF.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 10 — INVOICES -->
+<div class="section-banner page-break">
+  <span class="snum">10</span>
+  <h2>Module: Invoices</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-043</td><td><span class="prio-badge p1">P1</span></td><td>Create Invoice</td><td class="tc-steps"><ol><li>Invoices → "New Invoice"</li><li>Select a contact</li><li>Add line items, apply tax</li><li>Set due date</li><li>Click Save</li></ol></td><td class="tc-expected">Invoice created with auto-number INV-0001. Status: Draft. Totals correct.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-044</td><td><span class="prio-badge p2">P2</span></td><td>Send Invoice</td><td class="tc-steps"><ol><li>Open a Draft invoice</li><li>Click "Send Invoice"</li><li>Confirm</li></ol></td><td class="tc-expected">Status changes to Sent. Email with invoice link sent to contact.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-045</td><td><span class="prio-badge p1">P1</span></td><td>Mark as Paid</td><td class="tc-steps"><ol><li>Open a Sent invoice</li><li>Click "Mark as Paid"</li><li>Confirm</li></ol></td><td class="tc-expected">Status changes to Paid. Invoice removed from "Outstanding" filter. Revenue stat updates.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-046</td><td><span class="prio-badge p2">P2</span></td><td>Invoice Overdue</td><td class="tc-steps"><ol><li>Create invoice with a past due date</li></ol></td><td class="tc-expected">Invoice shows "Overdue" badge. Different color (red/orange) from Sent (blue).</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-047</td><td><span class="prio-badge p2">P2</span></td><td>Invoice Filter</td><td class="tc-steps"><ol><li>Apply filters: Draft, Sent, Paid, Overdue</li></ol></td><td class="tc-expected">Each filter shows only invoices of that status. Count in filter matches visible rows.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-048</td><td><span class="prio-badge p3">P3</span></td><td>Invoice PDF</td><td class="tc-steps"><ol><li>Download or print invoice PDF</li></ol></td><td class="tc-expected">PDF shows logo, company name, contact info, line items, total, due date, invoice number.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-049</td><td><span class="prio-badge p2">P2</span></td><td>Invoice → Project</td><td class="tc-steps"><ol><li>Create invoice without linking a project</li></ol></td><td class="tc-expected">System auto-creates a project and links the invoice. Project appears in Projects module.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-050</td><td><span class="prio-badge p2">P2</span></td><td>Stripe Payment Link</td><td class="tc-steps"><ol><li>Open a Sent invoice</li><li>Click "Pay Online" or check for a payment link</li></ol></td><td class="tc-expected">Stripe checkout page opens with correct amount. Test card 4242... completes payment.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 11 — PAYMENTS -->
+<div class="section-banner page-break">
+  <span class="snum">11</span>
+  <h2>Module: Payments</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-051</td><td><span class="prio-badge p1">P1</span></td><td>Payments List</td><td class="tc-steps"><ol><li>Navigate to /payments</li></ol></td><td class="tc-expected">Table of payments loads. Columns: invoice, contact, amount, date, status.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-052</td><td><span class="prio-badge p2">P2</span></td><td>Record Manual Payment</td><td class="tc-steps"><ol><li>Payments → "Record Payment"</li><li>Select invoice, enter amount, date, method (cash/check)</li><li>Save</li></ol></td><td class="tc-expected">Payment recorded. Invoice status updates to Paid (if full amount). Payment appears in list.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-053</td><td><span class="prio-badge p2">P2</span></td><td>Partial Payment</td><td class="tc-steps"><ol><li>Record a payment for 50% of invoice amount</li></ol></td><td class="tc-expected">Invoice shows "Partial" status. Balance due shown correctly.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-054</td><td><span class="prio-badge p2">P2</span></td><td>Stripe Online Payment</td><td class="tc-steps"><ol><li>Click pay link from a sent invoice</li><li>Use Stripe test card 4242 4242 4242 4242, future date, any CVC</li></ol></td><td class="tc-expected">Payment processes successfully. Invoice marked as Paid. Stripe dashboard shows the charge.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-055</td><td><span class="prio-badge p3">P3</span></td><td>Payment Totals</td><td class="tc-steps"><ol><li>Check payment page summary stats</li></ol></td><td class="tc-expected">Total received, outstanding amounts shown accurately.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 12 — PROJECTS -->
+<div class="section-banner">
+  <span class="snum">12</span>
+  <h2>Module: Projects</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-056</td><td><span class="prio-badge p1">P1</span></td><td>Create Project</td><td class="tc-steps"><ol><li>Projects → "New Project"</li><li>Enter name, client, start/end date</li><li>Add description</li><li>Save</li></ol></td><td class="tc-expected">Project created with auto-number PRJ-0001. Status: Active. Appears in projects list.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-057</td><td><span class="prio-badge p2">P2</span></td><td>Project Status</td><td class="tc-steps"><ol><li>Change project status to: Planning → Active → Completed</li></ol></td><td class="tc-expected">Status badge updates each time. Color changes: Planning (gray), Active (green), Completed (blue).</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-058</td><td><span class="prio-badge p2">P2</span></td><td>Add Tasks</td><td class="tc-steps"><ol><li>Open a project</li><li>Add 3 tasks with names and due dates</li></ol></td><td class="tc-expected">Tasks appear in project detail. Can mark as complete. Progress bar updates.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-059</td><td><span class="prio-badge p2">P2</span></td><td>Team Members</td><td class="tc-steps"><ol><li>Open a project</li><li>Add a team member to the project</li></ol></td><td class="tc-expected">Team member assigned. Shown in project detail with role.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-060</td><td><span class="prio-badge p2">P2</span></td><td>Project Updates</td><td class="tc-steps"><ol><li>Add a project update/note</li></ol></td><td class="tc-expected">Update saved with timestamp. Appears in project updates feed.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-061</td><td><span class="prio-badge p3">P3</span></td><td>Project Filter</td><td class="tc-steps"><ol><li>Filter by status: Active / Completed / On Hold</li></ol></td><td class="tc-expected">List filters correctly. Only matching projects shown.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-062</td><td><span class="prio-badge p3">P3</span></td><td>Project Budget</td><td class="tc-steps"><ol><li>Set a budget on a project</li><li>Link an invoice to the project</li></ol></td><td class="tc-expected">Budget vs. actual spend tracked. Budget indicator shown (green/orange/red).</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 13 — CHANGE ORDERS -->
+<div class="section-banner page-break">
+  <span class="snum">13</span>
+  <h2>Module: Change Orders</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-063</td><td><span class="prio-badge p1">P1</span></td><td>Create Change Order</td><td class="tc-steps"><ol><li>Change Orders → "New Change Order"</li><li>Link to a project</li><li>Add description and amount change</li><li>Save</li></ol></td><td class="tc-expected">Change order saved with Draft status. Linked to project.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-064</td><td><span class="prio-badge p2">P2</span></td><td>Send for Approval</td><td class="tc-steps"><ol><li>Open Draft change order</li><li>Click "Send for Approval"</li></ol></td><td class="tc-expected">Status → Sent. Client notified (if email configured). Awaiting approval.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-065</td><td><span class="prio-badge p2">P2</span></td><td>Approve / Reject</td><td class="tc-steps"><ol><li>Mark change order as Approved</li><li>Create another and mark as Rejected</li></ol></td><td class="tc-expected">Approved: green badge, project budget updated. Rejected: red badge.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-066</td><td><span class="prio-badge p3">P3</span></td><td>Change Order List</td><td class="tc-steps"><ol><li>View all change orders</li></ol></td><td class="tc-expected">Table shows: number, project, description, amount, status, date. Filterable by status.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 14 — SCHEDULING -->
+<div class="section-banner">
+  <span class="snum">14</span>
+  <h2>Module: Scheduling</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-067</td><td><span class="prio-badge p2">P2</span></td><td>Set Availability</td><td class="tc-steps"><ol><li>Scheduling → Availability tab</li><li>Set Mon-Fri 9am-5pm</li><li>Save</li></ol></td><td class="tc-expected">Availability saved. Time slots reflect the set hours.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-068</td><td><span class="prio-badge p2">P2</span></td><td>Booking Links</td><td class="tc-steps"><ol><li>Scheduling → Links tab</li><li>Create a booking link for "30-minute consultation"</li></ol></td><td class="tc-expected">Booking link generated. Shareable URL shown. Can copy link.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-069</td><td><span class="prio-badge p2">P2</span></td><td>Meeting List</td><td class="tc-steps"><ol><li>Scheduling → Meetings tab</li></ol></td><td class="tc-expected">Shows scheduled meetings (upcoming first), with client name, time, type.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-070</td><td><span class="prio-badge p2">P2</span></td><td>Meeting Types</td><td class="tc-steps"><ol><li>Scheduling → Settings tab</li><li>Create a meeting type with 60-minute duration</li></ol></td><td class="tc-expected">Meeting type saved. Appears in booking link options.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 15 — COMMUNICATIONS -->
+<div class="section-banner page-break">
+  <span class="snum">15</span>
+  <h2>Module: Communications</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-071</td><td><span class="prio-badge p2">P2</span></td><td>Send Email</td><td class="tc-steps"><ol><li>Communications → New</li><li>Select channel: Email</li><li>Select a contact</li><li>Write subject + body</li><li>Send</li></ol></td><td class="tc-expected">Email sent (or logged as sent if Resend not configured). Appears in communication log.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-072</td><td><span class="prio-badge p2">P2</span></td><td>Log a Call</td><td class="tc-steps"><ol><li>New communication → channel: Call</li><li>Select contact, add notes, duration</li><li>Save</li></ol></td><td class="tc-expected">Call logged in communication history with timestamp.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-073</td><td><span class="prio-badge p2">P2</span></td><td>Add Note</td><td class="tc-steps"><ol><li>New communication → channel: Note</li><li>Select contact, write note</li><li>Save</li></ol></td><td class="tc-expected">Note saved in communication log. Visible under contact's history.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-074</td><td><span class="prio-badge p2">P2</span></td><td>SMS / WhatsApp</td><td class="tc-steps"><ol><li>Try logging SMS and WhatsApp communication types</li></ol></td><td class="tc-expected">Log saved with correct channel type. Icons distinguish SMS from WhatsApp.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-075</td><td><span class="prio-badge p3">P3</span></td><td>Filter by Channel</td><td class="tc-steps"><ol><li>Filter communication log by: Email / SMS / Call / Note</li></ol></td><td class="tc-expected">List filters to show only selected channel type.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 16 — TEAM -->
+<div class="section-banner">
+  <span class="snum">16</span>
+  <h2>Module: Team Management</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-076</td><td><span class="prio-badge p2">P2</span></td><td>Invite Team Member</td><td class="tc-steps"><ol><li>Team → "Invite Member"</li><li>Enter email, select role (Staff)</li><li>Send invite</li></ol></td><td class="tc-expected">Invitation email sent. Pending invite appears in team list with "Pending" badge.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-077</td><td><span class="prio-badge p2">P2</span></td><td>Accept Invite</td><td class="tc-steps"><ol><li>Check invited email inbox</li><li>Click invite link</li><li>Register (if new user) or login</li></ol></td><td class="tc-expected">Invited user joined. Appears in team list as active. Role is Staff.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-078</td><td><span class="prio-badge p2">P2</span></td><td>Change Role</td><td class="tc-steps"><ol><li>Change a team member's role from Staff to Admin</li></ol></td><td class="tc-expected">Role updated. Team member sees more permissions on next login.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-079</td><td><span class="prio-badge p1">P1</span></td><td>Remove Member</td><td class="tc-steps"><ol><li>Remove a team member</li><li>Try to login as that member</li></ol></td><td class="tc-expected">Member removed. Their session is invalidated. They cannot access the business data.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-080</td><td><span class="prio-badge p2">P2</span></td><td>Role Permissions</td><td class="tc-steps"><ol><li>Login as Staff member</li><li>Try to access Team settings page</li></ol></td><td class="tc-expected">Staff members cannot manage team (redirect or access denied). Owner-only actions hidden.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 17 — TEMPLATES -->
+<div class="section-banner page-break">
+  <span class="snum">17</span>
+  <h2>Module: Templates</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-081</td><td><span class="prio-badge p2">P2</span></td><td>Create Template</td><td class="tc-steps"><ol><li>Templates → "New Template"</li><li>Select type (Quote / Invoice / Contract)</li><li>Add name, items, description</li><li>Save</li></ol></td><td class="tc-expected">Template saved. Appears in template list.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-082</td><td><span class="prio-badge p2">P2</span></td><td>Use Template</td><td class="tc-steps"><ol><li>Create a new quote</li><li>Click "Use Template"</li><li>Select the saved template</li></ol></td><td class="tc-expected">Line items from template pre-filled in the quote. Can edit before saving.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-083</td><td><span class="prio-badge p3">P3</span></td><td>Edit Template</td><td class="tc-steps"><ol><li>Edit a template's items</li><li>Save</li></ol></td><td class="tc-expected">Updated template saved. Future uses of the template use the new items.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-084</td><td><span class="prio-badge p3">P3</span></td><td>Delete Template</td><td class="tc-steps"><ol><li>Delete a template</li></ol></td><td class="tc-expected">Template removed from list. Confirmation dialog shown before delete.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 18 — NOTIFICATIONS -->
+<div class="section-banner">
+  <span class="snum">18</span>
+  <h2>Module: Notifications</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-085</td><td><span class="prio-badge p2">P2</span></td><td>Bell Notifications</td><td class="tc-steps"><ol><li>Perform an action (send quote)</li><li>Check the notification bell</li></ol></td><td class="tc-expected">Notification appears in bell dropdown. Unread count badge shown.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-086</td><td><span class="prio-badge p2">P2</span></td><td>Mark as Read</td><td class="tc-steps"><ol><li>Click a notification in the dropdown</li></ol></td><td class="tc-expected">Notification marked as read. Count badge decreases. Unread dot removed.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-087</td><td><span class="prio-badge p3">P3</span></td><td>Notification Settings</td><td class="tc-steps"><ol><li>Settings → Notifications</li><li>Toggle off "Quote Sent" notification</li><li>Send a quote</li></ol></td><td class="tc-expected">No notification received for quote sent (if setting honored).</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 19 — SETTINGS -->
+<div class="section-banner page-break">
+  <span class="snum">19</span>
+  <h2>Module: Settings (9 Sections)</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-088</td><td><span class="prio-badge p2">P2</span></td><td>Profile Settings</td><td class="tc-steps"><ol><li>Settings → Profile</li><li>Change name, click Save</li></ol></td><td class="tc-expected">Name updated. Shown in sidebar and header immediately.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-089</td><td><span class="prio-badge p2">P2</span></td><td>Change Password</td><td class="tc-steps"><ol><li>Settings → Security</li><li>Enter current password, new password, confirm</li><li>Save</li></ol></td><td class="tc-expected">Password changed. Old password no longer works on next login.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-090</td><td><span class="prio-badge p2">P2</span></td><td>Quote Prefix</td><td class="tc-steps"><ol><li>Settings → Numbering</li><li>Change quote prefix to "EST-"</li><li>Save</li><li>Create a new quote</li></ol></td><td class="tc-expected">New quote uses EST-0001 (new prefix). Previous quotes unchanged.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-091</td><td><span class="prio-badge p2">P2</span></td><td>Tax Rate</td><td class="tc-steps"><ol><li>Settings → Preferences</li><li>Set default tax rate to 8.5%</li><li>Create a new quote</li></ol></td><td class="tc-expected">New quote pre-fills tax at 8.5%.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-092</td><td><span class="prio-badge p3">P3</span></td><td>Email Settings</td><td class="tc-steps"><ol><li>Settings → Email</li><li>Set a reply-to email</li><li>Save</li></ol></td><td class="tc-expected">Reply-to address saved. Used in sent emails.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-093</td><td><span class="prio-badge p3">P3</span></td><td>Currency/Region</td><td class="tc-steps"><ol><li>Settings → Region</li><li>Change currency to USD</li><li>Save, check a quote</li></ol></td><td class="tc-expected">Currency symbol $ shown on quotes and invoices.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-094</td><td><span class="prio-badge p3">P3</span></td><td>Settings Sections</td><td class="tc-steps"><ol><li>Click through all 9 Settings tabs</li></ol></td><td class="tc-expected">All tabs load without error: Profile, Preferences, Numbering, Notifications, Email, Integrations, Region, Security, API/Webhooks.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 20 — SUBSCRIPTION -->
+<div class="section-banner page-break">
+  <span class="snum">20</span>
+  <h2>Module: Subscription &amp; Billing</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-095</td><td><span class="prio-badge p2">P2</span></td><td>Subscription Page</td><td class="tc-steps"><ol><li>Navigate to /subscription</li></ol></td><td class="tc-expected">3 plans shown: Free Trial ($0/15 days), Monthly ($49/mo), Yearly ($490/yr). Current plan highlighted.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-096</td><td><span class="prio-badge p2">P2</span></td><td>Upgrade to Monthly</td><td class="tc-steps"><ol><li>Click "Upgrade" on Monthly plan</li><li>Complete Stripe checkout with test card</li></ol></td><td class="tc-expected">Checkout opens. Payment processed. Plan upgrades to Monthly. Stripe shows subscription.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-097</td><td><span class="prio-badge p3">P3</span></td><td>Trial Expiry</td><td class="tc-steps"><ol><li>Check trial countdown on subscription page</li></ol></td><td class="tc-expected">Days remaining shown accurately. Upgrade CTA clearly visible.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-098</td><td><span class="prio-badge p3">P3</span></td><td>Billing History</td><td class="tc-steps"><ol><li>After upgrading, check billing history section</li></ol></td><td class="tc-expected">Shows past payments with date, amount, status (Paid).</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 21 — AI CHATBOT -->
+<div class="section-banner">
+  <span class="snum">21</span>
+  <h2>Module: AI Assistant (Chatbot)</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-099</td><td><span class="prio-badge p2">P2</span></td><td>Open Chatbot</td><td class="tc-steps"><ol><li>Find the AI assistant icon (bottom right or sidebar)</li><li>Click to open</li></ol></td><td class="tc-expected">Chat panel opens. "Hello! How can I help?" greeting shown.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-100</td><td><span class="prio-badge p2">P2</span></td><td>Ask a Question</td><td class="tc-steps"><ol><li>Type: "How do I create a quote?"</li><li>Press Enter or click Send</li></ol></td><td class="tc-expected">AI responds with a helpful answer within 5 seconds. Response is relevant.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-101</td><td><span class="prio-badge p3">P3</span></td><td>Multi-turn Chat</td><td class="tc-steps"><ol><li>Ask 3 follow-up questions in the same chat</li></ol></td><td class="tc-expected">Each response is coherent and references previous context.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-102</td><td><span class="prio-badge p3">P3</span></td><td>Chat UI</td><td class="tc-steps"><ol><li>Check chat bubble colors</li><li>Check input field, send button</li></ol></td><td class="tc-expected">User messages: right-aligned, navy/blue. AI messages: left-aligned, gray. Input and send button visible.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 22 — REPORTS -->
+<div class="section-banner page-break">
+  <span class="snum">22</span>
+  <h2>Module: Reports</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-103</td><td><span class="prio-badge p2">P2</span></td><td>Reports Page</td><td class="tc-steps"><ol><li>Navigate to /reports</li></ol></td><td class="tc-expected">Reports page loads with charts and summary statistics.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-104</td><td><span class="prio-badge p2">P2</span></td><td>Date Range Filter</td><td class="tc-steps"><ol><li>Set date range to "Last 30 days"</li></ol></td><td class="tc-expected">Charts and stats update to reflect data only in that range.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-105</td><td><span class="prio-badge p3">P3</span></td><td>Revenue Report</td><td class="tc-steps"><ol><li>View revenue report with at least 2 paid invoices</li></ol></td><td class="tc-expected">Revenue total matches sum of paid invoices. Chart shows correct months.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 23 — SECURITY CHECKS -->
+<div class="section-banner">
+  <span class="snum">23</span>
+  <h2>Security &amp; Data Isolation Checks</h2>
+</div>
+<div class="section-body">
+<table class="qa-table">
+  <thead>
+    <tr><th style="width:60px;">Test ID</th><th style="width:50px;">Prio</th><th style="width:100px;">Feature</th><th style="width:200px;">Steps</th><th style="width:180px;">Expected Result</th><th style="width:120px;">Actual Result</th><th style="width:60px;">Status</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="tc-id">TC-106</td><td><span class="prio-badge p1">P1</span></td><td>Data Isolation</td><td class="tc-steps"><ol><li>Register 2 separate accounts (Account A, Account B)</li><li>Create a quote as Account A</li><li>Login as Account B</li><li>Navigate to /quotes</li></ol></td><td class="tc-expected">Account B sees ZERO quotes from Account A. No cross-tenant data leakage.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-107</td><td><span class="prio-badge p1">P1</span></td><td>API Auth</td><td class="tc-steps"><ol><li>Open browser DevTools → Network tab</li><li>Call /api/quotes directly (no cookie)</li></ol></td><td class="tc-expected">API returns 401 Unauthorized. No data returned.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-108</td><td><span class="prio-badge p1">P1</span></td><td>HTTPS</td><td class="tc-steps"><ol><li>Check the URL bar on clearbuildusa.com</li></ol></td><td class="tc-expected">Padlock icon shown. URL starts with https://. No "Not Secure" warning.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-109</td><td><span class="prio-badge p2">P2</span></td><td>Session Cookie</td><td class="tc-steps"><ol><li>DevTools → Application → Cookies</li><li>Find cb_session cookie</li></ol></td><td class="tc-expected">Cookie is HttpOnly (not readable by JS). SameSite is Lax or Strict. Secure flag set on HTTPS.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+    <tr><td class="tc-id">TC-110</td><td><span class="prio-badge p2">P2</span></td><td>XSS Test</td><td class="tc-steps"><ol><li>In any text field (contact name, quote note), enter: &lt;script&gt;alert(1)&lt;/script&gt;</li><li>Save and reload page</li></ol></td><td class="tc-expected">Script not executed. The text is shown literally or escaped. No alert popup.</td><td class="result-cell"></td><td class="status-cell"></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- SECTION 24 — BUG REPORT TEMPLATE -->
+<div class="section-banner page-break">
+  <span class="snum">24</span>
+  <h2>Bug Report Template — Fill One Per Bug Found</h2>
+</div>
+<div class="section-body">
+
+  <div class="bug-form">
+    <h3>Bug Report #BUG-___</h3>
+    <div class="form-row-3">
+      <div class="field-group"><label>Bug ID</label><div class="field-input">BUG-</div></div>
+      <div class="field-group"><label>Date Found</label><div class="field-input"></div></div>
+      <div class="field-group"><label>Tester Name</label><div class="field-input"></div></div>
+    </div>
+    <div class="form-row-3">
+      <div class="field-group"><label>Module</label><div class="field-input"></div></div>
+      <div class="field-group"><label>Test Case ID</label><div class="field-input">TC-</div></div>
+      <div class="field-group"><label>Priority</label><div class="field-input">P1 / P2 / P3 / P4</div></div>
+    </div>
+    <div class="form-row-2">
+      <div class="field-group"><label>Browser &amp; Version</label><div class="field-input"></div></div>
+      <div class="field-group"><label>Device / OS</label><div class="field-input"></div></div>
+    </div>
+    <div class="form-row-2">
+      <div class="field-group"><label>Screen Size (px)</label><div class="field-input"></div></div>
+      <div class="field-group"><label>URL When Bug Occurred</label><div class="field-input">https://clearbuildusa.com/</div></div>
+    </div>
+    <div class="field-group" style="margin-bottom:12px;"><label>Bug Title (Short Description)</label><div class="field-input"></div></div>
+    <div class="field-group" style="margin-bottom:12px;"><label>Steps to Reproduce</label><div class="field-input taller"><ol style="padding-left:14px;"><li>Step 1:</li><li>Step 2:</li><li>Step 3:</li></ol></div></div>
+    <div class="form-row-2">
+      <div class="field-group"><label>Expected Result</label><div class="field-input tall"></div></div>
+      <div class="field-group"><label>Actual Result</label><div class="field-input tall"></div></div>
+    </div>
+    <div class="field-group" style="margin-bottom:12px;"><label>Screenshot Filename(s)</label><div class="field-input">BUG-___.png</div></div>
+    <div class="field-group"><label>Additional Notes / Frequency (always / sometimes / once)</label><div class="field-input tall"></div></div>
+  </div>
+
+  <p style="font-size:11px;color:var(--muted);text-align:center;">Make a copy of this template for each bug. Number sequentially: BUG-001, BUG-002, etc.</p>
+
+</div>
+
+<!-- SECTION 25 — DAILY REPORT -->
+<div class="section-banner page-break">
+  <span class="snum">25</span>
+  <h2>Daily Progress Report Template</h2>
+</div>
+<div class="section-body">
+
+  <div class="report-form">
+    <h3>Daily Testing Report</h3>
+    <div class="form-row-2" style="margin-bottom:16px;">
+      <div class="field-group"><label>Date</label><div class="field-input"></div></div>
+      <div class="field-group"><label>Tester Name</label><div class="field-input"></div></div>
+    </div>
+    <div class="form-row-2" style="margin-bottom:16px;">
+      <div class="field-group"><label>Testing Session (e.g. 9am – 5pm)</label><div class="field-input"></div></div>
+      <div class="field-group"><label>Environment Tested</label><div class="field-input">https://clearbuildusa.com</div></div>
+    </div>
+
+    <div class="progress-grid">
+      <div class="progress-box"><div class="num">___</div><div class="lbl">Tests Executed</div></div>
+      <div class="progress-box"><div class="num" style="color:#065f46;">___</div><div class="lbl">Passed</div></div>
+      <div class="progress-box"><div class="num" style="color:#991b1b;">___</div><div class="lbl">Failed</div></div>
+      <div class="progress-box"><div class="num" style="color:#92400e;">___</div><div class="lbl">Blocked / Skip</div></div>
+    </div>
+
+    <label style="display:block;font-size:10px;font-weight:700;color:var(--navy);margin-bottom:4px;text-transform:uppercase;">Overall Progress</label>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+    <p style="font-size:10px;color:var(--muted);margin-bottom:16px;">____% of total test cases complete (___/220)</p>
+
+    <h4 style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:8px;">Modules Tested Today</h4>
+    <table class="module-progress" style="margin-bottom:16px;">
+      <thead><tr><th>Module</th><th>TC Range</th><th>Tests Run</th><th>Pass</th><th>Fail</th><th class="status-col">Module Status</th></tr></thead>
+      <tbody>
+        <tr><td></td><td></td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td><td class="status-col"></td></tr>
+      </tbody>
+    </table>
+
+    <h4 style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:8px;">Bugs Found Today</h4>
+    <table class="module-progress" style="margin-bottom:16px;">
+      <thead><tr><th>Bug ID</th><th>Module</th><th>Title</th><th>Priority</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>BUG-</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>BUG-</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>BUG-</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>BUG-</td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+
+    <div class="form-row-2">
+      <div class="field-group"><label>Blockers / Issues Faced</label><div class="field-input tall"></div></div>
+      <div class="field-group"><label>Plan for Tomorrow</label><div class="field-input tall"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SECTION 26 — FINAL SUMMARY REPORT -->
+<div class="section-banner page-break">
+  <span class="snum">26</span>
+  <h2>Final QA Summary Report Template</h2>
+</div>
+<div class="section-body">
+
+  <div class="report-form">
+    <h3>Final QA Testing Summary</h3>
+    <div class="form-row-3" style="margin-bottom:16px;">
+      <div class="field-group"><label>Testing Start Date</label><div class="field-input"></div></div>
+      <div class="field-group"><label>Testing End Date</label><div class="field-input"></div></div>
+      <div class="field-group"><label>Tester Name(s)</label><div class="field-input"></div></div>
+    </div>
+
+    <h4 style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:8px;">Overall Results</h4>
+    <table class="module-progress" style="margin-bottom:16px;">
+      <thead><tr><th>Metric</th><th>Count</th><th>Percentage</th></tr></thead>
+      <tbody>
+        <tr><td>Total Test Cases</td><td>220</td><td>100%</td></tr>
+        <tr><td>Passed</td><td></td><td></td></tr>
+        <tr><td>Failed</td><td></td><td></td></tr>
+        <tr><td>Skipped / N/A</td><td></td><td></td></tr>
+        <tr><td>Total Bugs Reported</td><td></td><td></td></tr>
+        <tr><td>P1 Critical Bugs</td><td></td><td></td></tr>
+        <tr><td>P2 High Bugs</td><td></td><td></td></tr>
+        <tr><td>P3 Medium Bugs</td><td></td><td></td></tr>
+        <tr><td>P4 Low Bugs</td><td></td><td></td></tr>
+      </tbody>
+    </table>
+
+    <h4 style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:8px;">Module-by-Module Summary</h4>
+    <table class="module-progress" style="margin-bottom:16px;">
+      <thead><tr><th>Module</th><th>Tests</th><th>Pass</th><th>Fail</th><th>Bugs</th><th class="status-col">Result</th></tr></thead>
+      <tbody>
+        <tr><td>Authentication</td><td>10</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Business Setup</td><td>3</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Dashboard</td><td>6</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Navigation</td><td>5</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Contacts / Leads</td><td>8</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Quotes</td><td>10</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Invoices</td><td>8</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Payments</td><td>5</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Projects</td><td>7</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Change Orders</td><td>4</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Scheduling</td><td>4</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Communications</td><td>5</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Team Management</td><td>5</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Templates</td><td>4</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Notifications</td><td>3</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Settings (9 sections)</td><td>7</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Subscription</td><td>4</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>AI Chatbot</td><td>4</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Reports</td><td>3</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Security Checks</td><td>5</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>UI/UX Global</td><td>~30</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr><td>Browser Compat</td><td>~30</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+        <tr style="background:#f1f3f8;font-weight:700;"><td>TOTAL</td><td>220+</td><td></td><td></td><td></td><td class="status-col"></td></tr>
+      </tbody>
+    </table>
+
+    <h4 style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:8px;">Critical Issues (P1 + P2) — Must Fix Before Launch</h4>
+    <table class="module-progress" style="margin-bottom:16px;">
+      <thead><tr><th>Bug ID</th><th>Module</th><th>Title</th><th>Priority</th><th>Recommended Action</th></tr></thead>
+      <tbody>
+        <tr><td>BUG-</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>BUG-</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>BUG-</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>BUG-</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>BUG-</td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+
+    <div class="form-row-2">
+      <div class="field-group"><label>Overall Assessment</label>
+        <div class="field-input tall" style="font-size:11px;">
+          ☐ READY TO LAUNCH — All P1/P2 fixed, P3/P4 accepted<br/>
+          ☐ READY WITH CONDITIONS — Fix critical bugs listed above first<br/>
+          ☐ NOT READY — Multiple P1 blockers need resolution
+        </div>
+      </div>
+      <div class="field-group"><label>Tester Sign-off Notes</label><div class="field-input tall"></div></div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+    <p style="font-size:11px;color:var(--muted);">Clear Build USA — QA Testing Process &amp; Tracker v1.0 — May 2026</p>
+    <p style="font-size:11px;color:var(--muted);">Test environment: <strong>https://clearbuildusa.com</strong> — 220+ test cases across 22 modules</p>
+    <p style="font-size:11px;color:var(--muted);margin-top:6px;">For questions contact: <strong>support@clearbuildusa.com</strong></p>
+  </div>
+
+</div>
+</div><!-- .page-wrap -->
+</body>
+</html>

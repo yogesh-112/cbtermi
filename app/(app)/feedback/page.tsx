@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Plus, Star, ThumbsUp, ThumbsDown, Minus } from "lucide-react";
+import { Plus, Star, ThumbsUp, ThumbsDown, Minus, Mail, Clock } from "lucide-react";
 import { Modal, toast, EmptyState } from "@/components/ui";
+import ContactSelect from "@/components/ui/ContactSelect";
 import { fmtDate } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 
@@ -13,6 +14,8 @@ export default function FeedbackPage() {
   const [projects, setProjects] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
   const [form, setForm] = useState({ project_id: "", contact_id: "", rating: 5, category: "general", message: "", is_public: false });
+  const [requestForm, setRequestForm] = useState({ contact_id: "", project_id: "", message: "" });
+  const [requestModal, setRequestModal] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const load = () => {
@@ -32,9 +35,9 @@ export default function FeedbackPage() {
   const save = async () => {
     if (!form.message) { toast(t.common.required, "error"); return; }
     setSaving(true);
+    const body = { ...form, contact_id: form.contact_id || null, project_id: form.project_id || null };
     const res = await fetch("/api/feedback", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
     });
     setSaving(false);
     if (res.ok) {
@@ -43,6 +46,25 @@ export default function FeedbackPage() {
       load();
     } else {
       const d = await res.json(); toast(d.message || "Failed", "error");
+    }
+  };
+
+  const sendRequest = async () => {
+    if (!requestForm.contact_id) { toast("Please select a contact", "error"); return; }
+    setSaving(true);
+    const res = await fetch("/api/feedback/request", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestForm),
+    });
+    const d = await res.json().catch(() => ({}));
+    setSaving(false);
+    if (res.ok || res.status === 207) {
+      toast(res.status === 207 ? d.message : "Feedback request sent!", "success");
+      setRequestModal(false);
+      setRequestForm({ contact_id: "", project_id: "", message: "" });
+      load();
+    } else {
+      toast(d.message || "Failed", "error");
     }
   };
 
@@ -73,7 +95,10 @@ export default function FeedbackPage() {
           <h1 className="page-title">{t.feedback.title}</h1>
           <p className="page-desc">{t.feedback.subtitle}</p>
         </div>
-        <button className="btn btn-green" onClick={() => setModal(true)}><Plus size={15} /> {t.feedback.recordFeedback}</button>
+        <div className="flex gap-2">
+          <button className="btn btn-outline btn-sm" onClick={() => setRequestModal(true)}><Mail size={14} /> Send Request</button>
+          <button className="btn btn-green" onClick={() => setModal(true)}><Plus size={15} /> {t.feedback.recordFeedback}</button>
+        </div>
       </div>
 
       {feedback.length > 0 && (
@@ -116,9 +141,13 @@ export default function FeedbackPage() {
                     <p className="font-semibold text-[#0c1226]">{f.contacts?.full_name ?? "Anonymous"}</p>
                     {f.projects?.name && <p className="text-xs text-[#8a8fa3]">{f.projects.name}</p>}
                   </div>
-                  <div className="flex items-center gap-0.5">{stars(f.rating)}</div>
+                  {f.status === "pending"
+                    ? <span className="badge bg-amber-100 text-amber-700 flex items-center gap-1"><Clock size={10} />Awaiting</span>
+                    : <div className="flex items-center gap-0.5">{stars(f.rating)}</div>}
                 </div>
-                <p className="text-sm text-[#4a5168] mt-2 leading-relaxed">{f.message}</p>
+                {f.status === "pending"
+                  ? <p className="text-[12px] text-[#8a8fa3] mt-2">Request sent {fmtDate(f.email_sent_at)}</p>
+                  : <p className="text-sm text-[#4a5168] mt-2 leading-relaxed">{f.message}</p>}
                 <div className="flex items-center gap-2 mt-2 text-xs text-[#8a8fa3]">
                   <span className="badge bg-[#f0efea] text-[#4a5168] capitalize">{f.category}</span>
                   <span>{fmtDate(f.created_at)}</span>
@@ -208,6 +237,40 @@ export default function FeedbackPage() {
             <button className="btn btn-outline" onClick={() => setModal(false)}>{t.feedback.cancelBtn}</button>
             <button className="btn btn-green" onClick={save} disabled={saving}>
               {saving ? t.feedback.saving : t.feedback.recordBtn}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Send Feedback Request Modal */}
+      <Modal open={requestModal} onClose={() => setRequestModal(false)} title="Send Feedback Request" size="sm">
+        <div className="space-y-4">
+          <p className="text-[13px] text-[#8a8fa3]">Send an email to a contact asking for their feedback. They respond via a public form link.</p>
+          <div>
+            <label className="label">Contact <span className="text-red-500">*</span></label>
+            <ContactSelect contacts={contacts} value={requestForm.contact_id}
+              onChange={id => setRequestForm(f => ({ ...f, contact_id: id }))}
+              onContactCreated={c => setContacts(cs => [c, ...cs])}
+              placeholder="Select contact" />
+          </div>
+          <div>
+            <label className="label">Project <span className="text-[#8a8fa3] font-normal">(optional)</span></label>
+            <select value={requestForm.project_id} onChange={e => setRequestForm(f => ({ ...f, project_id: e.target.value }))} className="field">
+              <option value="">— No project —</option>
+              {projects.map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="label">Custom message <span className="text-[#8a8fa3] font-normal">(optional)</span></label>
+            <textarea value={requestForm.message}
+              onChange={e => setRequestForm(f => ({ ...f, message: e.target.value }))}
+              className="field resize-none" rows={3}
+              placeholder="Thanks for working with us! We'd love to hear your feedback…" />
+          </div>
+          <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
+            <button className="btn btn-outline" onClick={() => setRequestModal(false)}>Cancel</button>
+            <button className="btn btn-primary gap-1.5" onClick={sendRequest} disabled={saving}>
+              <Mail size={14} /> {saving ? "Sending…" : "Send Request"}
             </button>
           </div>
         </div>

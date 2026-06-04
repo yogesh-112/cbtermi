@@ -37,17 +37,23 @@ export default function SchedulingPage() {
 
   const load = async () => {
     setLoading(true);
-    const [s, l, m, c] = await Promise.all([
-      fetch("/api/scheduling/slots").then(r => r.json()),
-      fetch("/api/scheduling/booking-links").then(r => r.json()),
-      fetch("/api/scheduling/meetings").then(r => r.json()),
-      fetch("/api/contacts").then(r => r.json()),
-    ]);
-    setSlots(s.slots ?? []);
-    setLinks(l.links ?? []);
-    setMeetings(m.meetings ?? []);
-    setContacts(c.contacts ?? []);
-    setLoading(false);
+    try {
+      const safeJson = (r: Response) => r.ok ? r.json() : Promise.resolve({});
+      const [s, l, m, c] = await Promise.all([
+        fetch("/api/scheduling/slots").then(safeJson),
+        fetch("/api/scheduling/booking-links").then(safeJson),
+        fetch("/api/scheduling/meetings").then(safeJson),
+        fetch("/api/contacts").then(safeJson),
+      ]);
+      setSlots(s.slots ?? []);
+      setLinks(l.links ?? []);
+      setMeetings(m.meetings ?? []);
+      setContacts(c.contacts ?? []);
+    } catch (e) {
+      console.error("[scheduling] load failed:", e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, []);

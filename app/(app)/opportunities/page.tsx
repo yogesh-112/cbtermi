@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Target, TrendingUp, Search, ChevronRight } from "lucide-react";
 import { Modal, ConfirmDialog, EmptyState, toast } from "@/components/ui";
+import ContactSelect from "@/components/ui/ContactSelect";
 import { fmt, fmtDate } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 
@@ -295,10 +296,13 @@ export default function OpportunitiesPage() {
           </div>
           <div>
             <label className="label">{t.opportunities.contactLabel}</label>
-            <select value={form.contact_id} onChange={e => setForm({ ...form, contact_id: e.target.value })} className="field">
-              <option value="">{t.opportunities.noContact}</option>
-              {contacts.map(c => <option key={c.id} value={c.id}>{c.full_name}</option>)}
-            </select>
+            <ContactSelect
+              contacts={contacts}
+              value={form.contact_id}
+              onChange={id => setForm(f => ({ ...f, contact_id: id }))}
+              onContactCreated={c => setContacts(cs => [c, ...cs])}
+              placeholder={t.opportunities.noContact}
+            />
           </div>
           <div>
             <label className="label">{t.opportunities.projectTypeLabel}</label>

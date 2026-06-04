@@ -9,7 +9,7 @@ export async function GET() {
 
   const { data } = await supabase
     .from("support_tickets")
-    .select("*, support_ticket_messages(count)")
+    .select("*, support_ticket_messages(id)")
     .eq("business_id", session.businessId)
     .order("created_at", { ascending: false });
 

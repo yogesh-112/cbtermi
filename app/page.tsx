@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import "./landing.css";
 
@@ -64,6 +64,101 @@ function Btn({ href, variant = "primary", size, className = "", onClick, childre
   return <button type="button" className={cls} onClick={onClick}>{children}</button>;
 }
 
+/* ── Language switcher ──────────────────────────────────────────────── */
+const CB_LANGS = [
+  { code: "en" as const, short: "EN", label: "English",   sub: "United States" },
+  { code: "es" as const, short: "ES", label: "Español",   sub: "Spanish" },
+  { code: "pt" as const, short: "PT", label: "Português", sub: "Portuguese" },
+];
+type LangCode = "en" | "es" | "pt";
+
+function applyLang(code: LangCode) {
+  try { document.documentElement.setAttribute("lang", code); } catch {}
+  try { localStorage.setItem("cb_lang", code); } catch {}
+  try { window.dispatchEvent(new CustomEvent("cb:langchange", { detail: { lang: code } })); } catch {}
+}
+
+function useLang(): [LangCode, (code: LangCode) => void] {
+  const [lang, setLangState] = useState<LangCode>("en");
+  useEffect(() => {
+    try {
+      const s = localStorage.getItem("cb_lang") as LangCode | null;
+      if (s && CB_LANGS.some(l => l.code === s)) { setLangState(s); applyLang(s); }
+    } catch {}
+  }, []);
+  useEffect(() => {
+    const fn = (e: Event) => {
+      const code = (e as CustomEvent).detail?.lang as LangCode;
+      if (code && CB_LANGS.some(l => l.code === code)) setLangState(code);
+    };
+    window.addEventListener("cb:langchange", fn);
+    return () => window.removeEventListener("cb:langchange", fn);
+  }, []);
+  const setLang = (code: LangCode) => { applyLang(code); setLangState(code); };
+  return [lang, setLang];
+}
+
+function LangSwitcher() {
+  const [lang, setLang] = useLang();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const current = CB_LANGS.find(l => l.code === lang) ?? CB_LANGS[0];
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
+  }, [open]);
+  return (
+    <div className="lang" ref={ref}>
+      <button type="button" className="lang-btn" onClick={() => setOpen(o => !o)}
+        aria-haspopup="listbox" aria-expanded={open} aria-label="Change language">
+        <Icon name="globe" className="lang-globe" />
+        <span className="lang-short">{current.short}</span>
+        <Icon name="chevron" className="lang-caret" style={{ transform: open ? "rotate(180deg)" : "rotate(0)" }} />
+      </button>
+      {open && (
+        <div className="lang-menu" role="listbox">
+          <span className="lang-menu-label mono">LANGUAGE</span>
+          {CB_LANGS.map(l => (
+            <button type="button" key={l.code} role="option" aria-selected={l.code === lang}
+              className={`lang-opt${l.code === lang ? " is-active" : ""}`}
+              onClick={() => { setLang(l.code); setOpen(false); }}>
+              <span className="lang-opt-code">{l.short}</span>
+              <span className="lang-opt-text">
+                <span className="lang-opt-label">{l.label}</span>
+                <span className="lang-opt-sub">{l.sub}</span>
+              </span>
+              {l.code === lang && <span className="lang-opt-check"><Icon name="check" /></span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LangSegment() {
+  const [lang, setLang] = useLang();
+  return (
+    <div className="lang-seg" role="group" aria-label="Change language">
+      <span className="lang-seg-label"><Icon name="globe" /> Language</span>
+      <div className="lang-seg-options">
+        {CB_LANGS.map(l => (
+          <button type="button" key={l.code}
+            className={`lang-seg-opt${l.code === lang ? " is-active" : ""}`}
+            aria-pressed={l.code === lang}
+            onClick={() => setLang(l.code)}>
+            {l.short}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ── Reveal hook ────────────────────────────────────────────────────── */
 function useReveal() {
   useEffect(() => {
@@ -95,18 +190,23 @@ function Nav() {
           {links.map(([t, h]) => <a key={t} href={h}>{t}</a>)}
         </nav>
         <div className="nav-cta">
+          <LangSwitcher />
           <Link href="/login" className="nav-signin">Sign In</Link>
           <Link href="/login" className="btn btn-soft btn-sm">Book Demo</Link>
           <Link href="/register" className="btn btn-primary btn-sm">Start Free Trial</Link>
         </div>
-        <button type="button" className="nav-burger" onClick={() => setOpen(o => !o)} aria-label="Menu">
-          <Icon name={open ? "close" : "menu"} />
-        </button>
+        <div className="nav-mobile-controls">
+          <LangSwitcher />
+          <button type="button" className="nav-burger" onClick={() => setOpen(o => !o)} aria-label="Menu">
+            <Icon name={open ? "close" : "menu"} />
+          </button>
+        </div>
       </div>
       {open && (
         <div className="nav-mobile">
           {links.map(([t, h]) => <a key={t} href={h} onClick={() => setOpen(false)}>{t}</a>)}
-          <Link href="/login" onClick={() => setOpen(false)}>Sign In</Link>
+          <Link href="/login" className="nav-mobile-signin" onClick={() => setOpen(false)}>Sign In</Link>
+          <LangSegment />
           <Link href="/login" onClick={() => setOpen(false)} className="btn btn-soft">Book Demo</Link>
           <Link href="/register" onClick={() => setOpen(false)} className="btn btn-primary">Start Free Trial</Link>
         </div>

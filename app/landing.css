@@ -37,6 +37,7 @@
   --ease:cubic-bezier(.22,.61,.36,1);
 
   box-sizing:border-box;
+  font-size:16px;
   font-family:'Hanken Grotesk',system-ui,-apple-system,sans-serif;
   color:var(--ink);
   background:var(--paper);
@@ -66,7 +67,7 @@
 .lp .kicker .dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;}
 .lp .section-head{max-width:740px;}
 .lp .section-head.center{margin:0 auto;}
-.lp .section-title{font-family:'Archivo Expanded','Archivo',sans-serif;font-weight:800;letter-spacing:-.02em;line-height:1.04;color:var(--navy);font-size:clamp(30px,3.6vw,46px);margin-top:16px;}
+.lp .section-title{font-family:'Archivo Expanded','Archivo',sans-serif;font-weight:800;letter-spacing:-.02em;line-height:1.04;color:var(--navy);font-size:clamp(30px,3.6vw,46px);margin-top:16px;text-transform:none;margin-bottom:0;}
 .lp .section-sub{margin-top:18px;font-size:clamp(17px,1.5vw,19px);color:var(--muted);line-height:1.55;}
 
 /* ---------- buttons ---------- */

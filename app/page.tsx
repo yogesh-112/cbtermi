@@ -1,7 +1,8 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, createContext, useContext } from "react";
 import Link from "next/link";
 import "./landing.css";
+import { LANDING_T, type LandingT } from "./landing-translations";
 
 /* ── Icons ─────────────────────────────────────────────────────────── */
 const ICONS: Record<string, string> = {
@@ -63,6 +64,10 @@ function Btn({ href, variant = "primary", size, className = "", onClick, childre
   if (href) return <a href={href} className={cls}>{children}</a>;
   return <button type="button" className={cls} onClick={onClick}>{children}</button>;
 }
+
+/* ── Translations context ───────────────────────────────────────────── */
+const TCtx = createContext<LandingT>(LANDING_T.en);
+function useT() { return useContext(TCtx); }
 
 /* ── Language switcher ──────────────────────────────────────────────── */
 const CB_LANGS = [
@@ -174,6 +179,7 @@ function useReveal() {
 
 /* ── Nav ────────────────────────────────────────────────────────────── */
 function Nav() {
+  const t = useT();
   const [solid, setSolid] = useState(false);
   const [open, setOpen] = useState(false);
   useEffect(() => {
@@ -181,19 +187,24 @@ function Nav() {
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
-  const links: [string, string][] = [["Features", "#features"], ["How it works", "#how"], ["Pricing", "#pricing"], ["FAQ", "#faq"]];
+  const links: [string, string][] = [
+    [t.nav.features, "#features"],
+    [t.nav.how,      "#how"],
+    [t.nav.pricing,  "#pricing"],
+    [t.nav.faq,      "#faq"],
+  ];
   return (
     <header className={`nav${solid ? " nav--solid" : ""}`}>
       <div className="wrap nav-inner">
         <a href="#top" className="nav-brand"><Logo height={34} /></a>
         <nav className="nav-links">
-          {links.map(([t, h]) => <a key={t} href={h}>{t}</a>)}
+          {links.map(([label, href]) => <a key={href} href={href}>{label}</a>)}
         </nav>
         <div className="nav-cta">
           <LangSwitcher />
-          <Link href="/login" className="nav-signin">Sign In</Link>
-          <Link href="/login" className="btn btn-soft btn-sm">Book Demo</Link>
-          <Link href="/register" className="btn btn-primary btn-sm">Start Free Trial</Link>
+          <Link href="/login" className="nav-signin">{t.nav.signIn}</Link>
+          <Link href="/login" className="btn btn-soft btn-sm">{t.nav.bookDemo}</Link>
+          <Link href="/register" className="btn btn-primary btn-sm">{t.nav.startTrial}</Link>
         </div>
         <div className="nav-mobile-controls">
           <LangSwitcher />
@@ -204,11 +215,11 @@ function Nav() {
       </div>
       {open && (
         <div className="nav-mobile">
-          {links.map(([t, h]) => <a key={t} href={h} onClick={() => setOpen(false)}>{t}</a>)}
-          <Link href="/login" className="nav-mobile-signin" onClick={() => setOpen(false)}>Sign In</Link>
+          {links.map(([label, href]) => <a key={href} href={href} onClick={() => setOpen(false)}>{label}</a>)}
+          <Link href="/login" className="nav-mobile-signin" onClick={() => setOpen(false)}>{t.nav.signIn}</Link>
           <LangSegment />
-          <Link href="/login" onClick={() => setOpen(false)} className="btn btn-soft">Book Demo</Link>
-          <Link href="/register" onClick={() => setOpen(false)} className="btn btn-primary">Start Free Trial</Link>
+          <Link href="/login" onClick={() => setOpen(false)} className="btn btn-soft">{t.nav.bookDemo}</Link>
+          <Link href="/register" onClick={() => setOpen(false)} className="btn btn-primary">{t.nav.startTrial}</Link>
         </div>
       )}
     </header>
@@ -217,58 +228,58 @@ function Nav() {
 
 /* ── Hero ───────────────────────────────────────────────────────────── */
 function HeroChain() {
-  const steps = [
-    { n: "Q", color: "var(--blue)",  name: "Quote #1042",          meta: "Kitchen remodel · Maple St.",    pill: ["sent",     "Sent"]     as [string,string] | null, amt: null },
-    { n: "✓", color: "var(--green)", name: "Approval captured",    meta: "Signed by client · Mar 14",      pill: ["approved", "Approved"] as [string,string] | null, amt: null },
-    { n: "+", color: "var(--navy)",  name: "Change order #2",      meta: "Tile upgrade · +$2,400",          pill: ["approved", "Approved"] as [string,string] | null, amt: null },
-    { n: "$", color: "var(--blue)",  name: "Invoice #1042",        meta: "From approved work",             pill: null, amt: "$18,400" },
-    { n: "✓", color: "var(--green)", name: "Payment received",     meta: "Card · linked to job",           pill: ["paid",     "Paid"]     as [string,string] | null, amt: null },
-  ];
+  const t = useT();
+  const { chainSteps: steps, chainTitle, chainJob, chainBadge } = t.hero;
+  const nodeColors = ["var(--blue)", "var(--green)", "var(--navy)", "var(--blue)", "var(--green)"];
+  const nodeLabels = ["Q", "✓", "+", "$", "✓"];
+  const pillKinds: Record<string, string> = { Sent: "sent", Enviada: "sent", Enviado: "sent", Approved: "approved", Aprobado: "approved", Aprovado: "approved", Paid: "paid", Pagado: "paid", Pago: "paid" };
   return (
     <div className="chain">
       <div className="chain-head">
-        <span className="chain-head-title"><span className="d" />One job, one connected record</span>
-        <span className="chain-head-id mono">JOB&nbsp;#1042</span>
+        <span className="chain-head-title"><span className="d" />{chainTitle}</span>
+        <span className="chain-head-id mono">{chainJob}</span>
       </div>
       <div className="chain-rail" />
       {steps.map((s, i) => (
         <div className="chain-step" key={i} style={{ animationDelay: (0.5 + i * 0.14) + "s" }}>
-          <div className="chain-node" style={{ background: s.color }}>{s.n}</div>
+          <div className="chain-node" style={{ background: nodeColors[i] }}>{nodeLabels[i]}</div>
           <div className="chain-card">
             <div className="chain-card-top">
               <span className="chain-name">{s.name}</span>
-              {s.pill ? <Pill kind={s.pill[0]}>{s.pill[1]}</Pill> : <span className="chain-amt archivo">{s.amt}</span>}
+              {"pill" in s && s.pill
+                ? <Pill kind={pillKinds[s.pill] ?? "sent"}>{s.pill}</Pill>
+                : <span className="chain-amt archivo">{"amt" in s ? s.amt : ""}</span>}
             </div>
             <div className="chain-meta">{s.meta}</div>
           </div>
         </div>
       ))}
-      <div className="chain-badge"><Icon name="link" /> Everything linked</div>
+      <div className="chain-badge"><Icon name="link" /> {chainBadge}</div>
     </div>
   );
 }
 
 function Hero() {
+  const t = useT();
+  const h = t.hero;
   return (
     <section className="hero" id="top">
       <div className="hero-glow" />
       <div className="wrap hero-inner">
         <div className="hero-copy">
-          <span className="eyebrow hero-eyebrow reveal">FIELD SERVICE &amp; COMMERCIAL CONTROL</span>
+          <span className="eyebrow hero-eyebrow reveal">{h.eyebrow}</span>
           <h1 className="display hero-h1 reveal" data-d="1">
-            Keep approved work, billing &amp; payment <span className="hl">in&nbsp;sync.</span>
+            {h.h1a} <span className="hl">{h.h1b}</span>
           </h1>
-          <p className="hero-sub reveal" data-d="2">
-            Clear Build connects quotes, approvals, change orders, invoices, and payments to every job — so owner-led remodelers stop losing money between approved work and collected payment.
-          </p>
+          <p className="hero-sub reveal" data-d="2">{h.sub}</p>
           <div className="hero-cta reveal" data-d="3">
-            <Btn href="/register" variant="primary" size="lg">Start Free Trial <Icon name="arrow" /></Btn>
-            <Btn href="/login" variant="soft" size="lg">Book a Demo</Btn>
+            <Btn href="/register" variant="primary" size="lg">{h.cta1} <Icon name="arrow" /></Btn>
+            <Btn href="/login" variant="soft" size="lg">{h.cta2}</Btn>
           </div>
           <div className="hero-trust reveal" data-d="4">
-            {["No credit card required", "Set up fast", "No per-user pricing"].map(t => (
-              <span key={t} className="hero-trust-item">
-                <span className="tick"><Icon name="check" /></span>{t}
+            {h.trust.map(item => (
+              <span key={item} className="hero-trust-item">
+                <span className="tick"><Icon name="check" /></span>{item}
               </span>
             ))}
           </div>
@@ -283,14 +294,15 @@ function Hero() {
 
 /* ── Pipeline Strip ─────────────────────────────────────────────────── */
 function PipelineStrip() {
-  const steps = ["Lead", "Quote", "Approval", "Change order", "Invoice", "Payment"];
+  const t = useT();
+  const { label, steps } = t.pipeline;
   return (
     <div className="pipestrip">
       <div className="wrap pipestrip-inner">
-        <span className="pipestrip-label mono">THE CONNECTED CHAIN</span>
+        <span className="pipestrip-label mono">{label}</span>
         <div className="pipestrip-flow">
           {steps.map((s, i) => (
-            <span key={s}>
+            <span key={i}>
               <span className="pipestrip-node">{s}</span>
               {i < steps.length - 1 && <Icon name="arrow" className="pipestrip-arrow" />}
             </span>
@@ -303,43 +315,38 @@ function PipelineStrip() {
 
 /* ── Features ───────────────────────────────────────────────────────── */
 function Features() {
-  const primary = [
-    { ic: "quote",  col: "blue",  t: "Quotes & Change Orders",          d: "Create professional quotes, capture approval, and keep change orders formally linked to the original job." },
-    { ic: "card",   col: "green", t: "Invoices & Online Payments",       d: "Send invoices, collect payments online, and track paid, due, and overdue amounts clearly." },
-    { ic: "link",   col: "navy",  t: "Project-Linked Financial Control", d: "Keep quotes, invoices, payments, and updates tied to the same job so nothing gets lost." },
-    { ic: "shield", col: "blue",  t: "Approval Proof",                   d: "Capture quote and change-order approvals digitally so billing disputes are easier to prevent." },
-  ];
-  const secondary = [
-    { ic: "pipeline", t: "Leads & Client Pipeline",      d: "Track prospects and customers from first contact through signed work without spreadsheet chaos." },
-    { ic: "calendar", t: "Scheduling & Team Coordination", d: "Assign work, track upcoming jobs, and keep the team aligned without bloated dispatch software." },
-  ];
+  const t = useT();
+  const f = t.features;
+  const icons = ["quote", "card", "link", "shield"];
+  const cols  = ["blue",  "green","navy", "blue"];
+  const secIcons = ["pipeline", "calendar"];
   return (
     <section className="section" id="features">
       <div className="wrap">
         <div className="section-head center reveal">
-          <span className="kicker eyebrow"><span className="dot" />FEATURES</span>
-          <h2 className="section-title">Everything you need to keep approved work,<br />billing &amp; payment in sync</h2>
-          <p className="section-sub">The first four are the wedge — formal commercial control most contractor tools blur over. The rest keep the day-to-day moving.</p>
+          <span className="kicker eyebrow"><span className="dot" />{f.kicker}</span>
+          <h2 className="section-title">{f.title}</h2>
+          <p className="section-sub">{f.sub}</p>
         </div>
         <div className="feat-primary">
-          {primary.map((f, i) => (
-            <article className="feat-card reveal" data-d={String(i + 1)} key={f.t}>
-              <div className={`ico ico-${f.col} feat-ico`}><Icon name={f.ic} /></div>
-              <h3 className="feat-title">{f.t}</h3>
-              <p className="feat-desc">{f.d}</p>
+          {f.primary.map((item, i) => (
+            <article className="feat-card reveal" data-d={String(i + 1)} key={i}>
+              <div className={`ico ico-${cols[i]} feat-ico`}><Icon name={icons[i]} /></div>
+              <h3 className="feat-title">{item.t}</h3>
+              <p className="feat-desc">{item.d}</p>
               <span className="feat-rank mono">0{i + 1}</span>
             </article>
           ))}
         </div>
         <div className="feat-secondary reveal">
-          <span className="feat-also mono">ALSO INCLUDED</span>
+          <span className="feat-also mono">{f.alsoIncluded}</span>
           <div className="feat-secondary-grid">
-            {secondary.map(f => (
-              <article className="feat-card-2" key={f.t}>
-                <div className="ico ico-navy feat-ico-2"><Icon name={f.ic} /></div>
+            {f.secondary.map((item, i) => (
+              <article className="feat-card-2" key={i}>
+                <div className="ico ico-navy feat-ico-2"><Icon name={secIcons[i]} /></div>
                 <div>
-                  <h3 className="feat-title-2">{f.t}</h3>
-                  <p className="feat-desc-2">{f.d}</p>
+                  <h3 className="feat-title-2">{item.t}</h3>
+                  <p className="feat-desc-2">{item.d}</p>
                 </div>
               </article>
             ))}
@@ -352,25 +359,21 @@ function Features() {
 
 /* ── How It Works ───────────────────────────────────────────────────── */
 function HowItWorks() {
-  const steps = [
-    { ic: "pipeline", t: "Add leads and client details",             d: "Capture leads manually or import them, and keep every opportunity in one place." },
-    { ic: "quote",    t: "Create and send professional quotes",       d: "Build itemized quotes quickly and send them for digital approval." },
-    { ic: "shield",   t: "Capture approval and manage change orders", d: "Keep proof of what was approved and handle changes formally before they affect billing." },
-    { ic: "invoice",  t: "Turn approved work into invoices",          d: "Create invoices from approved work so commercial details stay connected." },
-    { ic: "chart",    t: "Track projects, payments & next actions",   d: "See what's active, what's paid, and what still needs attention across every job." },
-  ];
+  const t = useT();
+  const h = t.how;
+  const icons = ["pipeline", "quote", "shield", "invoice", "chart"];
   const [active, setActive] = useState(0);
   return (
     <section className="section bg-cool" id="how">
       <div className="wrap">
         <div className="section-head center reveal">
-          <span className="kicker eyebrow"><span className="dot" />HOW IT WORKS</span>
-          <h2 className="section-title">Built for how remodelers actually work</h2>
-          <p className="section-sub">Five connected steps — the approval and change-order bridge most tools skip is right in the middle.</p>
+          <span className="kicker eyebrow"><span className="dot" />{h.kicker}</span>
+          <h2 className="section-title">{h.title}</h2>
+          <p className="section-sub">{h.sub}</p>
         </div>
         <div className="how-grid reveal">
           <ol className="how-steps">
-            {steps.map((s, i) => (
+            {h.steps.map((s, i) => (
               <li key={i} className={`how-step${i === active ? " is-active" : ""}`}
                 onMouseEnter={() => setActive(i)} onClick={() => setActive(i)}>
                 <span className="how-num archivo">{i + 1}</span>
@@ -384,14 +387,14 @@ function HowItWorks() {
           </ol>
           <div className="how-visual">
             <div className="how-visual-card" key={active}>
-              <div className="how-visual-ico ico ico-blue"><Icon name={steps[active].ic} /></div>
+              <div className="how-visual-ico ico ico-blue"><Icon name={icons[active]} /></div>
               <span className="how-visual-step mono">STEP {active + 1} / 5</span>
-              <h3 className="how-visual-title">{steps[active].t}</h3>
-              <p className="how-visual-desc">{steps[active].d}</p>
+              <h3 className="how-visual-title">{h.steps[active].t}</h3>
+              <p className="how-visual-desc">{h.steps[active].d}</p>
               <div className="how-visual-chain">
-                {steps.map((_, i) => <span key={i} className={`hv-dot${i <= active ? " on" : ""}`} />)}
+                {h.steps.map((_, i) => <span key={i} className={`hv-dot${i <= active ? " on" : ""}`} />)}
               </div>
-              <div className="how-visual-tag"><Icon name="link" /> Stays linked to the same job</div>
+              <div className="how-visual-tag"><Icon name="link" /> {h.linkedTag}</div>
             </div>
           </div>
         </div>
@@ -407,8 +410,8 @@ function AppShell({ active, children }: { active: string; children: React.ReactN
     <div className="appshell">
       <aside className="app-side">
         <div className="app-side-brand"><img src="/logo-white.png" alt="" style={{ height: "26px" }} /></div>
-        {nav.map(([t, ic]) => (
-          <div key={t} className={`app-nav-item${t === active ? " on" : ""}`}><Icon name={ic} /> <span>{t}</span></div>
+        {nav.map(([label, ic]) => (
+          <div key={label} className={`app-nav-item${label === active ? " on" : ""}`}><Icon name={ic} /> <span>{label}</span></div>
         ))}
         <div className="app-side-foot">
           <span className="app-avatar">JR</span>
@@ -584,27 +587,25 @@ function ScreenProject() {
 }
 
 function ProductDemo() {
-  const tabs: [string, string, string][] = [
-    ["quote",   "Quote builder",  "quote"],
-    ["approve", "Approval proof", "shield"],
-    ["invoice", "Invoice & pay",  "card"],
-    ["project", "Project view",   "layers"],
-  ];
-  const [tab, setTab] = useState("quote");
+  const t = useT();
+  const d = t.demo;
+  const tabKeys = ["quote", "approve", "invoice", "project"] as const;
+  const tabIcons = ["quote", "shield", "card", "layers"];
+  const [tab, setTab] = useState<typeof tabKeys[number]>("quote");
   const url = tab === "approve" ? "app.clearbuildusa.com/q/1042/approve" : `app.clearbuildusa.com/${tab}`;
   return (
     <section className="section demo">
       <div className="demo-glow" />
       <div className="wrap">
         <div className="section-head center reveal">
-          <span className="kicker eyebrow" style={{ color: "var(--green-bright)" }}><span className="dot" />SEE IT IN ACTION</span>
-          <h2 className="section-title" style={{ color: "#fff" }}>One connected workspace,<br />from quote to collected payment</h2>
-          <p className="section-sub" style={{ color: "#a7b4ce" }}>Click through the real screens owner-led teams use every day.</p>
+          <span className="kicker eyebrow" style={{ color: "var(--green-bright)" }}><span className="dot" />{d.kicker}</span>
+          <h2 className="section-title" style={{ color: "#fff" }}>{d.title}</h2>
+          <p className="section-sub" style={{ color: "#a7b4ce" }}>{d.sub}</p>
         </div>
         <div className="demo-tabs reveal">
-          {tabs.map(([k, label, ic]) => (
+          {tabKeys.map((k, i) => (
             <button type="button" key={k} className={`demo-tab${tab === k ? " is-active" : ""}`} onClick={() => setTab(k)}>
-              <Icon name={ic} /> {label}
+              <Icon name={tabIcons[i]} /> {d.tabs[i]}
             </button>
           ))}
         </div>
@@ -643,24 +644,21 @@ function InvoiceCardMock() {
 }
 
 function InvoiceSection() {
-  const bullets = [
-    ["card",    "Create invoices directly from approved work", "No re-keying — billing inherits the approved scope and change orders."],
-    ["globe",   "Clients pay online by card",                  "A pay link on every invoice, so money moves faster."],
-    ["refresh", "Accept partial payments",                      "Take a deposit now, collect the balance on completion."],
-    ["bell",    "Automatic overdue reminders",                  "Stop chasing payments manually — Clear Build nudges for you."],
-  ];
+  const t = useT();
+  const inv = t.invoice;
+  const icons = ["card", "globe", "refresh", "bell"];
   return (
     <section className="section" id="invoicing">
       <div className="wrap split">
         <div className="split-copy reveal">
-          <span className="kicker eyebrow"><span className="dot" />GET PAID FASTER</span>
-          <h2 className="section-title">Get paid faster without losing<br />track of approved work</h2>
-          <p className="section-sub">Payment speed tied to the actual wedge: every invoice traces back to what the client approved.</p>
+          <span className="kicker eyebrow"><span className="dot" />{inv.kicker}</span>
+          <h2 className="section-title">{inv.title}</h2>
+          <p className="section-sub">{inv.sub}</p>
           <ul className="bullet-list">
-            {bullets.map((b, i) => (
+            {inv.bullets.map((b, i) => (
               <li className="bullet" key={i}>
-                <span className="bullet-ico ico ico-green"><Icon name={b[0]} /></span>
-                <div><span className="bullet-t">{b[1]}</span><span className="bullet-d">{b[2]}</span></div>
+                <span className="bullet-ico ico ico-green"><Icon name={icons[i]} /></span>
+                <div><span className="bullet-t">{b.t}</span><span className="bullet-d">{b.d}</span></div>
               </li>
             ))}
           </ul>
@@ -695,24 +693,20 @@ function ProjectMiniMock() {
 }
 
 function ProjectsSection() {
-  const bullets = [
-    "Link quotes, change orders, invoices, and payments to one job",
-    "Track budget vs invoiced and collected amounts in real time",
-    "Keep team updates and project history in one timeline",
-    "Stop approved work from slipping through the cracks",
-  ];
+  const t = useT();
+  const p = t.projects;
   return (
     <section className="section bg-cool" id="projects">
       <div className="wrap split reverse">
         <div className="split-visual reveal"><ProjectMiniMock /></div>
         <div className="split-copy reveal" data-d="1">
-          <span className="kicker eyebrow"><span className="dot" />PROJECTS</span>
-          <h2 className="section-title">Keep every job, invoice<br />&amp; payment connected</h2>
-          <p className="section-sub">Not generic "project organization." Every dollar and decision stays tied to the work it belongs to.</p>
+          <span className="kicker eyebrow"><span className="dot" />{p.kicker}</span>
+          <h2 className="section-title">{p.title}</h2>
+          <p className="section-sub">{p.sub}</p>
           <ul className="check-list">
-            {bullets.map((b, i) => <li key={i}><span className="cl-tick"><Icon name="check" /></span>{b}</li>)}
+            {p.bullets.map((b, i) => <li key={i}><span className="cl-tick"><Icon name="check" /></span>{b}</li>)}
           </ul>
-          <Btn href="/register" variant="dark" className="mt">Track your first job free <Icon name="arrow" /></Btn>
+          <Btn href="/register" variant="dark" className="mt">{p.cta} <Icon name="arrow" /></Btn>
         </div>
       </div>
     </section>
@@ -721,15 +715,17 @@ function ProjectsSection() {
 
 /* ── Comparison ─────────────────────────────────────────────────────── */
 function Comparison() {
-  const rows: [string, boolean | "part", boolean | "part", boolean | "part"][] = [
-    ["Professional quotes & e-signatures", false, true,   true],
-    ["Online payment collection",          false, true,   true],
-    ["Change order tracking",              false, true,   true],
-    ["Approval proof",                     false, "part", true],
-    ["Mobile-friendly UI",                 false, true,   true],
-    ["Set up in under 15 minutes",         "part",false,  true],
-    ["Built for remodelers specifically",  false, false,  true],
-    ["No per-user pricing",                true,  false,  true],
+  const t = useT();
+  const c = t.comparison;
+  const data: [boolean | "part", boolean | "part", boolean | "part"][] = [
+    [false, true,   true],
+    [false, true,   true],
+    [false, true,   true],
+    [false, "part", true],
+    [false, true,   true],
+    ["part",false,  true],
+    [false, false,  true],
+    [true,  false,  true],
   ];
   function Cell({ v }: { v: boolean | "part" }) {
     if (v === true)   return <span className="cmp-mark cmp-yes"><Icon name="check" /></span>;
@@ -740,22 +736,22 @@ function Comparison() {
     <section className="section">
       <div className="wrap">
         <div className="section-head center reveal">
-          <span className="kicker eyebrow"><span className="dot" />WHY CLEAR BUILD</span>
-          <h2 className="section-title">Better than spreadsheets.<br />Simpler than bloated contractor software.</h2>
+          <span className="kicker eyebrow"><span className="dot" />{c.kicker}</span>
+          <h2 className="section-title">{c.title}</h2>
         </div>
         <div className="cmp reveal">
           <div className="cmp-row cmp-headrow">
             <span className="cmp-feat" />
-            <span className="cmp-col">Spreadsheets</span>
-            <span className="cmp-col">Bloated FSM software</span>
+            <span className="cmp-col">{c.headers[0]}</span>
+            <span className="cmp-col">{c.headers[1]}</span>
             <span className="cmp-col cmp-col-us"><Logo height={22} /></span>
           </div>
-          {rows.map((r, i) => (
+          {c.rows.map((row, i) => (
             <div className="cmp-row" key={i}>
-              <span className="cmp-feat">{r[0]}</span>
-              <span className="cmp-col"><Cell v={r[1]} /></span>
-              <span className="cmp-col"><Cell v={r[2]} /></span>
-              <span className="cmp-col cmp-col-us"><Cell v={r[3]} /></span>
+              <span className="cmp-feat">{row}</span>
+              <span className="cmp-col"><Cell v={data[i][0]} /></span>
+              <span className="cmp-col"><Cell v={data[i][1]} /></span>
+              <span className="cmp-col cmp-col-us"><Cell v={data[i][2]} /></span>
             </div>
           ))}
         </div>
@@ -766,35 +762,25 @@ function Comparison() {
 
 /* ── Best Fit ───────────────────────────────────────────────────────── */
 function BestFit() {
-  const bullets = [
-    "Owner-operators running $500K–$5M remodeling businesses",
-    "Remodelers tired of losing track of approved quotes, changes, and invoices",
-    "Contractors who want to look more professional to clients",
-    "Teams of 1–15 who don't need bloated enterprise software",
-    "Businesses moving off spreadsheets, email chains, and generic tools",
-  ];
-  const metrics: [string, string, string][] = [
-    ["bolt",  "Fast setup",              "Be quoting in an afternoon, not a quarter."],
-    ["lock",  "Private business workspace", "Your jobs, clients, and money — kept to your team."],
-    ["globe", "EN · ES · PT",            "Client-facing quotes, invoices & approvals."],
-    ["users", "No per-user pricing",     "Add the whole crew without the penalty."],
-  ];
+  const t = useT();
+  const b = t.bestfit;
+  const metricIcons = ["bolt", "lock", "globe", "users"];
   return (
     <section className="section bg-cool" id="bestfit">
       <div className="wrap bestfit">
         <div className="bestfit-copy reveal">
-          <span className="kicker eyebrow"><span className="dot" />BEST FIT</span>
-          <h2 className="section-title">Built for owner-led<br />remodeling businesses</h2>
+          <span className="kicker eyebrow"><span className="dot" />{b.kicker}</span>
+          <h2 className="section-title">{b.title}</h2>
           <ul className="check-list lg">
-            {bullets.map((b, i) => <li key={i}><span className="cl-tick"><Icon name="check" /></span>{b}</li>)}
+            {b.bullets.map((item, i) => <li key={i}><span className="cl-tick"><Icon name="check" /></span>{item}</li>)}
           </ul>
         </div>
         <div className="bestfit-metrics reveal" data-d="1">
-          {metrics.map((m, i) => (
+          {b.metrics.map((m, i) => (
             <div className="metric-card" key={i}>
-              <span className="metric-ico"><Icon name={m[0]} /></span>
-              <h3 className="metric-t">{m[1]}</h3>
-              <p className="metric-d">{m[2]}</p>
+              <span className="metric-ico"><Icon name={metricIcons[i]} /></span>
+              <h3 className="metric-t">{m.t}</h3>
+              <p className="metric-d">{m.d}</p>
             </div>
           ))}
         </div>
@@ -805,56 +791,49 @@ function BestFit() {
 
 /* ── Pricing ────────────────────────────────────────────────────────── */
 function Pricing() {
+  const t = useT();
+  const p = t.pricing;
   const [yearly, setYearly] = useState(true);
-  const plans = [
-    { name: "Solo", tag: "Owner-operators", m: 49, pop: false,
-      blurb: "Everything to quote, get approval, and get paid.",
-      feats: ["Digital quote approval", "Change orders", "Online payments", "Project-linked billing", "Up to 2 team members"] },
-    { name: "Crew", tag: "Growing teams", m: 99, pop: true,
-      blurb: "The full commercial-control chain for a working crew.",
-      feats: ["Everything in Solo", "Approval proof & history", "Scheduling & coordination", "Budget vs collected tracking", "Up to 8 team members", "Priority support"] },
-    { name: "Business", tag: "Established remodelers", m: 179, pop: false,
-      blurb: "Structure and visibility for a bigger book of work.",
-      feats: ["Everything in Crew", "Advanced project stages", "Multi-language client surfaces", "Custom templates", "Up to 15 team members"] },
-  ];
   const price = (m: number) => yearly ? Math.round(m * 10 / 12 * 10) / 10 : m;
+  const baseMonthly = [49, 99, 179];
+  const popIndex = 1;
   return (
     <section className="section" id="pricing">
       <div className="wrap">
         <div className="section-head center reveal">
-          <span className="kicker eyebrow"><span className="dot" />PRICING</span>
-          <h2 className="section-title">Simple pricing. No surprises.</h2>
-          <p className="section-sub">No per-user pricing. Start free for 14 days — no credit card required.</p>
+          <span className="kicker eyebrow"><span className="dot" />{p.kicker}</span>
+          <h2 className="section-title">{p.title}</h2>
+          <p className="section-sub">{p.sub}</p>
         </div>
         <div className="price-toggle reveal">
-          <button type="button" className={!yearly ? "on" : ""} onClick={() => setYearly(false)}>Monthly</button>
+          <button type="button" className={!yearly ? "on" : ""} onClick={() => setYearly(false)}>{p.monthly}</button>
           <button type="button" className={yearly ? "on" : ""} onClick={() => setYearly(true)}>
-            Yearly <span className="price-save">2 months free</span>
+            {p.yearly} <span className="price-save">{p.save}</span>
           </button>
         </div>
         <div className="price-grid reveal">
-          {plans.map((p, i) => (
-            <div className={`price-card${p.pop ? " pop" : ""}`} key={i}>
-              {p.pop && <span className="price-badge mono">MOST POPULAR</span>}
-              <span className="price-name archivo">{p.name}</span>
-              <span className="price-tag">{p.tag}</span>
+          {p.plans.map((plan, i) => (
+            <div className={`price-card${i === popIndex ? " pop" : ""}`} key={i}>
+              {i === popIndex && <span className="price-badge mono">{p.popular}</span>}
+              <span className="price-name archivo">{plan.name}</span>
+              <span className="price-tag">{plan.tag}</span>
               <div className="price-amt">
                 <span className="price-cur">$</span>
-                <span className="price-num archivo">{price(p.m)}</span>
+                <span className="price-num archivo">{price(baseMonthly[i])}</span>
                 <span className="price-per">/mo</span>
               </div>
-              <span className="price-bill mono">{yearly ? "billed yearly" : "billed monthly"}</span>
-              <p className="price-blurb">{p.blurb}</p>
-              <Btn href="/register" variant={p.pop ? "primary" : "soft"} className="price-cta">Start Free Trial</Btn>
+              <span className="price-bill mono">{yearly ? p.billedYearly : p.billedMonthly}</span>
+              <p className="price-blurb">{plan.blurb}</p>
+              <Btn href="/register" variant={i === popIndex ? "primary" : "soft"} className="price-cta">{p.startTrial}</Btn>
               <ul className="price-feats">
-                {p.feats.map((f, j) => (
+                {plan.feats.map((f, j) => (
                   <li key={j}><span className="pf-tick"><Icon name="check" /></span>{f}</li>
                 ))}
               </ul>
             </div>
           ))}
         </div>
-        <p className="price-note reveal"><Icon name="shield" /> All plans are built for small remodeling teams that want clarity without enterprise complexity.</p>
+        <p className="price-note reveal"><Icon name="shield" /> {p.note}</p>
       </div>
     </section>
   );
@@ -862,28 +841,20 @@ function Pricing() {
 
 /* ── FAQ ────────────────────────────────────────────────────────────── */
 function FAQ() {
-  const qa = [
-    ["Is there really a free trial with no credit card?", "Yes. Start a 14-day free trial with full access — no card required. You only add billing if you decide to keep going."],
-    ["Can customers approve quotes and change orders online?", "Yes. Clients review and approve quotes and change orders from a link, and every approval is captured digitally with a timestamp so you keep proof on file."],
-    ["How is Clear Build different from spreadsheets or generic contractor software?", "Clear Build keeps quotes, approvals, change orders, invoices, and payments connected to the same job. Spreadsheets lose the thread; bloated enterprise tools add complexity you don't need."],
-    ["Can I track invoices and payments by project?", "Yes. Every invoice and payment links back to its job, so you can see budget vs invoiced vs collected for each project in real time."],
-    ["How does online payment collection work?", "Send an invoice with a pay link. Clients pay by card, you can accept partial payments, and overdue reminders go out automatically."],
-    ["Can I invite my team?", "Yes. Add your crew with no per-user pricing — plans include set team sizes, and the whole team sees the work they need to."],
-    ["Is it mobile-friendly?", "Yes. Clear Build works in the field on a phone or tablet, so quoting, approvals, and updates happen on site."],
-    ["Can I import my existing contacts and data?", "Yes. Bring leads and client details in by import, or add them manually, and keep everything in one place from day one."],
-  ];
+  const t = useT();
+  const f = t.faq;
   const [open, setOpen] = useState(1);
   return (
     <section className="section bg-cool" id="faq">
       <div className="wrap faq-wrap">
         <div className="faq-head reveal">
-          <span className="kicker eyebrow"><span className="dot" />FAQ</span>
-          <h2 className="section-title">Questions, answered</h2>
-          <p className="section-sub">The things owner-led teams ask before switching.</p>
-          <div className="faq-help"><Icon name="phone" /> Still deciding? <a href="/login">Book a demo →</a></div>
+          <span className="kicker eyebrow"><span className="dot" />{f.kicker}</span>
+          <h2 className="section-title">{f.title}</h2>
+          <p className="section-sub">{f.sub}</p>
+          <div className="faq-help"><Icon name="phone" /> {f.help} <a href="/login">{f.bookDemo}</a></div>
         </div>
         <div className="faq-list reveal" data-d="1">
-          {qa.map((x, i) => (
+          {f.qa.map((x, i) => (
             <div className={`faq-item${open === i ? " is-open" : ""}`} key={i}>
               <div className="faq-q-wrap">
                 <button type="button" className="faq-q" onClick={() => setOpen(open === i ? -1 : i)}>
@@ -904,20 +875,22 @@ function FAQ() {
 
 /* ── Final CTA ──────────────────────────────────────────────────────── */
 function FinalCTA() {
+  const t = useT();
+  const c = t.cta;
   return (
     <section className="section finalcta" id="demo">
       <div className="finalcta-tex" />
       <div className="wrap finalcta-inner reveal">
-        <span className="eyebrow" style={{ color: "var(--green-bright)" }}>STOP THE LEAKAGE</span>
-        <h2 className="display finalcta-h">Stop losing money between approved<br />work and collected payment.</h2>
-        <p className="finalcta-sub">Use Clear Build to keep quotes, approvals, change orders, invoices, and payments connected across every job.</p>
+        <span className="eyebrow" style={{ color: "var(--green-bright)" }}>{c.eyebrow}</span>
+        <h2 className="display finalcta-h">{c.h2}</h2>
+        <p className="finalcta-sub">{c.sub}</p>
         <div className="finalcta-cta">
-          <Btn href="/register" variant="green" size="lg">Start Free Trial <Icon name="arrow" /></Btn>
-          <Btn href="/login" variant="outline-light" size="lg">Book a Demo</Btn>
+          <Btn href="/register" variant="green" size="lg">{c.cta1} <Icon name="arrow" /></Btn>
+          <Btn href="/login" variant="outline-light" size="lg">{c.cta2}</Btn>
         </div>
         <div className="finalcta-trust">
-          {["No credit card", "Set up fast", "Cancel anytime"].map(t => (
-            <span key={t}><Icon name="check" /> {t}</span>
+          {c.trust.map(item => (
+            <span key={item}><Icon name="check" /> {item}</span>
           ))}
         </div>
       </div>
@@ -927,40 +900,34 @@ function FinalCTA() {
 
 /* ── Footer ─────────────────────────────────────────────────────────── */
 function Footer() {
-  const cols: [string, string[]][] = [
-    ["Product",   ["Features", "How it works", "Pricing", "Product tour", "Mobile app"]],
-    ["Company",   ["About", "Careers", "Contact", "Book a demo"]],
-    ["Resources", ["Help center", "Video tutorials", "Importing data", "Status"]],
-    ["Legal",     ["Privacy", "Terms", "Security"]],
-  ];
+  const t = useT();
+  const f = t.footer;
   return (
     <footer className="footer">
       <div className="wrap footer-top">
         <div className="footer-brand">
           <Logo variant="white" height={36} />
-          <p className="footer-tag">Field service &amp; commercial control for owner-led remodelers. Keep approved work, billing, and payment in sync.</p>
+          <p className="footer-tag">{f.tag}</p>
           <div className="footer-langs">
-            <span className="mono">CLIENT-FACING IN</span>
+            <span className="mono">{f.clientFacing}</span>
             <span className="footer-lang">English</span>
             <span className="footer-lang">Español</span>
             <span className="footer-lang">Português</span>
           </div>
         </div>
         <div className="footer-cols">
-          {cols.map(([h, items]) => (
-            <div className="footer-col" key={h}>
-              <span className="footer-col-h">{h}</span>
-              {items.map(it => <a key={it} href="#">{it}</a>)}
+          {f.cols.map(([heading, items]) => (
+            <div className="footer-col" key={heading}>
+              <span className="footer-col-h">{heading}</span>
+              {items.map(item => <a key={item} href="#">{item}</a>)}
             </div>
           ))}
         </div>
       </div>
       <div className="wrap footer-bot">
-        <span>© 2026 Clear Build USA. Made for American remodelers. 🇺🇸</span>
+        <span>{f.copy}</span>
         <div className="footer-bot-links">
-          <a href="#">Privacy</a>
-          <a href="#">Terms</a>
-          <Link href="/login">Sign In</Link>
+          <a href="#">Privacy</a><a href="#">Terms</a><Link href="/login">Sign In</Link>
         </div>
       </div>
     </footer>
@@ -969,25 +936,29 @@ function Footer() {
 
 /* ── App ────────────────────────────────────────────────────────────── */
 export default function LandingPage() {
+  const [lang, setLang] = useLang();
+  const t = LANDING_T[lang];
   useReveal();
   return (
-    <div className="lp">
-      <Nav />
-      <main>
-        <Hero />
-        <PipelineStrip />
-        <Features />
-        <HowItWorks />
-        <ProductDemo />
-        <InvoiceSection />
-        <ProjectsSection />
-        <Comparison />
-        <BestFit />
-        <Pricing />
-        <FAQ />
-        <FinalCTA />
-      </main>
-      <Footer />
-    </div>
+    <TCtx.Provider value={t}>
+      <div className="lp">
+        <Nav />
+        <main>
+          <Hero />
+          <PipelineStrip />
+          <Features />
+          <HowItWorks />
+          <ProductDemo />
+          <InvoiceSection />
+          <ProjectsSection />
+          <Comparison />
+          <BestFit />
+          <Pricing />
+          <FAQ />
+          <FinalCTA />
+        </main>
+        <Footer />
+      </div>
+    </TCtx.Provider>
   );
 }

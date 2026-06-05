@@ -12,11 +12,9 @@ interface EmailOptions {
 
 export async function sendEmail({ to, subject, html }: EmailOptions) {
   if (!process.env.RESEND_API_KEY) {
-    console.log("\n📧 [EMAIL MOCK]");
-    console.log(`To:      ${to}`);
-    console.log(`Subject: ${subject}`);
-    console.log(`Body:    ${html.replace(/<[^>]+>/g, "").trim().slice(0, 200)}...`);
-    console.log("");
+    console.warn("[EMAIL] RESEND_API_KEY is not set — email not sent (mock mode)");
+    console.log(`  To:      ${to}`);
+    console.log(`  Subject: ${subject}`);
     return { success: true };
   }
 

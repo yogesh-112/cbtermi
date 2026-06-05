@@ -237,7 +237,7 @@
 .lp .how-visual-card{background:linear-gradient(165deg,#15294d,#0e1c38);color:#fff;border-radius:var(--r-xl);padding:34px;box-shadow:var(--shadow-xl);position:relative;overflow:hidden;}
 .lp .how-visual-ico{width:56px;height:56px;font-size:26px;background:rgba(47,95,224,.25);color:#9fc0ff;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;}
 .lp .how-visual-step{display:block;margin-top:22px;font-size:12px;color:var(--green-bright);letter-spacing:.14em;font-family:'JetBrains Mono',monospace;}
-.lp .how-visual-title{font-family:'Archivo';font-weight:800;font-size:24px;margin-top:10px;line-height:1.2;}
+.lp .how-visual-title{font-family:'Archivo';font-weight:800;font-size:24px;margin-top:10px;line-height:1.2;color:#fff;}
 .lp .how-visual-desc{margin-top:12px;font-size:15.5px;color:#aebbd4;line-height:1.55;}
 .lp .how-visual-chain{display:flex;gap:8px;margin-top:26px;}
 .lp .hv-dot{height:6px;flex:1;border-radius:3px;background:rgba(255,255,255,.14);transition:background .3s;}

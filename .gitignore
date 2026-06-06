@@ -2,7 +2,8 @@
 node_modules/
 
 # next.js
-.next/
+# .next/ is committed so Hostinger doesn't need to build — cache excluded (too large)
+.next/cache/
 out/
 
 # env files

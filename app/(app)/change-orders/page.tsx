@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, GitPullRequestDraft, MoreHorizontal } from "lucide-react";
-import { EmptyState, StatusBadge, toast } from "@/components/ui";
+import { EmptyState, StatusBadge, toast, Pagination } from "@/components/ui";
 import { fmt, fmtDate } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 
@@ -16,14 +16,20 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function ChangeOrdersPage() {
   const t = useT();
+  const PAGE_SIZE = 50;
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
-  const load = () => {
+  const load = (p = page) => {
     setLoading(true);
-    fetch("/api/change-orders").then(r => r.json()).then(d => setOrders(d.changeOrders ?? [])).finally(() => setLoading(false));
+    fetch(`/api/change-orders?limit=${PAGE_SIZE}&offset=${p * PAGE_SIZE}`)
+      .then(r => r.json())
+      .then(d => { setOrders(d.changeOrders ?? []); setTotalCount(d.total ?? 0); })
+      .finally(() => setLoading(false));
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(0); }, []);
 
   const total = orders.reduce((s, o) => s + (o.total ?? 0), 0);
   const draft = orders.filter(o => o.status === "draft").length;
@@ -35,7 +41,7 @@ export default function ChangeOrdersPage() {
       <div className="flex items-center justify-between mb-1">
         <div>
           <h1 className="page-title">{t.changeOrders.title}</h1>
-          <p className="page-desc">{fmt(total)} {t.changeOrders.totalValue} · {orders.length} {t.changeOrders.orders}</p>
+          <p className="page-desc">{fmt(total)} {t.changeOrders.totalValue} · {totalCount} {t.changeOrders.orders}</p>
         </div>
         <Link href="/change-orders/new" className="btn btn-primary btn-sm flex items-center gap-1.5">
           <Plus size={13} strokeWidth={2.5} /> {t.changeOrders.newOrder}
@@ -121,6 +127,9 @@ export default function ChangeOrdersPage() {
           </Link>
         ))}
       </div>
+
+      <Pagination page={page} pageSize={PAGE_SIZE} total={totalCount}
+        onChange={p => { setPage(p); load(p); }} />
     </div>
   );
 }

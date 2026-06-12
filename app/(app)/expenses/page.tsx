@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Plus, Receipt, TrendingDown, Filter } from "lucide-react";
-import { Modal, ConfirmDialog, EmptyState, toast } from "@/components/ui";
+import { Modal, ConfirmDialog, EmptyState, toast, Pagination } from "@/components/ui";
 import { fmt, fmtDate } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 
@@ -29,10 +29,12 @@ export default function ExpensesPage() {
   const [form, setForm]           = useState({ ...BLANK_FORM });
   const [filterCat, setFilterCat] = useState("");
   const [filterProj, setFilterProj] = useState("");
+  const PAGE_SIZE = 50;
+  const [page, setPage] = useState(0);
 
-  const load = () => {
+  const load = (p = page) => {
     setLoading(true);
-    const params = new URLSearchParams({ limit: "200" });
+    const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(p * PAGE_SIZE) });
     if (filterCat)  params.set("category",   filterCat);
     if (filterProj) params.set("project_id", filterProj);
     fetch(`/api/expenses?${params}`).then(r => r.json()).then(d => {
@@ -42,7 +44,7 @@ export default function ExpensesPage() {
   };
 
   useEffect(() => {
-    load();
+    setPage(0); load(0);
     fetch("/api/projects?limit=200").then(r => r.json()).then(d => setProjects(d.projects ?? []));
   }, [filterCat, filterProj]);
 
@@ -261,6 +263,9 @@ export default function ExpensesPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} pageSize={PAGE_SIZE} total={total}
+        onChange={p => { setPage(p); load(p); }} />
 
       {/* Category breakdown */}
       {catTotals.length > 0 && (

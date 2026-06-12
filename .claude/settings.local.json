@@ -97,7 +97,9 @@
       "PowerShell($appFiles = Get-ChildItem -Path E:\\\\cbv1\\\\app -Recurse -File | Measure-Object; $apiCount = Get-ChildItem -Path E:\\\\cbv1\\\\app\\\\api -Recurse -File | Measure-Object; $pageCount = Get-ChildItem -Path E:\\\\cbv1\\\\app -Recurse -File -Filter \"page.tsx\" | Measure-Object; Write-Output \"Total app files: $\\($appFiles.Count\\)\"; Write-Output \"API routes: $\\($apiCount.Count\\)\"; Write-Output \"Page components: $\\($pageCount.Count\\)\")",
       "Bash(npx kill-port *)",
       "Bash(powershell -Command 'Get-NetTCPConnection -LocalPort 3000 -State Listen | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }')",
-      "Bash(powershell -Command 'Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }')"
+      "Bash(powershell -Command 'Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }')",
+      "Bash(grep -n -B3 -A12 \"fetch\\(\\\\`/api/expenses\\\\|fetch\\(\\\\\"/api/expenses\" \"app/\\(app\\)/expenses/page.tsx\")",
+      "Bash(grep -n -B4 -A10 \"fetch\\(\\\\`/api/opportunities\\\\|fetch\\(\\\\\"/api/opportunities?\" \"app/\\(app\\)/opportunities/page.tsx\")"
     ]
   }
 }

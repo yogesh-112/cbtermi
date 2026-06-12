@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, UserCheck, Search } from "lucide-react";
-import { EmptyState, toast } from "@/components/ui";
+import { EmptyState, toast, Pagination } from "@/components/ui";
 import { fmtDate } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 
@@ -41,19 +41,22 @@ function statusBucket(s: string) {
 
 export default function LeadsPage() {
   const t = useT();
+  const PAGE_SIZE = 50;
   const [leads, setLeads]   = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [tab, setTab]       = useState("all");
+  const [page, setPage]     = useState(0);
+  const [total, setTotal]   = useState(0);
 
-  const load = () => {
+  const load = (p = page) => {
     setLoading(true);
-    fetch("/api/contacts?type=lead")
+    fetch(`/api/contacts?type=lead&limit=${PAGE_SIZE}&offset=${p * PAGE_SIZE}`)
       .then(r => r.json())
-      .then(d => setLeads(d.contacts ?? []))
+      .then(d => { setLeads(d.contacts ?? []); setTotal(d.total ?? 0); })
       .finally(() => setLoading(false));
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(0); }, []);
 
   const convertToCustomer = async (id: string, name: string) => {
     await fetch(`/api/contacts/${id}`, {
@@ -99,7 +102,7 @@ export default function LeadsPage() {
     <div>
       <div className="mb-1">
         <h1 className="page-title">{t.leads.title}</h1>
-        <p className="page-desc">{leads.length} active leads · {thisWeek} new this week</p>
+        <p className="page-desc">{total} active leads · {thisWeek} new this week</p>
       </div>
 
       {/* 4 stat cards */}
@@ -250,6 +253,9 @@ export default function LeadsPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} pageSize={PAGE_SIZE} total={total}
+        onChange={p => { setPage(p); load(p); }} />
     </div>
   );
 }

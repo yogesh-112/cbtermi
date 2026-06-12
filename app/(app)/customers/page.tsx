@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Users, LayoutGrid, List, SlidersHorizontal } from "lucide-react";
-import { EmptyState } from "@/components/ui";
+import { EmptyState, Pagination } from "@/components/ui";
 import { fmtDate } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 
@@ -28,18 +28,22 @@ function StarRating({ rating }: { rating: number }) {
 
 export default function CustomersPage() {
   const t = useT();
+  const PAGE_SIZE = 50;
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading]     = useState(true);
   const [view, setView]           = useState<"grid" | "list">("grid");
   const [search, setSearch]       = useState("");
+  const [page, setPage]           = useState(0);
+  const [total, setTotal]         = useState(0);
 
-  useEffect(() => {
+  const load = (p = 0) => {
     setLoading(true);
-    fetch("/api/contacts?type=customer")
+    fetch(`/api/contacts?type=customer&limit=${PAGE_SIZE}&offset=${p * PAGE_SIZE}`)
       .then(r => r.json())
-      .then(d => setCustomers(d.contacts ?? []))
+      .then(d => { setCustomers(d.contacts ?? []); setTotal(d.total ?? 0); })
       .finally(() => setLoading(false));
-  }, []);
+  };
+  useEffect(() => { load(0); }, []);
 
   const filtered = search
     ? customers.filter(c =>
@@ -63,7 +67,7 @@ export default function CustomersPage() {
     <div>
       <div className="mb-1">
         <h1 className="page-title">{t.customers.title}</h1>
-        <p className="page-desc">{customers.length} customers</p>
+        <p className="page-desc">{total} customers</p>
       </div>
 
       {/* 4 stat cards */}
@@ -229,6 +233,9 @@ export default function CustomersPage() {
           </table>
         </div>
       )}
+
+      <Pagination page={page} pageSize={PAGE_SIZE} total={total}
+        onChange={p => { setPage(p); load(p); }} />
     </div>
   );
 }

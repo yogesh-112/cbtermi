@@ -77,6 +77,31 @@ export function EmptyState({ icon, title, description, action }: {
   );
 }
 
+// ─── PAGINATION ───────────────────────────────────────────────────────────────
+export function Pagination({ page, pageSize, total, onChange }: {
+  page: number;       // zero-based
+  pageSize: number;
+  total: number;
+  onChange: (page: number) => void;
+}) {
+  if (total <= pageSize) return null;
+  const from = page * pageSize + 1;
+  const to = Math.min((page + 1) * pageSize, total);
+  return (
+    <div className="flex items-center justify-between pt-3">
+      <span className="text-[12px] text-[#8a8fa3]">
+        Showing {from}–{to} of {total}
+      </span>
+      <div className="flex gap-2">
+        <button onClick={() => onChange(page - 1)} disabled={page === 0}
+          className="btn btn-outline btn-sm disabled:opacity-40">Previous</button>
+        <button onClick={() => onChange(page + 1)} disabled={(page + 1) * pageSize >= total}
+          className="btn btn-outline btn-sm disabled:opacity-40">Next</button>
+      </div>
+    </div>
+  );
+}
+
 // ─── SPINNER ──────────────────────────────────────────────────────────────────
 export function Spinner({ size = 20 }: { size?: number }) {
   return (

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Target, TrendingUp, Search, ChevronRight } from "lucide-react";
-import { Modal, ConfirmDialog, EmptyState, toast } from "@/components/ui";
+import { Modal, ConfirmDialog, EmptyState, toast, Pagination } from "@/components/ui";
 import ContactSelect from "@/components/ui/ContactSelect";
 import { fmt, fmtDate } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
@@ -52,9 +52,12 @@ export default function OpportunitiesPage() {
   const [saving, setSaving]   = useState(false);
   const [form, setForm]       = useState({ ...BLANK });
 
-  const load = () => {
+  const PAGE_SIZE = 50;
+  const [page, setPage] = useState(0);
+
+  const load = (p = page) => {
     setLoading(true);
-    const params = new URLSearchParams({ limit: "200" });
+    const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(p * PAGE_SIZE) });
     if (tab !== "all") params.set("status", tab);
     fetch(`/api/opportunities?${params}`).then(r => r.json()).then(d => {
       setOpps(d.opportunities ?? []);
@@ -63,7 +66,7 @@ export default function OpportunitiesPage() {
   };
 
   useEffect(() => {
-    load();
+    setPage(0); load(0);
     fetch("/api/contacts?limit=200").then(r => r.json()).then(d => setContacts(d.contacts ?? []));
   }, [tab]);
 
@@ -287,6 +290,9 @@ export default function OpportunitiesPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} pageSize={PAGE_SIZE} total={total}
+        onChange={p => { setPage(p); load(p); }} />
 
       {/* Create/Edit Modal */}
       <Modal open={modal} onClose={() => setModal(false)}

@@ -152,7 +152,7 @@ export default function ProductTour() {
             <button onClick={skip} className="btn btn-ghost btn-sm">
               <SkipForward size={13} /> Skip
             </button>
-            <button onClick={next} className={`btn btn-sm flex-1 ${isLast ? "btn-green" : "btn-primary"}`}>
+            <button onClick={next} className={`btn btn-sm flex-1 ${isLast ? "btn-primary" : "btn-primary"}`}>
               {isLast ? <><CheckCircle size={13} /> Finish</> : <>Next <ChevronRight size={13} /></>}
             </button>
           </div>

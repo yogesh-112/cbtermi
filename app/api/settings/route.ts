@@ -12,12 +12,14 @@ export async function GET() {
 
 const ALLOWED_SETTINGS_FIELDS = [
   "name", "phone", "email", "address", "city", "state", "zip", "country",
-  "logo_url", "business_type", "timezone", "currency", "tax_rate",
+  "logo_url", "business_type", "timezone", "currency", "tax_rate", "default_tax_rate", "tax_label",
   "quote_prefix", "invoice_prefix", "project_prefix",
+  "quote_next_number", "invoice_next_number",
   "website", "about", "facebook", "instagram", "twitter", "whatsapp",
   "default_payment_terms", "default_notes", "calendly_url",
   "legal_name", "service_area", "trade_license", "payment_terms", "date_format", "language",
   "n_payment", "n_quote", "n_invoice", "n_message", "n_review",
+  "notify_new_quote", "notify_invoice_due", "notify_payment",
 ];
 
 export async function PATCH(request: NextRequest) {

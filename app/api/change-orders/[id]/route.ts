@@ -42,7 +42,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return s + base * (1 - (i.discount ?? 0) / 100) * ((i.tax_rate ?? 0) / 100);
     }, 0);
     body.subtotal = subtotal; body.tax_amount = tax_amount; body.total = subtotal + tax_amount;
-    await supabase.from("change_order_items").insert(items.map((item: any, i: number) => ({ ...item, change_order_id: id, sort_order: i })));
+    const { error: insertErr } = await supabase.from("change_order_items").insert(items.map((item: any, i: number) => ({ ...item, change_order_id: id, sort_order: i })));
+    if (insertErr) return NextResponse.json({ message: insertErr.message }, { status: 500 });
   }
 
   const { data, error } = await supabase.from("change_orders").update({ ...body, updated_at: new Date().toISOString() }).eq("id", id).eq("business_id", session.businessId).select().single();

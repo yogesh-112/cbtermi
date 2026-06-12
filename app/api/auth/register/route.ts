@@ -3,12 +3,19 @@ import bcrypt from "bcryptjs";
 import { supabase } from "@/lib/supabase";
 import { sendEmail, verificationEmail } from "@/lib/email";
 import { generateToken } from "@/lib/utils";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(`register:${clientIp(request)}`, 5, 15 * 60 * 1000);
+  if (limited) return limited;
+
   const { name, email, password, language = "en" } = await request.json();
 
   if (!name || !email || !password)
     return NextResponse.json({ message: "All fields are required" }, { status: 400 });
+
+  if (typeof password !== "string" || password.length < 8)
+    return NextResponse.json({ message: "Password must be at least 8 characters" }, { status: 400 });
 
   const { data: existing } = await supabase.from("users").select("id").eq("email", email).single();
   if (existing)

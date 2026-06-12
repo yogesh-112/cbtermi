@@ -19,15 +19,20 @@ interface Props {
   user: { name: string; email: string };
   businesses: Array<{ id: string; name: string }>;
   currentBusiness: { id: string; name: string } | null;
+  role?: string;
 }
 
-export default function Sidebar({ user, businesses, currentBusiness }: Props) {
+export default function Sidebar({ user, businesses, currentBusiness, role }: Props) {
+  const canViewAuditLog = ["owner", "admin"].includes(role ?? "");
   const pathname = usePathname();
   const t = useT();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [counts, setCounts] = useState<Counts>({ contacts: 0, leads: 0, customers: 0 });
-  const [trialDays, setTrialDays] = useState({ used: 0, total: 14 });
+  const [sub, setSub] = useState<{
+    plan: string; status: string; trialEndsAt: string | null;
+    periodEnd: string | null; cycle: string;
+  } | null>(null);
 
   const PRIMARY_NAV = [
     { href: "/dashboard",         icon: LayoutDashboard,      label: t.nav.dashboard,       countKey: null },
@@ -55,7 +60,8 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
     { href: "/project-updates",   icon: MessageSquare,  label: t.nav.projectUpdates,   countKey: null },
     { href: "/feedback",          icon: Star,           label: t.nav.feedback,         countKey: null },
     { href: "/team",              icon: UserCog,        label: t.nav.team,             countKey: null },
-    { href: "/audit-log",         icon: ShieldCheck,    label: t.nav.auditLog,         countKey: null },
+    // Audit log is owner/admin only
+    ...(canViewAuditLog ? [{ href: "/audit-log", icon: ShieldCheck, label: t.nav.auditLog, countKey: null }] : []),
     { href: "/settings",          icon: Settings,       label: t.nav.settings,         countKey: null },
     { href: "/help",              icon: HelpCircle,     label: "Help & Support",       countKey: null },
   ];
@@ -85,11 +91,14 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
         leads:     leads.total ?? 0,
         customers: customers.total ?? 0,
       });
-      if (sub.subscription?.created_at) {
-        const used = Math.max(0, Math.min(14,
-          Math.floor((Date.now() - new Date(sub.subscription.created_at).getTime()) / 86400000)
-        ));
-        setTrialDays({ used, total: 15 });
+      if (sub.subscription) {
+        setSub({
+          plan: sub.subscription.plan ?? "trial",
+          status: sub.subscription.status ?? "trial",
+          trialEndsAt: sub.subscription.trial_ends_at ?? null,
+          periodEnd: sub.subscription.current_period_end ?? sub.subscription.renews_at ?? null,
+          cycle: sub.subscription.billing_cycle ?? "monthly",
+        });
       }
     }).catch(err => console.error("[sidebar] counts fetch failed:", err));
   }, [pathname]);
@@ -151,8 +160,18 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
     </Link>
   );
 
-  const trialPct = Math.min(100, (trialDays.used / trialDays.total) * 100);
-  const daysLeft = trialDays.total - trialDays.used;
+  // Plan state: paid subscription vs free trial (real days from trial_ends_at)
+  const isPaid = !!sub && sub.plan !== "trial" && ["active", "trialing", "past_due"].includes(sub.status);
+  const TRIAL_TOTAL = 14;
+  const daysLeft = sub?.trialEndsAt
+    ? Math.max(0, Math.ceil((new Date(sub.trialEndsAt).getTime() - Date.now()) / 86400000))
+    : TRIAL_TOTAL;
+  const trialUsed = Math.min(TRIAL_TOTAL, TRIAL_TOTAL - Math.min(daysLeft, TRIAL_TOTAL));
+  const trialPct = Math.min(100, (trialUsed / TRIAL_TOTAL) * 100);
+  const planName = isPaid && sub ? sub.plan[0].toUpperCase() + sub.plan.slice(1) : "";
+  const renewDate = isPaid && sub?.periodEnd
+    ? new Date(sub.periodEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    : null;
 
   const SidebarContent = ({ inDrawer = false }: { inDrawer?: boolean }) => (
     <div className="flex flex-col h-full overflow-hidden">
@@ -192,8 +211,8 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
               ? <CollapsedLink {...item} />
               : <ExpandedLink {...item} />
             }
-            {/* Contacts sub-nav (only when expanded) */}
-            {item.href === "/contacts" && contactsActive && !collapsed && (
+            {/* Contacts sub-nav (only when expanded; always available in mobile drawer) */}
+            {item.href === "/contacts" && (contactsActive || inDrawer) && (!collapsed || inDrawer) && (
               <div className="ml-4 mt-0.5 space-y-0.5 border-l border-white/10 pl-2">
                 {CONTACTS_SUB.map(sub => (
                   <Link key={sub.href} href={sub.href} onClick={() => setMobileOpen(false)}
@@ -225,30 +244,50 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
         ))}
       </nav>
 
-      {/* Trial badge — hidden when collapsed */}
+      {/* Plan / trial badge — hidden when collapsed */}
       {(!collapsed || inDrawer) && (
-        <div className="mx-3 mb-4 p-3.5 rounded-[10px] bg-white/[0.06] flex-shrink-0">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-white text-[12.5px] font-semibold">{t.nav.trialLabel}</span>
-            <span className="text-white/50 text-[11px]">{daysLeft}{t.nav.daysLeft}</span>
+        isPaid ? (
+          <div className="mx-3 mb-4 p-3.5 rounded-[10px] bg-white/[0.06] flex-shrink-0">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-white text-[12.5px] font-semibold">{planName} {t.nav.activePlanLabel}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wide text-brand-green bg-brand-green/15 px-1.5 py-0.5 rounded">{t.nav.planActive}</span>
+            </div>
+            {renewDate && (
+              <div className="text-white/50 text-[11px] mb-2.5">
+                {t.nav.renewsOn} {renewDate}
+              </div>
+            )}
+            <Link href="/subscription"
+              className="block text-center text-[12px] font-medium py-1.5 rounded-[7px] bg-white/10 hover:bg-white/15 text-white/80 hover:text-white transition-colors">
+              {t.nav.managePlan}
+            </Link>
           </div>
-          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden mb-2.5">
-            <div
-              className="h-full rounded-full transition-all"
-              style={{
-                width: `${trialPct}%`,
-                background: trialPct > 80 ? "#ef4444" : trialPct > 50 ? "#f59e0b" : "#3FA66B",
-              }}
-            />
+        ) : (
+          <div className="mx-3 mb-4 p-3.5 rounded-[10px] bg-white/[0.06] flex-shrink-0">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-white text-[12.5px] font-semibold">{t.nav.trialLabel}</span>
+              <span className="text-white/50 text-[11px]">
+                {daysLeft > 0 ? <>{daysLeft}{t.nav.daysLeft}</> : t.nav.trialEnded}
+              </span>
+            </div>
+            <div className="h-1.5 bg-white/10 rounded-full overflow-hidden mb-2.5">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${trialPct}%`,
+                  background: trialPct > 80 ? "#ef4444" : trialPct > 50 ? "#f59e0b" : "#3FA66B",
+                }}
+              />
+            </div>
+            <div className="text-white/50 text-[11px] mb-2.5">
+              {t.nav.dayOf} {trialUsed} {t.nav.of} {TRIAL_TOTAL} · {t.nav.proFrom}
+            </div>
+            <Link href="/subscription"
+              className="block text-center text-[12px] font-medium py-1.5 rounded-[7px] bg-white/10 hover:bg-white/15 text-white/80 hover:text-white transition-colors">
+              {t.nav.upgradePlan}
+            </Link>
           </div>
-          <div className="text-white/50 text-[11px] mb-2.5">
-            {t.nav.dayOf} {trialDays.used} {t.nav.of} {trialDays.total} · {t.nav.proFrom}
-          </div>
-          <Link href="/subscription"
-            className="block text-center text-[12px] font-medium py-1.5 rounded-[7px] bg-white/10 hover:bg-white/15 text-white/80 hover:text-white transition-colors">
-            {t.nav.upgradePlan}
-          </Link>
-        </div>
+        )
       )}
 
       {/* Collapsed: small upgrade dot */}
@@ -258,7 +297,7 @@ export default function Sidebar({ user, businesses, currentBusiness }: Props) {
             className="flex items-center justify-center h-9 rounded-[8px] text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors">
             <CreditCard size={16} />
           </Link>
-          <Tooltip label={`${t.nav.upgradePlan} · ${daysLeft}${t.nav.daysLeft}`} />
+          <Tooltip label={isPaid ? `${planName} ${t.nav.activePlanLabel}` : `${t.nav.upgradePlan} · ${daysLeft}${t.nav.daysLeft}`} />
         </div>
       )}
     </div>

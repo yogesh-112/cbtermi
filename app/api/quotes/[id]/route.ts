@@ -36,7 +36,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const subtotal = items.reduce((s: number, i: any) => s + (i.total ?? 0), 0);
     const tax_amount = items.reduce((s: number, i: any) => s + ((i.total ?? 0) * (i.tax_rate ?? 0) / 100), 0);
     body.subtotal = subtotal; body.tax_amount = tax_amount; body.total = subtotal + tax_amount;
-    await supabase.from("quote_items").insert(items.map((item: any, i: number) => ({ ...item, quote_id: id, sort_order: i })));
+    const { error: insertErr } = await supabase.from("quote_items").insert(items.map((item: any, i: number) => ({ ...item, quote_id: id, sort_order: i })));
+    if (insertErr) return NextResponse.json({ message: insertErr.message }, { status: 500 });
   }
 
   const { data, error } = await supabase.from("quotes").update({ ...body, updated_at: new Date().toISOString() }).eq("id", id).eq("business_id", session.businessId).select("*, contacts(full_name, email), businesses(name)").single();

@@ -10,8 +10,11 @@ export interface AdminPayload {
 
 export const ADMIN_COOKIE = "cb_admin_session";
 
-const getSecret = () =>
-  new TextEncoder().encode(process.env.ADMIN_JWT_SECRET ?? "admin-dev-fallback-secret-local-only");
+if (!process.env.ADMIN_JWT_SECRET) {
+  throw new Error("ADMIN_JWT_SECRET environment variable is not set. Add it to .env (see .env.example).");
+}
+const secret = new TextEncoder().encode(process.env.ADMIN_JWT_SECRET);
+const getSecret = () => secret;
 
 export async function signAdminToken(payload: AdminPayload) {
   return new SignJWT(payload as unknown as Record<string, unknown>)

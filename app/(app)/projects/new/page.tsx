@@ -112,16 +112,31 @@ function NewProjectForm() {
 
   const removeMember = (id: string) => setAssignedTeam(prev => prev.filter(t => t.id !== id));
 
+  const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setCoverPreview(url);
+    if (!file) return;
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      toast("Only JPEG, PNG, WebP, or GIF images are allowed", "error");
+      if (fileRef.current) fileRef.current.value = "";
+      return;
     }
+    const url = URL.createObjectURL(file);
+    setCoverPreview(url);
   };
 
   const save = async (status = "active") => {
     if (!form.name.trim()) { toast("Project name required", "error"); return; }
+    if (form.start_date && form.end_date && form.end_date < form.start_date) {
+      toast("End date must be on or after the start date", "error"); return;
+    }
+    if (form.deposit_pct !== "") {
+      const pct = parseFloat(form.deposit_pct);
+      if (isNaN(pct) || pct < 0 || pct > 100) {
+        toast("Deposit percentage must be between 0 and 100", "error"); return;
+      }
+    }
     setSaving(true);
     const payload = {
       name: form.name,

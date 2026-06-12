@@ -47,12 +47,12 @@ export async function POST(request: NextRequest) {
 
   // Update invoice balance
   if (body.invoice_id) {
-    const { data: inv } = await supabase.from("invoices").select("total, amount_paid").eq("id", body.invoice_id).single();
+    const { data: inv } = await supabase.from("invoices").select("total, amount_paid").eq("id", body.invoice_id).eq("business_id", session.businessId).single();
     if (inv) {
       const amount_paid = (inv.amount_paid ?? 0) + body.amount;
       const amount_due  = Math.max(0, inv.total - amount_paid);
       const status = amount_due <= 0 ? "paid" : "partially_paid";
-      await supabase.from("invoices").update({ amount_paid, amount_due, status }).eq("id", body.invoice_id);
+      await supabase.from("invoices").update({ amount_paid, amount_due, status }).eq("id", body.invoice_id).eq("business_id", session.businessId);
     }
   }
   await logAudit({ businessId: session.businessId, userId: session.id, entityType: "payment", entityId: payment.id, action: "recorded", payload: { amount: body.amount, invoice_id: body.invoice_id } });
@@ -60,8 +60,8 @@ export async function POST(request: NextRequest) {
   // Send payment confirmation email
   if (body.invoice_id && body.contact_id) {
     const [{ data: contact }, { data: inv }, { data: bizInfo }] = await Promise.all([
-      supabase.from("contacts").select("full_name, email").eq("id", body.contact_id).single(),
-      supabase.from("invoices").select("invoice_number").eq("id", body.invoice_id).single(),
+      supabase.from("contacts").select("full_name, email").eq("id", body.contact_id).eq("business_id", session.businessId).single(),
+      supabase.from("invoices").select("invoice_number").eq("id", body.invoice_id).eq("business_id", session.businessId).single(),
       supabase.from("businesses").select("name").eq("id", session.businessId).single(),
     ]);
     if (contact?.email && inv) {

@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { supabase } from "@/lib/supabase";
 import { signToken, SESSION_COOKIE } from "@/lib/session";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(`login:${clientIp(request)}`, 10, 5 * 60 * 1000);
+  if (limited) return limited;
+
   const { email, password } = await request.json();
 
   if (!email || !password)

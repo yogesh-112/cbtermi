@@ -63,7 +63,9 @@ export default function PaymentsPage() {
   };
 
   const save = async () => {
-    if (!form.amount || parseFloat(form.amount) <= 0) { toast(t.common.required, "error"); return; }
+    if (!form.contact_id) { toast("Please select a contact", "error"); return; }
+    if (!form.amount || parseFloat(form.amount) <= 0) { toast("Amount must be greater than zero", "error"); return; }
+    if (!form.payment_date) { toast("Payment date is required", "error"); return; }
     setSaving(true);
     const res = await fetch("/api/payments", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -93,7 +95,7 @@ export default function PaymentsPage() {
         </div>
         <div className="flex items-center gap-2">
           <a href="/api/payments?format=csv" download className="btn btn-outline btn-sm">↓ CSV</a>
-          <button className="btn btn-green" onClick={() => setModal(true)}>
+          <button className="btn btn-primary" onClick={() => setModal(true)}>
             <Plus size={15} /> {t.payments.recordPayment}
           </button>
         </div>
@@ -160,7 +162,7 @@ export default function PaymentsPage() {
           [...Array(3)].map((_, i) => <div key={i} className="mobile-card animate-pulse h-20 skeleton" />)
         ) : payments.length === 0 ? (
           <EmptyState icon={<CreditCard size={36} />} title={t.payments.noPayments} description={t.payments.noPaymentsDesc}
-            action={<button className="btn btn-green btn-sm" onClick={() => setModal(true)}><Plus size={14} /> {t.payments.recordPayment}</button>} />
+            action={<button className="btn btn-primary btn-sm" onClick={() => setModal(true)}><Plus size={14} /> {t.payments.recordPayment}</button>} />
         ) : payments.map(p => (
           <div key={p.id} className="mobile-card">
             <div className="mobile-card-row">
@@ -204,7 +206,7 @@ export default function PaymentsPage() {
             ) : payments.length === 0 ? (
               <tr><td colSpan={8}>
                 <EmptyState icon={<CreditCard size={40} />} title={t.payments.noPayments} description={t.payments.noPaymentsDesc}
-                  action={<button className="btn btn-green btn-sm" onClick={() => setModal(true)}><Plus size={14} /> {t.payments.recordPayment}</button>} />
+                  action={<button className="btn btn-primary btn-sm" onClick={() => setModal(true)}><Plus size={14} /> {t.payments.recordPayment}</button>} />
               </td></tr>
             ) : payments.map(p => (
               <tr key={p.id}>
@@ -302,7 +304,7 @@ export default function PaymentsPage() {
         </div>
         <div className="flex gap-3 justify-end mt-5 pt-4 border-t border-[#e7e6e1]">
           <button className="btn btn-outline" onClick={() => setModal(false)}>{t.payments.cancelBtn}</button>
-          <button className="btn btn-green" onClick={save} disabled={saving}>{saving ? t.common.saving : t.payments.recordPayment}</button>
+          <button className="btn btn-primary" onClick={save} disabled={saving}>{saving ? t.common.saving : t.payments.recordPayment}</button>
         </div>
       </Modal>
     </div>

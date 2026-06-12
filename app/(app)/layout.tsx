@@ -27,13 +27,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const businesses = (members ?? []).map((m: any) => ({ id: m.businesses.id, name: m.businesses.name }));
   const currentBusiness = businesses.find((b) => b.id === session.businessId) ?? null;
   const userProps = { name: session.name, email: session.email };
+  const role = (members ?? []).find((m: any) => m.business_id === session.businessId)?.role ?? session.role ?? "staff";
 
   const impersonatedBy = (session as any).impersonatedBy as string | undefined;
 
   return (
     <div className={`flex min-h-screen bg-surface ${impersonatedBy ? "pt-[38px]" : ""}`}>
       {impersonatedBy && <ImpersonationBanner adminId={impersonatedBy} />}
-      <Sidebar user={userProps} businesses={businesses} currentBusiness={currentBusiness} />
+      <Sidebar user={userProps} businesses={businesses} currentBusiness={currentBusiness} role={role} />
       <MobileHeader user={userProps} businesses={businesses} currentBusiness={currentBusiness} />
       <Topbar user={userProps} businesses={businesses} currentBusiness={currentBusiness} />
       <MobileNav />

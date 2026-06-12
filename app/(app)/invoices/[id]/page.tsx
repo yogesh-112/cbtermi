@@ -149,7 +149,7 @@ export default function InvoiceDetailPage() {
           <button onClick={() => window.print()} className="btn btn-outline btn-sm"><Download size={13} /> Download PDF</button>
           {!["paid","voided"].includes(invoice.status) && (
             <>
-              <button onClick={openPayModal} className="btn btn-green btn-sm"><CreditCard size={13} /> Record payment</button>
+              <button onClick={openPayModal} className="btn btn-primary btn-sm"><CreditCard size={13} /> Record payment</button>
               <button onClick={() => { const url = `${window.location.origin}/invoices/${id}/pay`; navigator.clipboard.writeText(url).then(() => toast("Payment link copied!")); }}
                 className="btn btn-outline btn-sm"><Link2 size={13} /> Share pay link</button>
             </>
@@ -331,7 +331,7 @@ export default function InvoiceDetailPage() {
             </div>
             {!["paid","voided"].includes(invoice.status) && amtDue > 0 && (
               <button onClick={openPayModal}
-                className="btn btn-green w-full mt-4"><CreditCard size={13} /> Record payment</button>
+                className="btn btn-primary w-full mt-4"><CreditCard size={13} /> Record payment</button>
             )}
           </div>
 
@@ -459,7 +459,7 @@ export default function InvoiceDetailPage() {
 
             <div className="flex gap-3">
               <button className="btn btn-outline flex-1" onClick={() => setPayModal(false)}>Cancel</button>
-              <button className="btn btn-green flex-1" onClick={recordPayment} disabled={saving}>
+              <button className="btn btn-primary flex-1" onClick={recordPayment} disabled={saving}>
                 {saving ? "Saving…" : "Record payment"}
               </button>
             </div>

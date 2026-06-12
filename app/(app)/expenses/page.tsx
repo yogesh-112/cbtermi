@@ -119,7 +119,7 @@ export default function ExpensesPage() {
         </div>
         <div className="flex items-center gap-2">
           <a href="/api/expenses?format=csv" download className="btn btn-outline btn-sm">↓ CSV</a>
-          <button className="btn btn-green" onClick={openCreate}>
+          <button className="btn btn-primary" onClick={openCreate}>
             <Plus size={15} /> {t.expenses.addExpense}
           </button>
         </div>
@@ -187,7 +187,7 @@ export default function ExpensesPage() {
           [...Array(3)].map((_, i) => <div key={i} className="mobile-card animate-pulse h-16 skeleton" />)
         ) : expenses.length === 0 ? (
           <EmptyState icon={<Receipt size={36} />} title={t.expenses.noExpenses} description={t.expenses.noExpensesDesc}
-            action={<button className="btn btn-green btn-sm" onClick={openCreate}><Plus size={14} /> {t.expenses.addExpense}</button>} />
+            action={<button className="btn btn-primary btn-sm" onClick={openCreate}><Plus size={14} /> {t.expenses.addExpense}</button>} />
         ) : expenses.map(e => (
           <div key={e.id} className="mobile-card" onClick={() => openEdit(e)}>
             <div className="mobile-card-row">
@@ -225,7 +225,7 @@ export default function ExpensesPage() {
             ) : expenses.length === 0 ? (
               <tr><td colSpan={6}>
                 <EmptyState icon={<Receipt size={40} />} title={t.expenses.noExpenses} description={t.expenses.noExpensesDesc}
-                  action={<button className="btn btn-green btn-sm" onClick={openCreate}><Plus size={14} /> {t.expenses.addExpense}</button>} />
+                  action={<button className="btn btn-primary btn-sm" onClick={openCreate}><Plus size={14} /> {t.expenses.addExpense}</button>} />
               </td></tr>
             ) : expenses.map(e => (
               <tr key={e.id}>
@@ -332,7 +332,7 @@ export default function ExpensesPage() {
         </div>
         <div className="flex gap-3 justify-end mt-5 pt-4 border-t border-[#e7e6e1]">
           <button className="btn btn-outline" onClick={() => setModal(false)}>{t.common.cancel}</button>
-          <button className="btn btn-green" onClick={save} disabled={saving}>
+          <button className="btn btn-primary" onClick={save} disabled={saving}>
             {saving ? t.common.saving : editing ? t.common.save : t.expenses.addExpense}
           </button>
         </div>

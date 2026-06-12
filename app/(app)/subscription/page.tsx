@@ -11,7 +11,7 @@ const PLANS = [
     name: "Free Trial",
     price: 0,
     priceLabel: "Free",
-    period: "15 days",
+    period: "14 days",
     desc: "Try everything for free. No card required.",
     features: ["All features included", "Unlimited contacts", "Quotes & invoices", "Team access", "Scheduling & booking", "Email support"],
     icon: Clock,
@@ -62,7 +62,11 @@ export default function SubscriptionPage() {
       // If returning from Stripe checkout, sync from Stripe first (in case webhook hasn't fired)
       if (searchParams.get("success") === "1") {
         toast("Subscription activated! Your plan is now live.", "success");
-        await fetch("/api/billing/sync", { method: "POST" }).catch(() => {});
+        await fetch("/api/billing/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_id: searchParams.get("session_id") }),
+        }).catch(() => {});
       }
       const d = await fetch("/api/subscription").then(r => r.json()).catch(() => ({}));
       setSubscription(d.subscription ?? null);
@@ -152,7 +156,7 @@ export default function SubscriptionPage() {
           </div>
           {/* Progress bar */}
           <div className="mt-4 h-1.5 bg-white/20 rounded-full overflow-hidden">
-            <div className="h-full bg-white rounded-full transition-all" style={{ width: `${Math.max(5, (daysLeft / 15) * 100)}%` }} />
+            <div className="h-full bg-white rounded-full transition-all" style={{ width: `${Math.max(5, (daysLeft / 14) * 100)}%` }} />
           </div>
         </div>
       )}
@@ -237,7 +241,7 @@ export default function SubscriptionPage() {
                   </div>
                 ) : plan.cta ? (
                   <button onClick={() => upgrade(plan.id)} disabled={isLoading || !!upgrading}
-                    className={`btn w-full ${plan.id === "pro_yearly" ? "btn-green" : "btn-primary"}`}>
+                    className={`btn w-full ${plan.id === "pro_yearly" ? "btn-primary" : "btn-primary"}`}>
                     {isLoading ? "Redirecting…" : plan.cta}
                   </button>
                 ) : null}

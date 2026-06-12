@@ -53,7 +53,7 @@ function QuoteForm() {
     terms: "Payment is due within 30 days of the approved quote date.",
   });
 
-  const [items, setItems] = useState([{ ...EMPTY_ITEM }]);
+  const [items, setItems] = useState<any[]>([{ ...EMPTY_ITEM }]);
   const [sendEmail, setSendEmail] = useState(true);
   const [sendWhatsapp, setSendWhatsapp] = useState(true);
   const [sendSms, setSendSms] = useState(false);
@@ -92,26 +92,36 @@ function QuoteForm() {
     setItems(arr);
   };
 
-  const subtotal = items.reduce((s, i) => s + i.quantity * i.unit_price, 0);
-  const discountTotal = items.reduce((s, i) => s + i.quantity * i.unit_price * (i.discount / 100), 0);
-  const taxAmount = items.reduce((s, i) => s + (i.quantity * i.unit_price - i.quantity * i.unit_price * (i.discount / 100)) * (i.tax_rate / 100), 0);
+  const regularItems = items.filter((i: any) => !i.is_section);
+  const subtotal = regularItems.reduce((s: number, i: any) => s + i.quantity * i.unit_price, 0);
+  const discountTotal = regularItems.reduce((s: number, i: any) => s + i.quantity * i.unit_price * (i.discount / 100), 0);
+  const taxAmount = regularItems.reduce((s: number, i: any) => s + (i.quantity * i.unit_price - i.quantity * i.unit_price * (i.discount / 100)) * (i.tax_rate / 100), 0);
   const total = subtotal - discountTotal + taxAmount;
 
   const save = async (status = "draft") => {
-    if (!form.contact_id) { toast("Please select a contact", "error"); return; }
-    if (form.valid_until && new Date(form.valid_until) < new Date()) {
-      toast("Valid until date must be in the future", "error"); return;
+    if (status !== "draft" && !form.contact_id) { toast("Please select a contact", "error"); return; }
+    if (status !== "draft" && form.valid_until) {
+      const today = new Date().toISOString().split("T")[0];
+      if (form.valid_until < today) {
+        toast("Valid until date must be in the future", "error"); return;
+      }
     }
     setSaving(true);
+    const payload = {
+      ...form,
+      contact_id: form.contact_id || null,
+      status,
+      items: items.filter((i: any) => !i.is_section),
+    };
     const res = await fetch("/api/quotes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, status, items }),
+      body: JSON.stringify(payload),
     });
     const d = await res.json().catch(() => ({}));
     setSaving(false);
     if (res.ok) {
-      toast("Quote saved");
+      toast(status === "sent" ? "Quote sent to customer" : "Draft saved");
       router.push(`/quotes/${d.quote.id}`);
     } else {
       toast(d.message || "Failed to save quote", "error");
@@ -234,15 +244,33 @@ function QuoteForm() {
                     <th className="text-left py-2.5 px-2 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide w-14">Unit</th>
                     <th className="text-left py-2.5 px-2 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide w-14">QTY</th>
                     <th className="text-left py-2.5 px-2 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide w-24">Rate</th>
-                    <th className="text-right py-2.5 px-4 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide w-24 flex items-center justify-end gap-1">
-                      Total
-                      <InfoTooltip text="Unit price × quantity − discount, then tax is added. Optional items are included in the total but shown as add-ons to the customer." side="bottom" />
+                    <th className="text-right py-2.5 px-4 text-[11px] font-semibold text-[#8a8fa3] uppercase tracking-wide w-24">
+                      <span className="flex items-center justify-end gap-1">
+                        Total
+                        <InfoTooltip text="Unit price × quantity − discount, then tax is added. Optional items are included in the total but shown as add-ons to the customer." side="bottom" />
+                      </span>
                     </th>
                     <th className="w-8" />
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((item, i) => (
+                  {items.map((item: any, i) => (
+                    item.is_section ? (
+                      <tr key={i} className="border-b border-[#f0efea] bg-[#f9faf8] group">
+                        <td colSpan={4} className="py-2 px-4">
+                          <input value={item.item_name} onChange={e => { const arr = [...items]; arr[i] = { ...arr[i], item_name: e.target.value }; setItems(arr); }}
+                            placeholder="Section heading (e.g. Labor, Materials)"
+                            className="field text-[13px] font-bold bg-transparent border-[#e7e6e1]" />
+                        </td>
+                        <td className="py-2 px-4 text-right text-[12px] text-[#8a8fa3]">—</td>
+                        <td className="py-2 pr-3">
+                          <button onClick={() => setItems(items.filter((_: any, idx: number) => idx !== i))}
+                            className="text-[#d8d6cf] hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                            <Trash2 size={13} />
+                          </button>
+                        </td>
+                      </tr>
+                    ) : (
                     <tr key={i} className="border-b border-[#f6f6f3] hover:bg-[#fafaf8] transition-colors group">
                       <td className="py-2 px-4">
                         <input value={item.item_name} onChange={e => setItem(i, "item_name", e.target.value)}
@@ -269,12 +297,13 @@ function QuoteForm() {
                         {fmt(item.total)}
                       </td>
                       <td className="py-2 pr-3">
-                        <button onClick={() => setItems(items.filter((_, idx) => idx !== i))}
+                        <button onClick={() => setItems(items.filter((_: any, idx: number) => idx !== i))}
                           className="text-[#d8d6cf] hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
                           <Trash2 size={13} />
                         </button>
                       </td>
                     </tr>
+                    )
                   ))}
                 </tbody>
               </table>
@@ -287,7 +316,8 @@ function QuoteForm() {
                 <Plus size={13} /> Add line item
               </button>
               <span className="text-[#d8d6cf]">·</span>
-              <button className="flex items-center gap-1.5 text-[12px] font-medium text-[#4a5168] hover:text-[#0c1226] transition-colors">
+              <button onClick={() => setItems([...items, { is_section: true, item_name: "", description: "", quantity: 0, unit: "", unit_price: 0, tax_rate: 0, discount: 0, total: 0, optional: false }])}
+                className="flex items-center gap-1.5 text-[12px] font-medium text-[#4a5168] hover:text-[#0c1226] transition-colors">
                 <Plus size={13} /> Add section
               </button>
             </div>

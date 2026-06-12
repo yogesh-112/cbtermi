@@ -60,7 +60,7 @@ export default function ItemRequirementsPage() {
           <h1 className="page-title">{t.itemRequirements.title}</h1>
           <p className="page-desc">{t.itemRequirements.subtitle}</p>
         </div>
-        <button className="btn btn-green" onClick={() => setModal(true)}><Plus size={15} /> {t.itemRequirements.newList}</button>
+        <button className="btn btn-primary" onClick={() => setModal(true)}><Plus size={15} /> {t.itemRequirements.newList}</button>
       </div>
 
       {loading ? (
@@ -70,7 +70,7 @@ export default function ItemRequirementsPage() {
       ) : lists.length === 0 ? (
         <EmptyState icon={<ClipboardList size={36} />} title={t.itemRequirements.noLists}
           description={t.itemRequirements.noListsDesc}
-          action={<button className="btn btn-green btn-sm" onClick={() => setModal(true)}><Plus size={14} /> {t.itemRequirements.newList}</button>} />
+          action={<button className="btn btn-primary btn-sm" onClick={() => setModal(true)}><Plus size={14} /> {t.itemRequirements.newList}</button>} />
       ) : (
         <div className="space-y-3">
           {lists.map((list: any) => (
@@ -172,7 +172,7 @@ export default function ItemRequirementsPage() {
           </div>
           <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
             <button className="btn btn-outline" onClick={() => setModal(false)}>{t.itemRequirements.cancelBtn}</button>
-            <button className="btn btn-green" onClick={save} disabled={saving}>{saving ? t.itemRequirements.savingBtn : t.itemRequirements.createBtn}</button>
+            <button className="btn btn-primary" onClick={save} disabled={saving}>{saving ? t.itemRequirements.savingBtn : t.itemRequirements.createBtn}</button>
           </div>
         </div>
       </Modal>

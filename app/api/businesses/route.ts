@@ -9,10 +9,20 @@ export async function POST(request: NextRequest) {
   if (!session) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { name, email, phone, ...rest } = body;
-  if (!name) return NextResponse.json({ message: "Business name required" }, { status: 400 });
+  if (!body.name) return NextResponse.json({ message: "Business name required" }, { status: 400 });
 
-  const { data: biz, error } = await supabase.from("businesses").insert({ name, email, phone, ...rest }).select().single();
+  // Whitelist insertable fields — never spread the raw body (protects
+  // stripe_customer_id, trial_ends_at, restricted_mode, etc.)
+  const ALLOWED_FIELDS = [
+    "name", "email", "phone", "address", "city", "state", "zip", "country",
+    "business_type", "website", "timezone", "currency",
+    "legal_name", "service_area", "default_tax_rate", "payment_terms",
+    "quote_prefix", "invoice_prefix", "project_prefix",
+  ] as const;
+  const insert: Record<string, unknown> = {};
+  for (const f of ALLOWED_FIELDS) if (body[f] !== undefined) insert[f] = body[f];
+
+  const { data: biz, error } = await supabase.from("businesses").insert(insert).select().single();
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });
 
   await supabase.from("business_members").insert({ business_id: biz.id, user_id: session.id, role: "owner" });

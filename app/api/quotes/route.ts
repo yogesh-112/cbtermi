@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
 import { checkTrialAccess } from "@/lib/trial";
 import { toCSV, csvResponse } from "@/lib/csv";
+import { sendEmail } from "@/lib/email";
 
 export async function GET(request: NextRequest) {
   const session = await requireSession().catch(() => null);
@@ -74,5 +75,33 @@ export async function POST(request: NextRequest) {
     const { error: itemsErr } = await supabase.from("quote_items").insert(items.map((item: any, i: number) => ({ ...item, quote_id: quote.id, sort_order: i })));
     if (itemsErr) console.error("[quotes] quote_items insert failed:", itemsErr.message);
   }
+
+  // Send email to contact when status is "sent"
+  if (body.status === "sent" && body.contact_id) {
+    const { data: contact } = await supabase.from("contacts").select("full_name, email").eq("id", body.contact_id).eq("business_id", session.businessId).single();
+    const { data: bizInfo } = await supabase.from("businesses").select("name").eq("id", session.businessId).single();
+    if (contact?.email) {
+      const fmtMoney = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2 });
+      const validLabel = body.valid_until ? new Date(body.valid_until).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+      await sendEmail({
+        to: contact.email,
+        subject: `Quote ${quote.quote_number} from ${bizInfo?.name ?? "your contractor"}`,
+        html: `<div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:32px">
+          <div style="background:#16265a;padding:20px 24px;border-radius:8px 8px 0 0">
+            <h1 style="color:#fff;font-size:20px;margin:0">${bizInfo?.name ?? "Clear Build USA"}</h1>
+          </div>
+          <div style="background:#fff;border:1px solid #e2e8f0;border-top:0;padding:32px;border-radius:0 0 8px 8px">
+            <p style="color:#0f172a;font-size:16px">Hi ${contact.full_name ?? "there"},</p>
+            <p style="color:#475569">Your quote <strong>${quote.quote_number}</strong> is ready to review.</p>
+            <p style="color:#475569">Total: <strong>${fmtMoney(total)}</strong>${validLabel ? ` · Valid until ${validLabel}` : ""}</p>
+            <a href="${appUrl}/quotes/${quote.id}/preview" style="display:inline-block;background:#16265a;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;margin:16px 0">Review Quote</a>
+            <p style="color:#94a3b8;font-size:13px">Questions? Reply to this email and we'll get back to you.</p>
+          </div>
+        </div>`,
+      }).catch(err => console.error("[quotes] email failed:", err));
+    }
+  }
+
   return NextResponse.json({ quote }, { status: 201 });
 }

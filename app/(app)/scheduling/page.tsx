@@ -146,8 +146,8 @@ export default function SchedulingPage() {
           { label: t.scheduling.completed, value: meetings.filter(m=>m.status==="completed").length, color: "mini-stat-green" },
         ].map(s => (
           <div key={s.label} className={`mini-stat ${s.color}`}>
-            <span className="stat-value text-[22px]">{s.value}</span>
-            <span className="stat-label">{s.label}</span>
+            <span className="mini-stat-value">{s.value}</span>
+            <span className="mini-stat-label">{s.label}</span>
           </div>
         ))}
       </div>
@@ -445,7 +445,7 @@ export default function SchedulingPage() {
             )}
             {!["completed","canceled"].includes(viewMeeting.status) && (
               <div className="flex flex-wrap gap-2 pt-2 border-t border-[#f3f4f6]">
-                <button className="btn btn-green btn-sm" onClick={() => updateMeeting(viewMeeting.id, "completed")}>Mark Completed</button>
+                <button className="btn btn-primary btn-sm" onClick={() => updateMeeting(viewMeeting.id, "completed")}>Mark Completed</button>
                 <button className="btn btn-danger btn-sm" onClick={() => updateMeeting(viewMeeting.id, "canceled")}>Cancel Meeting</button>
                 <button className="btn btn-outline btn-sm" onClick={() => updateMeeting(viewMeeting.id, "confirmed")}>Confirm</button>
               </div>

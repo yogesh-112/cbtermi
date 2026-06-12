@@ -185,7 +185,7 @@ export default function OpportunityDetailPage() {
         <div className="flex flex-wrap gap-2 pt-3 border-t border-[#f0efea]">
           {opp.status !== "won" && (
             <button onClick={() => markStatus("won")}
-              className="btn btn-green btn-sm">
+              className="btn btn-primary btn-sm">
               <CheckCircle size={13} /> {t.opportunities.markWon}
             </button>
           )}
@@ -278,7 +278,7 @@ export default function OpportunityDetailPage() {
         </div>
         <div className="flex gap-3 justify-end mt-5 pt-4 border-t border-[#e7e6e1]">
           <button className="btn btn-outline" onClick={() => setEditing(false)}>{t.common.cancel}</button>
-          <button className="btn btn-green" onClick={saveQuick} disabled={saving}>
+          <button className="btn btn-primary" onClick={saveQuick} disabled={saving}>
             {saving ? t.common.saving : t.common.save}
           </button>
         </div>

@@ -2,25 +2,31 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken, SESSION_COOKIE } from "@/lib/session";
 import { verifyAdminToken, ADMIN_COOKIE } from "@/lib/admin-auth";
 
+// Paths that are always public — no authentication required.
+// API routes are NOT listed here; they manage their own auth via requireSession().
+// NOTE: matched with startsWith — "/" is special-cased to an exact match below,
+// otherwise every path would be public.
 const PUBLIC_PATHS = [
-  "/login", "/register", "/verify-email", "/forgot-password",
-  "/reset-password", "/api/auth", "/api/invite",
-  "/feedback/respond",      // public feedback response page (email link for customers)
-  "/api/feedback/respond",  // public feedback response API
+  "/login", "/register", "/verify-email", "/forgot-password", "/reset-password",
+  "/invite",
+  "/booking/",            // public booking pages
+  "/feedback/respond",    // public feedback response page (email link for customers)
+  "/api/auth",
+  "/api/invite",
+  "/api/feedback/respond",
+  "/api/public/",
+  "/api/webhooks/",
 ];
 
-const APP_PATHS = [
-  "/dashboard", "/contacts", "/leads", "/customers", "/quotes", "/invoices", "/payments",
-  "/projects", "/item-requirements", "/project-updates", "/feedback",
-  "/notifications", "/communications", "/team", "/settings", "/subscription",
-  "/change-orders", "/profile", "/more", "/audit-log"
+// Specific sub-paths that are public within otherwise-protected route trees
+// (e.g. /quotes/[id]/preview is public but /quotes is not)
+const PUBLIC_SUBPATH_RE = [
+  /^\/quotes\/[^/]+\/preview(\/|$)/,
+  /^\/invoices\/[^/]+\/pay(\/|$)/,
+  /^\/change-orders\/[^/]+\/preview(\/|$)/,
 ];
 
 const ADMIN_PUBLIC = ["/admin/login"];
-const ADMIN_PROTECTED = ["/admin/dashboard", "/admin/businesses", "/admin/users",
-  "/admin/subscriptions", "/admin/payments", "/admin/plans", "/admin/audit-logs",
-  "/admin/admins", "/admin/settings", "/admin/support", "/admin/broadcasts",
-  "/admin/analytics", "/admin/security"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -49,14 +55,26 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── Customer app routes ───────────────────────────────────────
-  const token = request.cookies.get(SESSION_COOKIE)?.value;
-  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
-  const isApp    = APP_PATHS.some((p) => pathname.startsWith(p));
-  const isBusinessSetup = pathname === "/business-setup";
+  // ── API routes manage their own auth — pass through ───────────
+  if (pathname.startsWith("/api/")) return NextResponse.next();
 
-  // Public paths always win over app-path guards
-  if ((isApp || isBusinessSetup) && !isPublic) {
+  // ── Customer app routes ───────────────────────────────────────
+  const isPublic = pathname === "/"
+    || PUBLIC_PATHS.some(p => pathname.startsWith(p))
+    || PUBLIC_SUBPATH_RE.some(re => re.test(pathname));
+  const isBusinessSetup = pathname === "/business-setup";
+  const token = request.cookies.get(SESSION_COOKIE)?.value;
+
+  // Redirect already-logged-in users away from auth pages
+  if (isPublic && token && ["/login", "/register"].includes(pathname)) {
+    const payload = await verifyToken(token);
+    if (payload) {
+      return NextResponse.redirect(new URL(payload.businessId ? "/dashboard" : "/business-setup", request.url));
+    }
+  }
+
+  // Protect every non-public page by default
+  if (!isPublic) {
     if (!token) return NextResponse.redirect(new URL("/login", request.url));
     const payload = await verifyToken(token);
     if (!payload) {
@@ -64,22 +82,20 @@ export async function middleware(request: NextRequest) {
       res.cookies.delete(SESSION_COOKIE);
       return res;
     }
-    if (isApp && !payload.businessId && pathname !== "/business-setup") {
+    if (!payload.businessId && !isBusinessSetup) {
       return NextResponse.redirect(new URL("/business-setup", request.url));
     }
   }
 
-  if (isPublic && token) {
-    const payload = await verifyToken(token);
-    if (payload && ["/login", "/register"].includes(pathname)) {
-      const dest = payload.businessId ? "/dashboard" : "/business-setup";
-      return NextResponse.redirect(new URL(dest, request.url));
-    }
-  }
-
-  return NextResponse.next();
+  // Never let proxies/browsers cache page HTML: after a deploy, stale HTML
+  // points at hashed CSS/JS chunks that no longer exist (unstyled pages).
+  const res = NextResponse.next();
+  res.headers.set("Cache-Control", "no-cache, must-revalidate");
+  return res;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|public).*)"],
+  // Skip Next internals and any static file (paths containing a dot, e.g.
+  // /logo.png) — otherwise the auth redirect breaks images and assets.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };

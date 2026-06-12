@@ -64,7 +64,7 @@ export default function ProjectUpdatesPage() {
           <h1 className="page-title">{t.projectUpdates.title}</h1>
           <p className="page-desc">{updates.length} {t.projectUpdates.title.toLowerCase()}</p>
         </div>
-        <button className="btn btn-green" onClick={() => setModal(true)}><Plus size={15} /> {t.projectUpdates.postUpdate}</button>
+        <button className="btn btn-primary" onClick={() => setModal(true)}><Plus size={15} /> {t.projectUpdates.postUpdate}</button>
       </div>
 
       {loading ? (
@@ -74,7 +74,7 @@ export default function ProjectUpdatesPage() {
       ) : updates.length === 0 ? (
         <EmptyState icon={<MessageSquare size={36} />} title={t.projectUpdates.noUpdates}
           description={t.projectUpdates.noUpdatesDesc}
-          action={<button className="btn btn-green btn-sm" onClick={() => setModal(true)}><Plus size={14} /> {t.projectUpdates.postUpdate}</button>} />
+          action={<button className="btn btn-primary btn-sm" onClick={() => setModal(true)}><Plus size={14} /> {t.projectUpdates.postUpdate}</button>} />
       ) : (
         <div className="space-y-3">
           {updates.map((u: any) => (
@@ -132,7 +132,7 @@ export default function ProjectUpdatesPage() {
           </div>
           <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
             <button className="btn btn-outline" onClick={() => setModal(false)}>{t.projectUpdates.cancelBtn}</button>
-            <button className="btn btn-green" onClick={save} disabled={saving}>
+            <button className="btn btn-primary" onClick={save} disabled={saving}>
               {saving ? t.projectUpdates.posting : t.projectUpdates.postBtn}
             </button>
           </div>

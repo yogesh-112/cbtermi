@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     ...(customerId ? { customer: customerId } : { customer_email: biz?.email ?? session.email }),
     metadata: { businessId: session.businessId },
     subscription_data: { metadata: { businessId: session.businessId } },
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscription?success=1`,
+    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscription?success=1&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscription`,
     // Use promo code if available, otherwise allow manual entry at checkout
     ...(stripePromoCodeId

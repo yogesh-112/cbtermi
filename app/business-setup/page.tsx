@@ -34,7 +34,7 @@ export default function BusinessSetupPage() {
     const data = await res.json();
     setLoading(false);
     if (!res.ok) setErr(data.message || t.businessSetup.creating);
-    else router.push("/dashboard");
+    else window.location.href = "/dashboard";
   };
 
   return (

@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { sendEmail, passwordResetEmail } from "@/lib/email";
 import { generateToken } from "@/lib/utils";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(`forgot:${clientIp(request)}`, 5, 15 * 60 * 1000);
+  if (limited) return limited;
+
   const { email } = await request.json();
   const { data: user } = await supabase.from("users").select("id, full_name").eq("email", email).single();
   if (user) {

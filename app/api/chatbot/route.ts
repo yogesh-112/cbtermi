@@ -20,7 +20,7 @@ APP PAGES & FEATURES:
 • Settings (/settings): Business name, logo, address, tax rate, quote/invoice prefixes.
 • Help & Support (/help): FAQs, common issues, raise support tickets.
 • Notifications (/notifications): Send push/email notifications to contacts.
-• Subscription (/subscription): Free Trial (15 days), Monthly ($49/mo), Yearly ($490/yr).
+• Subscription (/subscription): Free Trial (14 days), Monthly ($49/mo), Yearly ($490/yr).
 • Change Orders (/change-orders): Track project change orders.
 • Audit Log (/audit-log): Track all system changes.
 
@@ -66,15 +66,23 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const { messages, currentPage } = await req.json() as {
+  const { messages: rawMessages, currentPage } = await req.json() as {
     messages: Array<{ role: "user" | "assistant"; content: string }>;
     currentPage?: string;
   };
+  if (!Array.isArray(rawMessages) || rawMessages.length === 0) {
+    return NextResponse.json({ message: "No message provided." }, { status: 400 });
+  }
+  // Cap history depth and message length to bound token usage
+  const messages = rawMessages.slice(-12).map(m => ({
+    role: m.role,
+    content: String(m.content ?? "").slice(0, 2000),
+  }));
 
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       systemInstruction: SYSTEM_PROMPT + (currentPage ? `\n\nUser is currently on: ${currentPage}` : ""),
     });
 
@@ -88,7 +96,7 @@ export async function POST(req: NextRequest) {
 
     const chat = model.startChat({
       history,
-      generationConfig: { maxOutputTokens: 512, temperature: 0.7 },
+      generationConfig: { maxOutputTokens: 1024, temperature: 0.7 },
     });
 
     const result = await chat.sendMessage(lastMessage);

@@ -26,6 +26,8 @@ const en = {
     newBusiness: "New Business", upgradePlan: "Upgrade plan",
     trialLabel: "Trial · explore free", daysLeft: "d left",
     dayOf: "Day", of: "of", proFrom: "Pro from $49/mo",
+    activePlanLabel: "plan", renewsOn: "Renews", managePlan: "Manage plan",
+    trialEnded: "Trial ended", planActive: "Active",
     profile: "Profile",
     scheduling: "Scheduling", templates: "Templates", help: "Help & Support",
   },

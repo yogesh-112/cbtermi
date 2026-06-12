@@ -109,7 +109,7 @@ export default function ProjectsPage() {
           [...Array(3)].map((_, i) => <div key={i} className="mobile-card animate-pulse h-24 skeleton" />)
         ) : projects.length === 0 ? (
           <EmptyState icon={<Briefcase size={36} />} title={t.projects.noProjects} description={t.projects.noProjectsDesc}
-            action={<Link href="/projects/new" className="btn btn-green btn-sm"><Plus size={14} /> {t.projects.newProject}</Link>} />
+            action={<Link href="/projects/new" className="btn btn-primary btn-sm"><Plus size={14} /> {t.projects.newProject}</Link>} />
         ) : projects.map(p => (
           <Link key={p.id} href={`/projects/${p.id}`} className="mobile-card block hover:shadow-card-md transition-shadow">
             <div className="mobile-card-row">

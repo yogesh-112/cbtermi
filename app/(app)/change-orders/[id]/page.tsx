@@ -78,7 +78,7 @@ export default function ChangeOrderDetailPage({ params }: { params: Promise<{ id
             </button>
           )}
           {co.status === "sent" && (
-            <button onClick={() => updateStatus("approved")} disabled={approving} className="btn btn-green btn-sm gap-1.5">
+            <button onClick={() => updateStatus("approved")} disabled={approving} className="btn btn-primary btn-sm gap-1.5">
               <CheckCircle size={13} /> {approving ? "Approving…" : "Mark Approved"}
             </button>
           )}

@@ -291,7 +291,7 @@ export default function QuoteDetailPage() {
               )}
               {canApprove && (
                 <>
-                  <button onClick={() => markStatus("approved")} className="btn btn-green w-full">
+                  <button onClick={() => markStatus("approved")} className="btn btn-primary w-full">
                     <CheckCircle size={13} /> Mark approved
                   </button>
                   <button onClick={() => markStatus("rejected")} className="btn btn-danger w-full">

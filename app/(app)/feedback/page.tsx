@@ -97,7 +97,7 @@ export default function FeedbackPage() {
         </div>
         <div className="flex gap-2">
           <button className="btn btn-outline btn-sm" onClick={() => setRequestModal(true)}><Mail size={14} /> Send Request</button>
-          <button className="btn btn-green" onClick={() => setModal(true)}><Plus size={15} /> {t.feedback.recordFeedback}</button>
+          <button className="btn btn-primary" onClick={() => setModal(true)}><Plus size={15} /> {t.feedback.recordFeedback}</button>
         </div>
       </div>
 
@@ -130,7 +130,7 @@ export default function FeedbackPage() {
       ) : feedback.length === 0 ? (
         <EmptyState icon={<Star size={36} />} title={t.feedback.noFeedback}
           description={t.feedback.noFeedbackDesc}
-          action={<button className="btn btn-green btn-sm" onClick={() => setModal(true)}><Plus size={14} /> {t.feedback.recordFeedback}</button>} />
+          action={<button className="btn btn-primary btn-sm" onClick={() => setModal(true)}><Plus size={14} /> {t.feedback.recordFeedback}</button>} />
       ) : (
         <>
           <div className="lg:hidden space-y-3">
@@ -235,7 +235,7 @@ export default function FeedbackPage() {
           </div>
           <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
             <button className="btn btn-outline" onClick={() => setModal(false)}>{t.feedback.cancelBtn}</button>
-            <button className="btn btn-green" onClick={save} disabled={saving}>
+            <button className="btn btn-primary" onClick={save} disabled={saving}>
               {saving ? t.feedback.saving : t.feedback.recordBtn}
             </button>
           </div>

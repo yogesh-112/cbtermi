@@ -86,6 +86,9 @@ export default function OpportunitiesPage() {
 
   const save = async () => {
     if (!form.name.trim()) { toast(t.common.required, "error"); return; }
+    if (form.estimated_value !== "" && parseFloat(form.estimated_value) < 0) {
+      toast("Estimated value cannot be negative", "error"); return;
+    }
     setSaving(true);
     const body = { ...form, estimated_value: form.estimated_value || null, contact_id: form.contact_id || null };
     const [url, method] = editing
@@ -135,7 +138,7 @@ export default function OpportunitiesPage() {
             {open.length} {t.opportunities.openLabel} · {fmt(pipeline)} {t.opportunities.pipelineValue}
           </p>
         </div>
-        <button className="btn btn-green" onClick={openCreate}>
+        <button className="btn btn-primary" onClick={openCreate}>
           <Plus size={15} /> {t.opportunities.newOpportunity}
         </button>
       </div>
@@ -192,7 +195,7 @@ export default function OpportunitiesPage() {
         ) : filtered.length === 0 ? (
           <EmptyState icon={<Target size={36} />} title={t.opportunities.noOpportunities}
             description={t.opportunities.noOpportunitiesDesc}
-            action={<button className="btn btn-green btn-sm" onClick={openCreate}><Plus size={14} /> {t.opportunities.newOpportunity}</button>} />
+            action={<button className="btn btn-primary btn-sm" onClick={openCreate}><Plus size={14} /> {t.opportunities.newOpportunity}</button>} />
         ) : filtered.map(o => (
           <Link key={o.id} href={`/opportunities/${o.id}`} className="mobile-card block">
             <div className="mobile-card-row">
@@ -235,7 +238,7 @@ export default function OpportunitiesPage() {
               <tr><td colSpan={8}>
                 <EmptyState icon={<Target size={40} />} title={t.opportunities.noOpportunities}
                   description={t.opportunities.noOpportunitiesDesc}
-                  action={<button className="btn btn-green btn-sm" onClick={openCreate}><Plus size={14} /> {t.opportunities.newOpportunity}</button>} />
+                  action={<button className="btn btn-primary btn-sm" onClick={openCreate}><Plus size={14} /> {t.opportunities.newOpportunity}</button>} />
               </td></tr>
             ) : filtered.map(o => (
               <tr key={o.id}>
@@ -354,7 +357,7 @@ export default function OpportunitiesPage() {
         </div>
         <div className="flex gap-3 justify-end mt-5 pt-4 border-t border-[#e7e6e1]">
           <button className="btn btn-outline" onClick={() => setModal(false)}>{t.common.cancel}</button>
-          <button className="btn btn-green" onClick={save} disabled={saving}>
+          <button className="btn btn-primary" onClick={save} disabled={saving}>
             {saving ? t.common.saving : editing ? t.common.save : t.opportunities.newOpportunity}
           </button>
         </div>

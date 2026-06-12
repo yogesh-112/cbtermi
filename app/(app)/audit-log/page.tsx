@@ -31,15 +31,29 @@ export default function AuditLogPage() {
   const t = useT();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [denied, setDenied] = useState(false);
   const [search, setSearch] = useState("");
   const [entityFilter, setEntityFilter] = useState("All");
 
   useEffect(() => {
     fetch("/api/audit-log")
-      .then(r => r.json())
+      .then(async r => {
+        if (r.status === 403) { setDenied(true); return { events: [] }; }
+        return r.json();
+      })
       .then(d => setEvents(d.events ?? []))
       .finally(() => setLoading(false));
   }, []);
+
+  if (denied) {
+    return (
+      <div className="card p-8 text-center max-w-md mx-auto mt-12">
+        <ShieldCheck size={28} className="mx-auto text-[#8a8fa3] mb-3" />
+        <p className="font-semibold text-[#0c1226] mb-1">Owners and admins only</p>
+        <p className="text-[13px] text-[#8a8fa3]">The audit log is only available to business owners and admins.</p>
+      </div>
+    );
+  }
 
   const filtered = events.filter(e => {
     const matchesEntity = entityFilter === "All" || e.entity_type === entityFilter;
@@ -49,7 +63,7 @@ export default function AuditLogPage() {
       e.entity_type?.toLowerCase().includes(q) ||
       e.entity_id?.toLowerCase().includes(q) ||
       JSON.stringify(e.payload ?? {}).toLowerCase().includes(q) ||
-      e.users?.name?.toLowerCase().includes(q);
+      e.users?.full_name?.toLowerCase().includes(q);
     return matchesEntity && matchesSearch;
   });
 
@@ -112,7 +126,7 @@ export default function AuditLogPage() {
                     <td className="text-[#8a8fa3] whitespace-nowrap">{fmtDate(e.created_at)}</td>
                     <td>
                       <span className="text-[13px] font-medium text-[#0c1226]">
-                        {e.users?.name ?? "System"}
+                        {e.users?.full_name ?? "System"}
                       </span>
                     </td>
                     <td>

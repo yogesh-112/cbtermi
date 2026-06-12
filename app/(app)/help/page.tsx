@@ -72,7 +72,7 @@ export default function HelpPage() {
       setTickets(tk.tickets ?? []);
     }).catch(e => console.error("[help] load failed:", e))
       .finally(() => setLoading(false));
-  }, []);
+  }, [lang]);
 
   const faqCategories = ["All", ...Array.from(new Set(faqs.map((f: any) => f.category)))];
 

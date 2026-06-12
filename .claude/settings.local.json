@@ -74,7 +74,30 @@
       "PowerShell(cd \"E:\\\\cbv1\"; git add app\\\\\\(app\\\\\\)\\\\expenses\\\\ app\\\\\\(app\\\\\\)\\\\opportunities\\\\ app\\\\api\\\\expenses\\\\ app\\\\api\\\\opportunities\\\\ \"app\\\\api\\\\quotes\\\\[id]\\\\versions\\\\\" \"app\\\\api\\\\change-orders\\\\[id]\\\\preview\\\\\" \"app\\\\change-orders\\\\\" supabase\\\\migrations\\\\ \"app\\\\\\(app\\)\\\\change-orders\\\\[id]\\\\page.tsx\" \"app\\\\\\(app\\)\\\\dashboard\\\\page.tsx\" \"app\\\\\\(app\\)\\\\help\\\\page.tsx\" \"app\\\\\\(app\\)\\\\more\\\\page.tsx\" \"app\\\\\\(app\\)\\\\quotes\\\\[id]\\\\page.tsx\" app\\\\api\\\\dashboard\\\\route.ts components\\\\layout\\\\MobileNav.tsx components\\\\layout\\\\Sidebar.tsx lib\\\\i18n\\\\en.ts lib\\\\i18n\\\\es.ts lib\\\\i18n\\\\pt.ts; git status --short)",
       "Bash(xargs grep -l \"super_admin\\\\|admin\")",
       "Bash(grep -roh \"\\\\.from\\(['\\\\\"]\\\\\\\\\\([^'\\\\\"]*\\\\\\\\\\)['\\\\\"]\" \"E:\\\\cbv1\\\\app\\\\api\" \"E:\\\\cbv1\\\\lib\")",
-      "Bash(grep -v \"//\\\\|console\\\\|toast\\\\|className\\\\|styles\\\\|url\")"
+      "Bash(grep -v \"//\\\\|console\\\\|toast\\\\|className\\\\|styles\\\\|url\")",
+      "Bash(echo \"PID: $!\")",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(echo \"Restarted dev server PID: $!\")",
+      "PowerShell($binPath = \"C:\\\\Users\\\\HP\\\\.claude\\\\projects\\\\E--cbv1\\\\e64afad4-4ae7-4bda-9966-e60ea6843f41\\\\tool-results\\\\webfetch-1780663958130-y0luu0.bin\"; $outPath = \"C:\\\\Users\\\\HP\\\\.claude\\\\projects\\\\E--cbv1\\\\e64afad4-4ae7-4bda-9966-e60ea6843f41\\\\tool-results\\\\landing.html\"; $inputStream = [System.IO.File]::OpenRead\\($binPath\\); $gzipStream = New-Object System.IO.Compression.GZipStream\\($inputStream, [System.IO.Compression.CompressionMode]::Decompress\\); $outputStream = [System.IO.File]::Create\\($outPath\\); $gzipStream.CopyTo\\($outputStream\\); $gzipStream.Close\\(\\); $outputStream.Close\\(\\); $inputStream.Close\\(\\); Write-Host \"Done\")",
+      "PowerShell(Get-ChildItem *)",
+      "Bash(npx next *)",
+      "Bash(pkill -f \"node\\\\|next\")",
+      "Bash(grep -E \"^\\\\├.*\\\\/\\\\s|^\\\\└.*\\\\/\\\\s|^\\\\├.*login|^\\\\├.*register|^\\\\○|^\\\\ƒ\")",
+      "Bash(grep \"^\\\\├ ○ /\\\\s\\\\|^\\\\└ ○ /\\\\s\")",
+      "PowerShell($proc = Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; if \\($proc\\) { Stop-Process -Id $proc -Force -ErrorAction SilentlyContinue; Write-Host \"Killed PID $proc on port 3000\" } else { Write-Host \"Port 3000 is free\" })",
+      "PowerShell($ports = @\\(3001, 3002\\); foreach \\($p in $ports\\) { $proc = Get-NetTCPConnection -LocalPort $p -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; if \\($proc\\) { Stop-Process -Id $proc -Force -ErrorAction SilentlyContinue; Write-Host \"Killed PID $proc on port $p\" } })",
+      "Bash(grep -v \"^//\")",
+      "Bash(git rm *)",
+      "Bash(git reset *)",
+      "Skill(code-review)",
+      "PowerShell(Get-ChildItem public\\\\docs\\\\ | Select-Object Name, @{N='Size';E={\"{0:N0} KB\" -f \\($_.Length/1KB\\)}})",
+      "Bash(Get-ChildItem -Path E:\\\\cbv1 -Force)",
+      "Bash(Select-Object -Property Mode, Name)",
+      "PowerShell(Get-ChildItem -Path E:\\\\cbv1 -Force | Where-Object { $_.Name -ne '.git' } | Select-Object -Property Mode, Name | Sort-Object Mode -Descending)",
+      "PowerShell($appFiles = Get-ChildItem -Path E:\\\\cbv1\\\\app -Recurse -File | Measure-Object; $apiCount = Get-ChildItem -Path E:\\\\cbv1\\\\app\\\\api -Recurse -File | Measure-Object; $pageCount = Get-ChildItem -Path E:\\\\cbv1\\\\app -Recurse -File -Filter \"page.tsx\" | Measure-Object; Write-Output \"Total app files: $\\($appFiles.Count\\)\"; Write-Output \"API routes: $\\($apiCount.Count\\)\"; Write-Output \"Page components: $\\($pageCount.Count\\)\")",
+      "Bash(npx kill-port *)",
+      "Bash(powershell -Command 'Get-NetTCPConnection -LocalPort 3000 -State Listen | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }')",
+      "Bash(powershell -Command 'Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }')"
     ]
   }
 }

@@ -1,5 +1,5 @@
 ﻿"use client";
-import { ReactNode, useState, useEffect, useRef, ComponentType } from "react";
+import { ReactNode, useState, useEffect, useRef, ComponentType, isValidElement } from "react";
 import { X, CheckCircle, AlertCircle, Info, ChevronDown, MoreHorizontal } from "lucide-react";
 
 // ─── MODAL ────────────────────────────────────────────────────────────────────
@@ -58,9 +58,12 @@ export function EmptyState({ icon, title, description, action }: {
   description?: string;
   action?: ReactNode | { label: string; onClick: () => void };
 }) {
-  const IconEl = typeof icon === "function"
-    ? (() => { const C = icon as ComponentType<{ size?: number }>; return <C size={40} />; })()
-    : icon;
+  // Lucide icons are forwardRef objects (not plain functions), so anything
+  // that isn't already a rendered element is treated as a component type.
+  const IconEl: ReactNode =
+    icon == null || isValidElement(icon) || typeof icon === "string"
+      ? (icon as ReactNode)
+      : (() => { const C = icon as ComponentType<{ size?: number }>; return <C size={40} />; })();
   const ActionEl = action && typeof action === "object" && "label" in (action as object)
     ? (() => { const a = action as { label: string; onClick: () => void }; return <button className="btn btn-primary btn-sm" onClick={a.onClick}>{a.label}</button>; })()
     : action as ReactNode;

@@ -32,11 +32,13 @@ export async function POST(request: NextRequest) {
 
         const { data: inv } = await supabase
           .from("invoices")
-          .select("id, invoice_number, total, amount_paid, amount_due, contacts(full_name, email), businesses(name)")
+          .select("id, invoice_number, total, amount_paid, amount_due, payment_intent_id, contacts(full_name, email), businesses(name)")
           .eq("id", invoiceId)
           .single();
 
         if (inv) {
+          // Idempotency guard: skip if this payment intent was already applied
+          if (inv.payment_intent_id === (cs.payment_intent as string)) break;
           const newPaid = (inv.amount_paid ?? 0) + amountPaid;
           const newDue = Math.max(0, (inv.total ?? 0) - newPaid);
           const newStatus = newDue <= 0 ? "paid" : "partially_paid";
@@ -74,21 +76,38 @@ export async function POST(request: NextRequest) {
       break;
     }
 
+    case "customer.subscription.created":
     case "customer.subscription.updated": {
       const sub = event.data.object;
-      const priceId = sub.items.data[0]?.price.id;
+      const item = sub.items.data[0];
+      const priceId = item?.price.id;
       const plan = planForPriceId(priceId ?? "");
       const [planName, cycle] = plan.split("_");
-      await supabase.from("subscriptions").update({
+      const rawPeriodEnd = (sub as any).current_period_end ?? (item as any)?.current_period_end;
+      const periodEnd = rawPeriodEnd ? new Date(rawPeriodEnd * 1000).toISOString() : null;
+      const businessId = sub.metadata?.businessId;
+      const row = {
         plan: planName,
         billing_cycle: cycle === "yearly" ? "yearly" : "monthly",
         stripe_price_id: priceId,
         status: sub.status,
-        current_period_end: new Date((sub as any).current_period_end * 1000).toISOString(),
-        cancel_at_period_end: (sub as any).cancel_at_period_end,
-        renews_at: new Date((sub as any).current_period_end * 1000).toISOString(),
+        current_period_end: periodEnd,
+        cancel_at_period_end: (sub as any).cancel_at_period_end ?? false,
+        renews_at: periodEnd,
         updated_at: new Date().toISOString(),
-      }).eq("stripe_subscription_id", sub.id);
+      };
+      if (businessId) {
+        // Upsert by business so the first event works even if checkout.session.completed
+        // hasn't stored the subscription id yet
+        await supabase.from("subscriptions").upsert({
+          ...row,
+          business_id: businessId,
+          stripe_subscription_id: sub.id,
+          stripe_customer_id: sub.customer as string,
+        }, { onConflict: "business_id" });
+      } else {
+        await supabase.from("subscriptions").update(row).eq("stripe_subscription_id", sub.id);
+      }
       break;
     }
 

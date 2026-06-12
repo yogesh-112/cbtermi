@@ -9,6 +9,7 @@ const MORE_PATHS = [
   "/item-requirements", "/project-updates", "/feedback",
   "/team", "/settings", "/change-orders", "/more",
   "/scheduling", "/templates", "/help", "/expenses", "/opportunities",
+  "/leads", "/customers", "/subscription", "/profile", "/audit-log",
 ];
 
 export default function MobileNav() {

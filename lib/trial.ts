@@ -18,7 +18,21 @@ export async function checkTrialAccess(businessId: string): Promise<NextResponse
     );
   }
 
-  if (biz.trial_ends_at && new Date(biz.trial_ends_at) < new Date()) {
+  // An active paid subscription always grants access, regardless of the
+  // original trial window.
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("plan, status, current_period_end, trial_ends_at")
+    .eq("business_id", businessId)
+    .single();
+
+  if (sub && sub.plan !== "trial" && ["active", "trialing", "past_due"].includes(sub.status)) {
+    return null;
+  }
+
+  // Trial window: prefer the subscription row's trial_ends_at, fall back to the business column
+  const trialEndsAt = sub?.trial_ends_at ?? biz.trial_ends_at;
+  if (trialEndsAt && new Date(trialEndsAt) < new Date()) {
     return NextResponse.json(
       { message: "Your free trial has ended. Please upgrade your subscription to continue creating or editing records." },
       { status: 403 }

@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   if (!valid) return NextResponse.json({ message: "Current password is incorrect." }, { status: 400 });
 
   const hashed = await bcrypt.hash(newPassword, 12);
-  await supabase.from("users").update({ password: hashed }).eq("id", session.id);
+  await supabase.from("users").update({ password: hashed, force_logout_at: new Date().toISOString() }).eq("id", session.id);
 
   return NextResponse.json({ message: "Password changed successfully." });
 }

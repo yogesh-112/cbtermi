@@ -4,8 +4,11 @@ import { requireSession } from "@/lib/auth";
 
 // Test-only endpoint: extends the trial for the current business so Playwright
 // create-flow tests are not blocked by checkTrialAccess returning 403.
-// Gated by PLAYWRIGHT_TEST_SECRET — disabled (403) if the env var is not set.
+// Disabled in production regardless of env vars.
 export async function POST(request: NextRequest) {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ message: "Not found" }, { status: 404 });
+  }
   const secret = process.env.PLAYWRIGHT_TEST_SECRET;
   if (!secret || request.headers.get("x-test-secret") !== secret) {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });

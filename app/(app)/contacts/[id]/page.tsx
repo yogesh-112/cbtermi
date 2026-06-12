@@ -34,7 +34,10 @@ export default function ContactDetailPage() {
 
   const load = () =>
     fetch(`/api/contacts/${id}`).then(r => r.json()).then(d => { setData(d); setForm(d.contact ?? {}); });
-  useEffect(() => { load(); }, [id]);
+  useEffect(() => {
+    if (id === "new") { router.push("/contacts"); return; }
+    load();
+  }, [id]);
 
   const save = async () => {
     setSaving(true);
@@ -60,7 +63,7 @@ export default function ContactDetailPage() {
     toast("Converted to customer"); load();
   };
 
-  if (!data) return <PageSkeleton />;
+  if (!data || !data.contact) return <PageSkeleton />;
   const c = data.contact;
 
   const initials = c.full_name?.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase() || "?";

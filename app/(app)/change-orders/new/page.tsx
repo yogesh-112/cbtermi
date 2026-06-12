@@ -37,16 +37,19 @@ export default function NewChangeOrderPage() {
   const updateItem = (i: number, k: string, v: any) => {
     setItems(items => {
       const next = [...items];
-      next[i] = calcItem({ ...next[i], [k]: v });
+      const numericKeys = ["qty", "rate", "tax_rate"];
+      const val = numericKeys.includes(k) ? Math.max(0, parseFloat(v) || 0) : v;
+      next[i] = calcItem({ ...next[i], [k]: val });
       return next;
     });
   };
 
-  const subtotal = items.reduce((s, i) => s + (i.total ?? 0), 0);
-  const tax_amount = items.reduce((s, i) => s + (i.total ?? 0) * (i.tax_rate ?? 0) / 100, 0);
-  const total = subtotal;
+  const subtotal = items.reduce((s, i) => s + i.qty * i.rate, 0);
+  const tax_amount = items.reduce((s, i) => s + i.qty * i.rate * (i.tax_rate / 100), 0);
+  const total = subtotal + tax_amount;
 
   const save = async () => {
+    if (!form.title.trim()) { toast("Title is required", "error"); return; }
     setSaving(true);
     const res = await fetch("/api/change-orders", {
       method: "POST",

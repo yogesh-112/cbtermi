@@ -64,12 +64,13 @@ function InvoiceForm() {
   const taxAmount = items.reduce((s, i) => s + i.total * (i.tax_rate / 100), 0);
   const total     = subtotal + taxAmount;
 
-  const validate = () => {
+  const validate = (action: "draft" | "review" | "send") => {
     if (!form.contact_id) { toast("Please select a contact", "error"); return false; }
     const validItems = items.filter(i => (i.item_name || i.description) && i.quantity > 0);
     if (!validItems.length) { toast("Add at least one line item with a quantity > 0", "error"); return false; }
     const badRate = validItems.find(i => i.unit_price <= 0);
     if (badRate) { toast("All line items must have a rate greater than 0", "error"); return false; }
+    if (action === "send" && !form.due_date) { toast("Due date is required when sending an invoice", "error"); return false; }
     if (form.issue_date && form.due_date && form.due_date < form.issue_date) {
       toast("Due date must be on or after the issue date", "error"); return false;
     }
@@ -77,7 +78,7 @@ function InvoiceForm() {
   };
 
   const save = async (action: "draft" | "review" | "send") => {
-    if (action !== "draft" && !validate()) return;
+    if (action !== "draft" && !validate(action)) return;
     if (action === "draft" && !form.contact_id) { toast("Please select a contact first", "error"); return; }
     setSaving(true);
     const status = action === "draft" ? "draft" : "sent";

@@ -31,3 +31,8 @@ test-results/
 
 # BrowserStack credentials
 .env.browserstack
+
+# local artifacts — internal docs and verify output (never deploy)
+public/docs/
+scripts/verify-shots/
+dev-verify*.log

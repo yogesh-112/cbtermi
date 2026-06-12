@@ -152,12 +152,18 @@ export default function ProjectDetailPage() {
   const saveUpdate = async () => {
     if (!updateForm.title) { toast("Title required", "error"); return; }
     setSaving(true);
-    await fetch("/api/project-updates", {
+    const res = await fetch("/api/project-updates", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...updateForm, project_id: id, contact_id: data?.project?.contact_id }),
     });
-    setSaving(false); toast("Update sent"); setUpdateModal(false);
-    setUpdateForm({ title: "", message: "", status_milestone: "" }); load();
+    setSaving(false);
+    if (res.ok) {
+      toast("Update posted"); setUpdateModal(false);
+      setUpdateForm({ title: "", message: "", status_milestone: "" }); load();
+    } else {
+      const d = await res.json().catch(() => ({}));
+      toast(d.message || "Failed to post update", "error");
+    }
   };
 
   const addTask = async () => {
@@ -732,7 +738,7 @@ export default function ProjectDetailPage() {
           </div>
           <div className="flex gap-3 justify-end pt-2 border-t border-[#e7e6e1]">
             <button className="btn btn-outline" onClick={() => setUpdateModal(false)}>Cancel</button>
-            <button className="btn btn-green" onClick={saveUpdate} disabled={saving}>{saving ? "Saving…" : "Send Update"}</button>
+            <button className="btn btn-primary" onClick={saveUpdate} disabled={saving}>{saving ? "Saving…" : "Send Update"}</button>
           </div>
         </div>
       </Modal>

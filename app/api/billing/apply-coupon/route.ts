@@ -28,5 +28,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "This coupon code has reached its usage limit." }, { status: 400 });
   }
 
+  await supabase.from("coupon_codes").update({ uses_count: (coupon.uses_count ?? 0) + 1 }).eq("id", coupon.id);
+
   return NextResponse.json({ coupon: { code: coupon.code, discount_percent: coupon.discount_percent } });
 }

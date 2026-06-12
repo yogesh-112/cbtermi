@@ -28,6 +28,8 @@ const pt: Translations = {
     newBusiness: "Nova empresa", upgradePlan: "Atualizar plano",
     trialLabel: "Teste · explorar grátis", daysLeft: "d restantes",
     dayOf: "Dia", of: "de", proFrom: "Pro a partir de $49/mês",
+    activePlanLabel: "plano", renewsOn: "Renova", managePlan: "Gerenciar plano",
+    trialEnded: "Teste encerrado", planActive: "Ativo",
     profile: "Perfil",
     scheduling: "Agendamento", templates: "Modelos", help: "Ajuda e Suporte",
   },

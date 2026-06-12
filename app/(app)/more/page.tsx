@@ -5,16 +5,19 @@ import {
   GitPullRequestDraft, ClipboardList, MessagesSquare, Star, Bell,
   UserCog, CreditCard, Settings, ChevronRight, ArrowRight,
   Calendar, LayoutTemplate, HelpCircle, Wallet,
+  UserCheck, UserCircle, Target, Briefcase, MessageSquare,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 export default function MorePage() {
   const t = useT();
   const [user, setUser] = useState<any>(null);
+  const [subscription, setSubscription] = useState<any>(null);
   const [counts, setCounts] = useState({ quotes: 0, invoices: 0, team: 0 });
 
   useEffect(() => {
     fetch("/api/auth/me").then(r => r.json()).then(d => setUser(d.user));
+    fetch("/api/subscription").then(r => r.json()).then(d => setSubscription(d.subscription ?? null)).catch(() => {});
     Promise.all([
       fetch("/api/quotes").then(r => r.json()),
       fetch("/api/invoices").then(r => r.json()),
@@ -28,7 +31,27 @@ export default function MorePage() {
     });
   }, []);
 
+  const planLabel = (() => {
+    if (!subscription) return "";
+    const isPaid = subscription.plan && subscription.plan !== "trial" && ["active", "trialing"].includes(subscription.status);
+    if (isPaid) {
+      const plan = subscription.plan[0].toUpperCase() + subscription.plan.slice(1);
+      return `${plan} plan · ${subscription.billing_cycle === "yearly" ? "Yearly" : "Monthly"}`;
+    }
+    if (subscription.trial_ends_at) {
+      const left = Math.max(0, Math.ceil((new Date(subscription.trial_ends_at).getTime() - Date.now()) / 86400000));
+      return left > 0 ? `Free trial · ${left}d left` : "Trial ended";
+    }
+    return "Free trial";
+  })();
+
   const WORKSPACE = [
+    { href: "/leads",             icon: UserCheck,           label: t.nav.leads,              badge: null },
+    { href: "/customers",         icon: UserCircle,          label: t.nav.customers,          badge: null },
+    { href: "/opportunities",     icon: Target,              label: t.opportunities.title,    badge: null },
+    { href: "/projects",          icon: Briefcase,           label: t.nav.projects,           badge: null },
+    { href: "/payments",          icon: CreditCard,          label: t.nav.payments,           badge: null },
+    { href: "/project-updates",   icon: MessageSquare,       label: t.nav.projectUpdates,     badge: null },
     { href: "/scheduling",        icon: Calendar,            label: t.scheduling.title,       badge: null },
     { href: "/expenses",          icon: Wallet,              label: t.expenses.title,         badge: null },
     { href: "/templates",         icon: LayoutTemplate,      label: "Templates",              badge: null },
@@ -59,7 +82,7 @@ export default function MorePage() {
             </div>
             <div>
               <p className="text-white font-semibold text-[15px] leading-tight">{user?.name ?? "—"}</p>
-              <p className="text-white/60 text-[12px] mt-0.5">Owner · Pro plan · 11d trial</p>
+              <p className="text-white/60 text-[12px] mt-0.5">{planLabel || "—"}</p>
             </div>
           </div>
           <Link href="/profile"

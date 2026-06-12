@@ -101,7 +101,8 @@
       "Bash(grep -n -B3 -A12 \"fetch\\(\\\\`/api/expenses\\\\|fetch\\(\\\\\"/api/expenses\" \"app/\\(app\\)/expenses/page.tsx\")",
       "Bash(grep -n -B4 -A10 \"fetch\\(\\\\`/api/opportunities\\\\|fetch\\(\\\\\"/api/opportunities?\" \"app/\\(app\\)/opportunities/page.tsx\")",
       "Bash(sed -n 378,400p \"app/\\(app\\)/quotes/new/page.tsx\")",
-      "Bash(sed -n 352,372p \"app/\\(app\\)/projects/new/page.tsx\")"
+      "Bash(sed -n 352,372p \"app/\\(app\\)/projects/new/page.tsx\")",
+      "Bash(nslookup -type=AAAA db.ernyjnbayadptczaowdn.supabase.co)"
     ]
   }
 }

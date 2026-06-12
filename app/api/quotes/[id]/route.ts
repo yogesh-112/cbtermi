@@ -26,7 +26,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const QUOTE_FIELDS = [
     "contact_id", "project_id", "opportunity_id", "quote_number", "title",
     "issue_date", "valid_until", "status", "discount_amount", "notes", "terms",
-    "approved_by", "approved_at",
+    "project_type", "project_address", "approved_by", "approved_at",
   ] as const;
   const body: Record<string, any> = {};
   for (const k of QUOTE_FIELDS) if (raw[k] !== undefined) body[k] = raw[k];

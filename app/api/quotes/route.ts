@@ -53,12 +53,13 @@ export async function POST(request: NextRequest) {
   const trialErr = await checkTrialAccess(session.businessId);
   if (trialErr) return trialErr;
   const { items, ...raw } = await request.json();
-  // Whitelist actual quotes columns — the form sends helper fields
-  // (contact_name, contact_email, project_type, project_address) that
-  // don't exist in the table and would fail the insert.
+  // Whitelist actual quotes columns — the form also sends helper fields
+  // (contact_name, contact_email) that don't exist in the table and would
+  // fail the insert.
   const QUOTE_FIELDS = [
     "contact_id", "project_id", "opportunity_id", "quote_number", "title",
     "issue_date", "valid_until", "status", "discount_amount", "notes", "terms",
+    "project_type", "project_address",
   ] as const;
   const body: Record<string, any> = {};
   for (const k of QUOTE_FIELDS) if (raw[k] !== undefined) body[k] = raw[k];

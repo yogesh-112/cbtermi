@@ -35,7 +35,7 @@ export default function ContactDetailPage() {
   const load = () =>
     fetch(`/api/contacts/${id}`).then(r => r.json()).then(d => { setData(d); setForm(d.contact ?? {}); });
   useEffect(() => {
-    if (id === "new") { router.push("/contacts"); return; }
+    if (id === "new") { router.replace("/contacts?new=1"); return; }
     load();
   }, [id]);
 

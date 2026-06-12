@@ -5,7 +5,7 @@ import {
   GitPullRequestDraft, ClipboardList, MessagesSquare, Star, Bell,
   UserCog, CreditCard, Settings, ChevronRight, ArrowRight,
   Calendar, LayoutTemplate, HelpCircle, Wallet,
-  UserCheck, UserCircle, Target, Briefcase, MessageSquare,
+  UserCheck, UserCircle, Target, Briefcase, MessageSquare, ShieldCheck,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
@@ -66,6 +66,10 @@ export default function MorePage() {
   const BUSINESS = [
     { href: "/team",         icon: UserCog,    label: t.more.team,             badge: null },
     { href: "/subscription", icon: CreditCard, label: t.nav.subscription,      badge: "Pro" },
+    // Audit log is owner/admin only — same gate as the desktop sidebar
+    ...(["owner", "admin"].includes(user?.role ?? "")
+      ? [{ href: "/audit-log", icon: ShieldCheck, label: t.nav.auditLog, badge: null }]
+      : []),
     { href: "/settings",     icon: Settings,   label: t.more.businessProfile,  badge: null },
   ];
 

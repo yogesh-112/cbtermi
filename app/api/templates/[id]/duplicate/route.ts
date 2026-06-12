@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth";
+import { checkTrialAccess } from "@/lib/trial";
 import { supabase } from "@/lib/supabase";
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  const trialErr = await checkTrialAccess(session.businessId);
+  if (trialErr) return trialErr;
 
   const { id } = await params;
   const { data: source } = await supabase

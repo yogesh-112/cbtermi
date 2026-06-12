@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
+import { checkTrialAccess } from "@/lib/trial";
 import { sendEmail } from "@/lib/email";
 import { generateToken } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  const trialErr = await checkTrialAccess(session.businessId);
+  if (trialErr) return trialErr;
 
   const { contact_id, project_id, message: customMessage } = await request.json();
   if (!contact_id) return NextResponse.json({ message: "Contact required" }, { status: 400 });

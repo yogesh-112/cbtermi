@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
+import { checkTrialAccess } from "@/lib/trial";
 import { sendEmail, teamInviteEmail } from "@/lib/email";
 import { generateToken } from "@/lib/utils";
 
@@ -15,6 +16,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  const trialErr = await checkTrialAccess(session.businessId);
+  if (trialErr) return trialErr;
   if (!["owner", "admin"].includes(session.role ?? "")) {
     return NextResponse.json({ message: "Only owners and admins can invite team members." }, { status: 403 });
   }

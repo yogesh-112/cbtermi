@@ -70,6 +70,10 @@ export async function POST(request: NextRequest) {
   const trialErr = await checkTrialAccess(session.businessId);
   if (trialErr) return trialErr;
   const { items, ...body } = await request.json();
+  // Postgres rejects "" for date/uuid columns — normalize to null
+  for (const k of ["issue_date", "due_date", "contact_id", "project_id"]) {
+    if (body[k] === "") body[k] = null;
+  }
 
   // Auto-create project if none selected
   let project_id = body.project_id;
@@ -106,7 +110,7 @@ export async function POST(request: NextRequest) {
 
   // Send invoice email to contact
   if (body.contact_id) {
-    const { data: contact } = await supabase.from("contacts").select("full_name, email").eq("id", body.contact_id).single();
+    const { data: contact } = await supabase.from("contacts").select("full_name, email").eq("id", body.contact_id).eq("business_id", session.businessId).single();
     const { data: bizInfo } = await supabase.from("businesses").select("name").eq("id", session.businessId).single();
     if (contact?.email) {
       const fmtMoney = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2 });

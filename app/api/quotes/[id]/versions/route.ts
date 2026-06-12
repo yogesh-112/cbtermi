@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
+import { checkTrialAccess } from "@/lib/trial";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession().catch(() => null);
@@ -30,6 +31,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  const trialErr = await checkTrialAccess(session.businessId);
+  if (trialErr) return trialErr;
   const { id } = await params;
 
   const { data: quote } = await supabase

@@ -109,7 +109,7 @@ function InvoiceForm() {
         <Link href="/invoices" className="btn btn-ghost btn-sm p-2"><ArrowLeft size={14} /></Link>
         <div className="flex-1">
           <h1 className="page-title">New invoice</h1>
-          <p className="text-[12px] text-[#8a8fa3]">Draft · auto-saves every 10 seconds</p>
+          <p className="text-[12px] text-[#8a8fa3]">Draft · not saved until you click Save</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <button onClick={() => save("draft")} disabled={saving} className="btn btn-outline btn-sm">

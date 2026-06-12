@@ -352,13 +352,9 @@ function NewProjectForm() {
             />
           </div>
 
-          {/* Actions */}
+          {/* Actions — "draft" is not a project status, so there is a single create action */}
           <div className="flex items-center justify-end gap-3 pb-6">
             <Link href="/projects" className="btn btn-outline">Cancel</Link>
-            <button onClick={() => save("active")} disabled={saving}
-              className="btn btn-ghost border border-[#e7e6e1] text-[#4a5168]">
-              {saving ? "Saving…" : "Save draft"}
-            </button>
             <button onClick={() => save("active")} disabled={saving}
               className="btn btn-primary px-6">
               {saving ? "Creating…" : "Create project"}

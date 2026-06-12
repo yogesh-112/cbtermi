@@ -21,7 +21,18 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  const { items, ...body } = await request.json();
+  const { items, ...raw } = await request.json();
+  // Whitelist actual quotes columns (form sends helper fields that aren't columns)
+  const QUOTE_FIELDS = [
+    "contact_id", "project_id", "opportunity_id", "quote_number", "title",
+    "issue_date", "valid_until", "status", "discount_amount", "notes", "terms",
+    "approved_by", "approved_at",
+  ] as const;
+  const body: Record<string, any> = {};
+  for (const k of QUOTE_FIELDS) if (raw[k] !== undefined) body[k] = raw[k];
+  for (const k of ["issue_date", "valid_until", "contact_id", "project_id", "opportunity_id"]) {
+    if (body[k] === "") body[k] = null;
+  }
 
   const { data: existing } = await supabase.from("quotes").select("status").eq("id", id).eq("business_id", session.businessId).single();
   if (!existing) return NextResponse.json({ message: "Not found" }, { status: 404 });

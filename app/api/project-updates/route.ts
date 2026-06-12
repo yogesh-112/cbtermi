@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
+import { checkTrialAccess } from "@/lib/trial";
 
 export async function GET() {
   const session = await requireSession().catch(() => null);
@@ -12,6 +13,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  const trialErr = await checkTrialAccess(session.businessId);
+  if (trialErr) return trialErr;
   const body = await request.json();
   const { data, error } = await supabase.from("project_updates").insert({ ...body, business_id: session.businessId, created_by: session.id }).select().single();
   if (error) return NextResponse.json({ message: error.message }, { status: 500 });

@@ -21,6 +21,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   const { id } = await params;
   const { items, ...body } = await request.json();
+  for (const k of ["issue_date", "due_date", "contact_id", "project_id"]) {
+    if (body[k] === "") body[k] = null;
+  }
 
   const { data: existing } = await supabase.from("invoices").select("is_sent, status, amount_paid").eq("id", id).eq("business_id", session.businessId).single();
   if (!existing) return NextResponse.json({ message: "Not found" }, { status: 404 });

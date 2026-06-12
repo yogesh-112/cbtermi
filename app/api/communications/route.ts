@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { requireSession } from "@/lib/auth";
+import { checkTrialAccess } from "@/lib/trial";
 
 export async function GET() {
   const session = await requireSession().catch(() => null);
@@ -17,6 +18,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await requireSession().catch(() => null);
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  const trialErr = await checkTrialAccess(session.businessId);
+  if (trialErr) return trialErr;
   const { contact_id, channel, message, subject, inbound } = await request.json();
   if (!contact_id || !message?.trim()) return NextResponse.json({ message: "contact_id and message are required" }, { status: 400 });
 

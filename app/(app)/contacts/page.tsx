@@ -1,5 +1,6 @@
 ﻿"use client";
 import { useEffect, useState, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Plus, Search, Phone, Mail, MessageCircle, MessageSquare,
@@ -60,6 +61,13 @@ export default function ContactsPage() {
   };
 
   useEffect(() => { setPage(0); load(0); }, [tab]);
+
+  // Open the create modal when arriving via "New Contact" / "Add Lead" CTAs (?new=1)
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get("new") === "1") openAdd();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {

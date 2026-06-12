@@ -52,7 +52,20 @@ export async function POST(request: NextRequest) {
   if (!session?.businessId) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   const trialErr = await checkTrialAccess(session.businessId);
   if (trialErr) return trialErr;
-  const { items, ...body } = await request.json();
+  const { items, ...raw } = await request.json();
+  // Whitelist actual quotes columns — the form sends helper fields
+  // (contact_name, contact_email, project_type, project_address) that
+  // don't exist in the table and would fail the insert.
+  const QUOTE_FIELDS = [
+    "contact_id", "project_id", "opportunity_id", "quote_number", "title",
+    "issue_date", "valid_until", "status", "discount_amount", "notes", "terms",
+  ] as const;
+  const body: Record<string, any> = {};
+  for (const k of QUOTE_FIELDS) if (raw[k] !== undefined) body[k] = raw[k];
+  // Postgres rejects "" for date/uuid columns — normalize to null
+  for (const k of ["issue_date", "valid_until", "contact_id", "project_id", "opportunity_id"]) {
+    if (body[k] === "") body[k] = null;
+  }
 
   const { data: biz } = await supabase.from("businesses").select("quote_prefix").eq("id", session.businessId).single();
   const { count } = await supabase.from("quotes").select("*", { count: "exact", head: true }).eq("business_id", session.businessId);
